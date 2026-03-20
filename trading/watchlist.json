@@ -1,0 +1,5 @@
+{
+  "_DEPRECATED": "This file is no longer used. The active watchlist lives in data/titan_intelligence.db, managed by src/storage/intelligence.py. Use 'python3 src/storage/intelligence.py watchlist' to view it.",
+  "migrated_to": "data/titan_intelligence.db",
+  "deprecated_date": "2026-03-17"
+}
