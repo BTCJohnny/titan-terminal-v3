@@ -1,0 +1,2296 @@
+{
+  "fetched_at": "2026-03-16T07:06:58.600143",
+  "token_count": 229,
+  "tokens": [
+    {
+      "symbol": "BTC",
+      "mark_price": 73823.0,
+      "funding_rate": 4.9129e-06,
+      "funding_rate_pct": 0.0005,
+      "annualized_funding_pct": 0.5,
+      "open_interest_usd": 1942916850.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ETH",
+      "mark_price": 2265.6,
+      "funding_rate": 4.3191e-06,
+      "funding_rate_pct": 0.0004,
+      "annualized_funding_pct": 0.5,
+      "open_interest_usd": 1354248491.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ATOM",
+      "mark_price": 1.9031,
+      "funding_rate": -4.03082e-05,
+      "funding_rate_pct": -0.004,
+      "annualized_funding_pct": -4.4,
+      "open_interest_usd": 2470776.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MATIC",
+      "mark_price": 0.37621,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "DYDX",
+      "mark_price": 0.0924,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1969010.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SOL",
+      "mark_price": 93.601,
+      "funding_rate": 6.3538e-06,
+      "funding_rate_pct": 0.0006,
+      "annualized_funding_pct": 0.7,
+      "open_interest_usd": 310266693.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AVAX",
+      "mark_price": 10.444,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 40004567.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BNB",
+      "mark_price": 680.25,
+      "funding_rate": -1.8323e-06,
+      "funding_rate_pct": -0.0002,
+      "annualized_funding_pct": -0.2,
+      "open_interest_usd": 31907845.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "APE",
+      "mark_price": 0.1023,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 774814.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "OP",
+      "mark_price": 0.13135,
+      "funding_rate": -6.16639e-05,
+      "funding_rate_pct": -0.0062,
+      "annualized_funding_pct": -6.8,
+      "open_interest_usd": 3842593.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "LTC",
+      "mark_price": 57.349,
+      "funding_rate": 4.0121e-06,
+      "funding_rate_pct": 0.0004,
+      "annualized_funding_pct": 0.4,
+      "open_interest_usd": 16141958.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ARB",
+      "mark_price": 0.1089,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 4157101.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "DOGE",
+      "mark_price": 0.10217,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 24781250.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "INJ",
+      "mark_price": 3.2096,
+      "funding_rate": -1.6859e-06,
+      "funding_rate_pct": -0.0002,
+      "annualized_funding_pct": -0.2,
+      "open_interest_usd": 2045049.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SUI",
+      "mark_price": 1.0669,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 33660876.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "kPEPE",
+      "mark_price": 0.003919,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 13870422.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "CRV",
+      "mark_price": 0.24999,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 7151885.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "LDO",
+      "mark_price": 0.32185,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 6087570.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "LINK",
+      "mark_price": 9.7366,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 26754590.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "STX",
+      "mark_price": 0.26014,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1321516.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "RNDR",
+      "mark_price": 6.8952,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "CFX",
+      "mark_price": 0.062556,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1429838.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "FTM",
+      "mark_price": 0.71688,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "GMX",
+      "mark_price": 6.7253,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 568668.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SNX",
+      "mark_price": 0.32591,
+      "funding_rate": -2.27859e-05,
+      "funding_rate_pct": -0.0023,
+      "annualized_funding_pct": -2.5,
+      "open_interest_usd": 400653.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "XRP",
+      "mark_price": 1.4821,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 89834483.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BCH",
+      "mark_price": 471.58,
+      "funding_rate": -3.3687e-05,
+      "funding_rate_pct": -0.0034,
+      "annualized_funding_pct": -3.7,
+      "open_interest_usd": 18088282.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "APT",
+      "mark_price": 0.9951,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 7216290.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AAVE",
+      "mark_price": 119.76,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 23219344.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "COMP",
+      "mark_price": 19.565,
+      "funding_rate": -6.6241e-06,
+      "funding_rate_pct": -0.0007,
+      "annualized_funding_pct": -0.7,
+      "open_interest_usd": 891747.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MKR",
+      "mark_price": 1831.5,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "WLD",
+      "mark_price": 0.38287,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 17384032.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "FXS",
+      "mark_price": 0.65538,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "HPOS",
+      "mark_price": 0.041873,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "RLB",
+      "mark_price": 0.071,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "UNIBOT",
+      "mark_price": 7.636,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "YGG",
+      "mark_price": 0.041028,
+      "funding_rate": -7.1398e-06,
+      "funding_rate_pct": -0.0007,
+      "annualized_funding_pct": -0.8,
+      "open_interest_usd": 433287.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "TRX",
+      "mark_price": 0.29772,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 9484013.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "kSHIB",
+      "mark_price": 0.006296,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1728980.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "UNI",
+      "mark_price": 4.0799,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 11317641.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SEI",
+      "mark_price": 0.068655,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 2397550.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "RUNE",
+      "mark_price": 0.4564,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1258657.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "OX",
+      "mark_price": 0.007459,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "FRIEND",
+      "mark_price": 4.72,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SHIA",
+      "mark_price": 0.000621,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "CYBER",
+      "mark_price": 1.0415,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ZRO",
+      "mark_price": 2.1694,
+      "funding_rate": -2.81784e-05,
+      "funding_rate_pct": -0.0028,
+      "annualized_funding_pct": -3.1,
+      "open_interest_usd": 42983533.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BLZ",
+      "mark_price": 0.070043,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "DOT",
+      "mark_price": 1.5947,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 9563040.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BANANA",
+      "mark_price": 4.2152,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 177394.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "TRB",
+      "mark_price": 16.825,
+      "funding_rate": -1.82198e-05,
+      "funding_rate_pct": -0.0018,
+      "annualized_funding_pct": -2.0,
+      "open_interest_usd": 488631.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "FTT",
+      "mark_price": 0.28835,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 86022.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "LOOM",
+      "mark_price": 0.071161,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "OGN",
+      "mark_price": 0.055683,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "RDNT",
+      "mark_price": 0.018328,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ARK",
+      "mark_price": 0.18307,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 146658.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BNT",
+      "mark_price": 0.38287,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "CANTO",
+      "mark_price": 0.066,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "REQ",
+      "mark_price": 0.15473,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BIGTIME",
+      "mark_price": 0.014043,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 321547.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "KAS",
+      "mark_price": 0.032099,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 875058.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ORBS",
+      "mark_price": 0.01939,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BLUR",
+      "mark_price": 0.02033,
+      "funding_rate": 1.06108e-05,
+      "funding_rate_pct": 0.0011,
+      "annualized_funding_pct": 1.2,
+      "open_interest_usd": 658099.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "TIA",
+      "mark_price": 0.36793,
+      "funding_rate": -2.41391e-05,
+      "funding_rate_pct": -0.0024,
+      "annualized_funding_pct": -2.6,
+      "open_interest_usd": 2170057.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BSV",
+      "mark_price": 15.397,
+      "funding_rate": 2.97354e-05,
+      "funding_rate_pct": 0.003,
+      "annualized_funding_pct": 3.3,
+      "open_interest_usd": 867008.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ADA",
+      "mark_price": 0.29122,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 22547056.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "TON",
+      "mark_price": 1.3196,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 10088355.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MINA",
+      "mark_price": 0.059839,
+      "funding_rate": -1.05536e-05,
+      "funding_rate_pct": -0.0011,
+      "annualized_funding_pct": -1.2,
+      "open_interest_usd": 350989.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "POLYX",
+      "mark_price": 0.041158,
+      "funding_rate": -2.85251e-05,
+      "funding_rate_pct": -0.0029,
+      "annualized_funding_pct": -3.1,
+      "open_interest_usd": 258468.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "GAS",
+      "mark_price": 1.6789,
+      "funding_rate": -0.0003785758,
+      "funding_rate_pct": -0.0379,
+      "annualized_funding_pct": -41.5,
+      "open_interest_usd": 137430.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PENDLE",
+      "mark_price": 1.3363,
+      "funding_rate": 6.9921e-06,
+      "funding_rate_pct": 0.0007,
+      "annualized_funding_pct": 0.8,
+      "open_interest_usd": 4477503.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "STG",
+      "mark_price": 0.15387,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "FET",
+      "mark_price": 0.20727,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 5496020.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "STRAX",
+      "mark_price": 1.5829,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "NEAR",
+      "mark_price": 1.3998,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 14532737.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MEME",
+      "mark_price": 0.000627,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 682049.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ORDI",
+      "mark_price": 2.712,
+      "funding_rate": -1.04387e-05,
+      "funding_rate_pct": -0.001,
+      "annualized_funding_pct": -1.1,
+      "open_interest_usd": 210299.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BADGER",
+      "mark_price": 0.88823,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "NEO",
+      "mark_price": 2.835,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 622240.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ZEN",
+      "mark_price": 6.193,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 932482.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "FIL",
+      "mark_price": 0.9526,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 2597407.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PYTH",
+      "mark_price": 0.050129,
+      "funding_rate": -1.00754e-05,
+      "funding_rate_pct": -0.001,
+      "annualized_funding_pct": -1.1,
+      "open_interest_usd": 956196.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SUSHI",
+      "mark_price": 0.22121,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 447654.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ILV",
+      "mark_price": 12.118,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "IMX",
+      "mark_price": 0.17106,
+      "funding_rate": -1.9943e-06,
+      "funding_rate_pct": -0.0002,
+      "annualized_funding_pct": -0.2,
+      "open_interest_usd": 899046.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "kBONK",
+      "mark_price": 0.006672,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 4484595.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "GMT",
+      "mark_price": 0.011685,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 281257.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SUPER",
+      "mark_price": 0.12139,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 337340.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "USTC",
+      "mark_price": 0.005108,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 180758.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "NFTI",
+      "mark_price": 6.5609,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "JUP",
+      "mark_price": 0.1688,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 5290435.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "kLUNC",
+      "mark_price": 0.042218,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 291259.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "RSR",
+      "mark_price": 0.001806,
+      "funding_rate": 1.23123e-05,
+      "funding_rate_pct": 0.0012,
+      "annualized_funding_pct": 1.3,
+      "open_interest_usd": 196359.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "GALA",
+      "mark_price": 0.003629,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 354836.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "JTO",
+      "mark_price": 0.29286,
+      "funding_rate": -1.41873e-05,
+      "funding_rate_pct": -0.0014,
+      "annualized_funding_pct": -1.6,
+      "open_interest_usd": 822108.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "NTRN",
+      "mark_price": 0.1238,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ACE",
+      "mark_price": 0.1493,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 420741.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MAV",
+      "mark_price": 0.015221,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 137030.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "WIF",
+      "mark_price": 0.1813,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 5733377.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "CAKE",
+      "mark_price": 1.5172,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 961192.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PEOPLE",
+      "mark_price": 0.007649,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 119962.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ENS",
+      "mark_price": 6.4591,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 2035526.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ETC",
+      "mark_price": 9.0196,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 2078305.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "XAI",
+      "mark_price": 0.01079,
+      "funding_rate": -6.27049e-05,
+      "funding_rate_pct": -0.0063,
+      "annualized_funding_pct": -6.9,
+      "open_interest_usd": 886041.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MANTA",
+      "mark_price": 0.07145,
+      "funding_rate": -4.12433e-05,
+      "funding_rate_pct": -0.0041,
+      "annualized_funding_pct": -4.5,
+      "open_interest_usd": 315951.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "UMA",
+      "mark_price": 0.45266,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 277779.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ONDO",
+      "mark_price": 0.28145,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 3140674.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ALT",
+      "mark_price": 0.00787,
+      "funding_rate": -7.43059e-05,
+      "funding_rate_pct": -0.0074,
+      "annualized_funding_pct": -8.1,
+      "open_interest_usd": 554858.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ZETA",
+      "mark_price": 0.0521,
+      "funding_rate": 2.8704e-06,
+      "funding_rate_pct": 0.0003,
+      "annualized_funding_pct": 0.3,
+      "open_interest_usd": 607458.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "DYM",
+      "mark_price": 0.03647,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 464038.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MAVIA",
+      "mark_price": 0.03521,
+      "funding_rate": 0.0004864831,
+      "funding_rate_pct": 0.0486,
+      "annualized_funding_pct": 53.3,
+      "open_interest_usd": 1894528.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "W",
+      "mark_price": 0.01735,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 809695.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PANDORA",
+      "mark_price": 3026.3,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "STRK",
+      "mark_price": 0.04068,
+      "funding_rate": 1.00203e-05,
+      "funding_rate_pct": 0.001,
+      "annualized_funding_pct": 1.1,
+      "open_interest_usd": 3963856.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PIXEL",
+      "mark_price": 0.024027,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AI",
+      "mark_price": 0.12555,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "TAO",
+      "mark_price": 272.73,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 43872674.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AR",
+      "mark_price": 1.9097,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 431370.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MYRO",
+      "mark_price": 0.015813,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "kFLOKI",
+      "mark_price": 0.032045,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 357647.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BOME",
+      "mark_price": 0.000497,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 143274.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ETHFI",
+      "mark_price": 0.57101,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 4867520.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ENA",
+      "mark_price": 0.11726,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 16103440.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MNT",
+      "mark_price": 0.80233,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 5365764.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "TNSR",
+      "mark_price": 0.04707,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 146503.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SAGA",
+      "mark_price": 0.03438,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1298278.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MERL",
+      "mark_price": 0.03888,
+      "funding_rate": 1.23277e-05,
+      "funding_rate_pct": 0.0012,
+      "annualized_funding_pct": 1.3,
+      "open_interest_usd": 621898.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "HBAR",
+      "mark_price": 0.098705,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 4341019.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "POPCAT",
+      "mark_price": 0.057815,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 2064150.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "OMNI",
+      "mark_price": 4.1915,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "EIGEN",
+      "mark_price": 0.2192,
+      "funding_rate": 8.228e-07,
+      "funding_rate_pct": 0.0001,
+      "annualized_funding_pct": 0.1,
+      "open_interest_usd": 2857537.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "REZ",
+      "mark_price": 0.00402,
+      "funding_rate": -0.0006872464,
+      "funding_rate_pct": -0.0687,
+      "annualized_funding_pct": -75.3,
+      "open_interest_usd": 536778.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "NOT",
+      "mark_price": 0.000425,
+      "funding_rate": -4.57888e-05,
+      "funding_rate_pct": -0.0046,
+      "annualized_funding_pct": -5.0,
+      "open_interest_usd": 174498.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "TURBO",
+      "mark_price": 0.001134,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 431149.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BRETT",
+      "mark_price": 0.00819,
+      "funding_rate": -2.05451e-05,
+      "funding_rate_pct": -0.0021,
+      "annualized_funding_pct": -2.2,
+      "open_interest_usd": 382135.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "IO",
+      "mark_price": 0.12129,
+      "funding_rate": -1.58939e-05,
+      "funding_rate_pct": -0.0016,
+      "annualized_funding_pct": -1.7,
+      "open_interest_usd": 226494.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ZK",
+      "mark_price": 0.020073,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 3749014.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BLAST",
+      "mark_price": 0.000559,
+      "funding_rate": -0.0009302942,
+      "funding_rate_pct": -0.093,
+      "annualized_funding_pct": -101.9,
+      "open_interest_usd": 1046809.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "LISTA",
+      "mark_price": 0.12466,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MEW",
+      "mark_price": 0.00068,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 106410.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "RENDER",
+      "mark_price": 1.866,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 2667420.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "kDOGS",
+      "mark_price": 0.13659,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "POL",
+      "mark_price": 0.099935,
+      "funding_rate": 1.00598e-05,
+      "funding_rate_pct": 0.001,
+      "annualized_funding_pct": 1.1,
+      "open_interest_usd": 2337743.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "CATI",
+      "mark_price": 0.082821,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "CELO",
+      "mark_price": 0.080195,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 705208.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "HMSTR",
+      "mark_price": 0.000167,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1227400.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SCR",
+      "mark_price": 0.04609,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 219750.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "NEIROETH",
+      "mark_price": 0.01808,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "kNEIRO",
+      "mark_price": 0.07539,
+      "funding_rate": -8.09947e-05,
+      "funding_rate_pct": -0.0081,
+      "annualized_funding_pct": -8.9,
+      "open_interest_usd": 304663.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "GOAT",
+      "mark_price": 0.019579,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 247992.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MOODENG",
+      "mark_price": 0.057356,
+      "funding_rate": -2.05463e-05,
+      "funding_rate_pct": -0.0021,
+      "annualized_funding_pct": -2.2,
+      "open_interest_usd": 1023962.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "GRASS",
+      "mark_price": 0.37591,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 3523497.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PURR",
+      "mark_price": 0.092315,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 4010923.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PNUT",
+      "mark_price": 0.05006,
+      "funding_rate": -2.9311e-06,
+      "funding_rate_pct": -0.0003,
+      "annualized_funding_pct": -0.3,
+      "open_interest_usd": 525355.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "XLM",
+      "mark_price": 0.17251,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 3377603.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "CHILLGUY",
+      "mark_price": 0.01025,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 437953.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SAND",
+      "mark_price": 0.088245,
+      "funding_rate": -4.8801e-06,
+      "funding_rate_pct": -0.0005,
+      "annualized_funding_pct": -0.5,
+      "open_interest_usd": 412731.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "IOTA",
+      "mark_price": 0.06603,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 292697.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ALGO",
+      "mark_price": 0.094884,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 750847.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "HYPE",
+      "mark_price": 38.704,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 695087232.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ME",
+      "mark_price": 0.12215,
+      "funding_rate": -7.96876e-05,
+      "funding_rate_pct": -0.008,
+      "annualized_funding_pct": -8.7,
+      "open_interest_usd": 293620.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MOVE",
+      "mark_price": 0.021715,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 456670.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "VIRTUAL",
+      "mark_price": 0.7625,
+      "funding_rate": 1.2027e-05,
+      "funding_rate_pct": 0.0012,
+      "annualized_funding_pct": 1.3,
+      "open_interest_usd": 15761111.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PENGU",
+      "mark_price": 0.007984,
+      "funding_rate": 1.15047e-05,
+      "funding_rate_pct": 0.0012,
+      "annualized_funding_pct": 1.3,
+      "open_interest_usd": 2791282.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "USUAL",
+      "mark_price": 0.01429,
+      "funding_rate": -4.23449e-05,
+      "funding_rate_pct": -0.0042,
+      "annualized_funding_pct": -4.6,
+      "open_interest_usd": 264429.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "FARTCOIN",
+      "mark_price": 0.17865,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 36652852.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AI16Z",
+      "mark_price": 0.06157,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AIXBT",
+      "mark_price": 0.02701,
+      "funding_rate": 8.98e-06,
+      "funding_rate_pct": 0.0009,
+      "annualized_funding_pct": 1.0,
+      "open_interest_usd": 1062423.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ZEREBRO",
+      "mark_price": 0.008157,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 628310.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BIO",
+      "mark_price": 0.021849,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 401716.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "GRIFFAIN",
+      "mark_price": 0.009902,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1613735.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SPX",
+      "mark_price": 0.325,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1986909.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "S",
+      "mark_price": 0.049163,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1554188.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MORPHO",
+      "mark_price": 1.9163,
+      "funding_rate": -2.67547e-05,
+      "funding_rate_pct": -0.0027,
+      "annualized_funding_pct": -2.9,
+      "open_interest_usd": 5879072.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "TRUMP",
+      "mark_price": 4.0023,
+      "funding_rate": -1.72144e-05,
+      "funding_rate_pct": -0.0017,
+      "annualized_funding_pct": -1.9,
+      "open_interest_usd": 15135676.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MELANIA",
+      "mark_price": 0.1223,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1793952.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ANIME",
+      "mark_price": 0.004778,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 386940.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "VINE",
+      "mark_price": 0.018365,
+      "funding_rate": 3.19025e-05,
+      "funding_rate_pct": 0.0032,
+      "annualized_funding_pct": 3.5,
+      "open_interest_usd": 492363.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "VVV",
+      "mark_price": 6.1764,
+      "funding_rate": -0.0002157861,
+      "funding_rate_pct": -0.0216,
+      "annualized_funding_pct": -23.6,
+      "open_interest_usd": 9493658.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "JELLY",
+      "mark_price": 0.037555,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BERA",
+      "mark_price": 0.67765,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 5382004.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "TST",
+      "mark_price": 0.01043,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 177649.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "LAYER",
+      "mark_price": 0.085372,
+      "funding_rate": -4.61758e-05,
+      "funding_rate_pct": -0.0046,
+      "annualized_funding_pct": -5.1,
+      "open_interest_usd": 533404.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "IP",
+      "mark_price": 0.80087,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 4672046.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "OM",
+      "mark_price": 0.06527,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "KAITO",
+      "mark_price": 0.36965,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1817914.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "NIL",
+      "mark_price": 0.0536,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 301089.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PAXG",
+      "mark_price": 5004.4,
+      "funding_rate": 1.4033e-06,
+      "funding_rate_pct": 0.0001,
+      "annualized_funding_pct": 0.2,
+      "open_interest_usd": 57749745.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PROMPT",
+      "mark_price": 0.043152,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1266201.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "BABY",
+      "mark_price": 0.01327,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 617735.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "WCT",
+      "mark_price": 0.059636,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 295160.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "HYPER",
+      "mark_price": 0.0925,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 359492.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ZORA",
+      "mark_price": 0.017299,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1132979.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "INIT",
+      "mark_price": 0.09133,
+      "funding_rate": -4.78102e-05,
+      "funding_rate_pct": -0.0048,
+      "annualized_funding_pct": -5.2,
+      "open_interest_usd": 686416.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "DOOD",
+      "mark_price": 0.00335,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 659082.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "LAUNCHCOIN",
+      "mark_price": 0.060367,
+      "funding_rate": 0.0,
+      "funding_rate_pct": 0.0,
+      "annualized_funding_pct": 0.0,
+      "open_interest_usd": 0.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "NXPC",
+      "mark_price": 0.28766,
+      "funding_rate": -3.57742e-05,
+      "funding_rate_pct": -0.0036,
+      "annualized_funding_pct": -3.9,
+      "open_interest_usd": 1318066.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SOPH",
+      "mark_price": 0.008831,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 504631.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "RESOLV",
+      "mark_price": 0.065415,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 4067129.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SYRUP",
+      "mark_price": 0.26578,
+      "funding_rate": 9.5101e-06,
+      "funding_rate_pct": 0.001,
+      "annualized_funding_pct": 1.0,
+      "open_interest_usd": 1406784.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PUMP",
+      "mark_price": 0.002079,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 37589142.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "PROVE",
+      "mark_price": 0.27525,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 376910.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "YZY",
+      "mark_price": 0.32518,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 554475.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "XPL",
+      "mark_price": 0.1115,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 36993810.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "WLFI",
+      "mark_price": 0.10509,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 22213375.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "LINEA",
+      "mark_price": 0.003487,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1645984.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SKY",
+      "mark_price": 0.070763,
+      "funding_rate": -3.76419e-05,
+      "funding_rate_pct": -0.0038,
+      "annualized_funding_pct": -4.1,
+      "open_interest_usd": 1662143.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ASTER",
+      "mark_price": 0.72792,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 62346981.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AVNT",
+      "mark_price": 0.15995,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1190041.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "STBL",
+      "mark_price": 0.036592,
+      "funding_rate": 4.59943e-05,
+      "funding_rate_pct": 0.0046,
+      "annualized_funding_pct": 5.0,
+      "open_interest_usd": 3243040.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "0G",
+      "mark_price": 0.58391,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 470682.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "HEMI",
+      "mark_price": 0.007916,
+      "funding_rate": 3.03428e-05,
+      "funding_rate_pct": 0.003,
+      "annualized_funding_pct": 3.3,
+      "open_interest_usd": 1694246.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "APEX",
+      "mark_price": 0.2761,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1888655.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "2Z",
+      "mark_price": 0.086038,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1877246.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ZEC",
+      "mark_price": 234.29,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 75179898.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MON",
+      "mark_price": 0.02412,
+      "funding_rate": 2.0185e-06,
+      "funding_rate_pct": 0.0002,
+      "annualized_funding_pct": 0.2,
+      "open_interest_usd": 30743276.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MET",
+      "mark_price": 0.16487,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1601157.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "MEGA",
+      "mark_price": 0.14238,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 4191020.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "CC",
+      "mark_price": 0.15003,
+      "funding_rate": 5.03099e-05,
+      "funding_rate_pct": 0.005,
+      "annualized_funding_pct": 5.5,
+      "open_interest_usd": 5635305.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "ICP",
+      "mark_price": 2.7225,
+      "funding_rate": -4.25891e-05,
+      "funding_rate_pct": -0.0043,
+      "annualized_funding_pct": -4.7,
+      "open_interest_usd": 1678716.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AERO",
+      "mark_price": 0.34911,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 2444820.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "STABLE",
+      "mark_price": 0.027815,
+      "funding_rate": -0.0001959266,
+      "funding_rate_pct": -0.0196,
+      "annualized_funding_pct": -21.5,
+      "open_interest_usd": 3616262.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "FOGO",
+      "mark_price": 0.023879,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 796827.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "LIT",
+      "mark_price": 1.1088,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 33597940.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "XMR",
+      "mark_price": 361.13,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 29720028.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AXS",
+      "mark_price": 1.2423,
+      "funding_rate": -6.74215e-05,
+      "funding_rate_pct": -0.0067,
+      "annualized_funding_pct": -7.4,
+      "open_interest_usd": 2853091.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "DASH",
+      "mark_price": 34.564,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1886283.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "SKR",
+      "mark_price": 0.022907,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 597842.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    },
+    {
+      "symbol": "AZTEC",
+      "mark_price": 0.024242,
+      "funding_rate": 1.25e-05,
+      "funding_rate_pct": 0.0013,
+      "annualized_funding_pct": 1.4,
+      "open_interest_usd": 1288730.0,
+      "imbalance_ratio": 1.0,
+      "squeeze_bias": "neutral"
+    }
+  ]
+}

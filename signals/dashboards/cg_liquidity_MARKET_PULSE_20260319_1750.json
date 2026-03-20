@@ -1,0 +1,128 @@
+{
+  "fetched_at": "2026-03-19T17:50:42.839865",
+  "symbol": "MARKET_PULSE",
+  "btc_funding": {
+    "symbol": "BTC",
+    "avg_rate": 0.00174301,
+    "avg_rate_pct": "0.1743%",
+    "max_rate": 0.010058,
+    "max_exchange": "Bitfinex",
+    "min_rate": -0.0101,
+    "min_exchange": "Gate",
+    "num_exchanges": 21,
+    "annualized_cost_pct": 254.48,
+    "bias": "long_crowded",
+    "interpretation": "BTC avg funding: 0.1743% across 21 exchanges. Longs paying heavily \u2014 crowded long positioning, squeeze DOWN risk. Annualized cost: 254.5% for the dominant side"
+  },
+  "eth_funding": {
+    "symbol": "ETH",
+    "avg_rate": 0.00126319,
+    "avg_rate_pct": "0.1263%",
+    "max_rate": 0.01,
+    "max_exchange": "OKX",
+    "min_rate": -0.00795357,
+    "min_exchange": "dYdX",
+    "num_exchanges": 21,
+    "annualized_cost_pct": 184.43,
+    "bias": "long_crowded",
+    "interpretation": "ETH avg funding: 0.1263% across 21 exchanges. Longs paying heavily \u2014 crowded long positioning, squeeze DOWN risk. Annualized cost: 184.4% for the dominant side"
+  },
+  "btc_oi": {
+    "symbol": "BTC",
+    "total_oi_usd": 48094675790.1638,
+    "change_1h_pct": 0.07,
+    "change_4h_pct": -0.1,
+    "change_24h_pct": -1.87,
+    "momentum": "stable",
+    "top_exchange_changes": [
+      {
+        "exchange": "dYdX",
+        "change_1h_pct": -6.95,
+        "oi_usd": 16059072.82397118
+      },
+      {
+        "exchange": "Bitunix",
+        "change_1h_pct": 4.94,
+        "oi_usd": 720226056.12636
+      },
+      {
+        "exchange": "KuCoin",
+        "change_1h_pct": -3.97,
+        "oi_usd": 528520323.9582
+      }
+    ],
+    "interpretation": "BTC total OI: $48.09B (-1.9% 24h). Biggest mover: dYdX (-7.0% 1h)"
+  },
+  "eth_oi": {
+    "symbol": "ETH",
+    "total_oi_usd": 29205704143.21,
+    "change_1h_pct": 0.6,
+    "change_4h_pct": 0.61,
+    "change_24h_pct": -3.04,
+    "momentum": "stable",
+    "top_exchange_changes": [
+      {
+        "exchange": "dYdX",
+        "change_1h_pct": -5.98,
+        "oi_usd": 12517295.699759414
+      },
+      {
+        "exchange": "Lighter",
+        "change_1h_pct": 3.05,
+        "oi_usd": 147584696.102144
+      },
+      {
+        "exchange": "CoinEx",
+        "change_1h_pct": -2.37,
+        "oi_usd": 25818135.42715
+      }
+    ],
+    "interpretation": "ETH total OI: $29.21B (-3.0% 24h). Biggest mover: dYdX (-6.0% 1h)"
+  },
+  "btc_ls": {
+    "symbol": "BTC",
+    "current_long_pct": 60.53,
+    "current_short_pct": 39.47,
+    "current_ratio": 1.53,
+    "trend": "more_longs",
+    "extreme": false,
+    "contrarian_signal": null,
+    "interpretation": "BTC Global L/S: 1.53x (60.5% long / 39.5% short). Crowd shifting long \u2014 retail piling into longs"
+  },
+  "btc_top_ls": {
+    "symbol": "BTC",
+    "top_account_long_pct": 62.34,
+    "top_account_ratio": 1.66,
+    "top_position_long_pct": 51.58,
+    "top_position_ratio": 1.07,
+    "account_position_divergence": true,
+    "smart_money_lean": "neutral",
+    "interpretation": "BTC Top Traders \u2014 Account: 1.66x (62.3% long), Position: 1.07x (51.6% long). Account/Position divergence: many small longs (acct 62%) but position weight lower (52%) \u2014 retail long, smart money less convinced"
+  },
+  "etf": {
+    "latest_day_flow_usd": 0.0,
+    "latest_day_date": "2026-03-19",
+    "latest_day_top_etf": "",
+    "latest_day_top_etf_flow_usd": 0.0,
+    "weekly_net_flow_usd": 584700000.0,
+    "streak_days": 1,
+    "bias": "strong_inflow",
+    "interpretation": "BTC ETF latest: $0 inflow (2026-03-19). Weekly net: $584.7M inflow"
+  },
+  "fear_greed": {
+    "value": 24,
+    "label": "Fear",
+    "avg_7d": 20.7,
+    "trend": "stable",
+    "contrarian_signal": null,
+    "interpretation": "Fear & Greed: 24 \u2014 Fear. 7d avg: 21, trend: stable"
+  },
+  "coinbase_premium": {
+    "premium_usd": -3.62,
+    "premium_rate": -0.0052,
+    "premium_rate_pct": "-0.52%",
+    "avg_rate": -0.006617,
+    "bias": "us_selling",
+    "interpretation": "Coinbase Premium: $-3.62 (-0.52%). US institutions selling below global price \u2014 bearish institutional flow"
+  }
+}

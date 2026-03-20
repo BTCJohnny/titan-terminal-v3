@@ -1,0 +1,4779 @@
+#!/usr/bin/env python3
+"""
+Titan Terminal v2
+===========================
+Query/response tracking for MCP calls, LLM interpretations, and trade cards.
+Enables future model evaluation and cost tracking.
+
+Storage: SQLite (data/titan_intelligence.db)
+"""
+
+import sqlite3
+import json
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Optional, Dict, List, Any
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+DB_PATH = Path(__file__).parent.parent.parent / "data" / "titan_intelligence.db"
+REFRESH_CONFIG_PATH = Path(__file__).parent.parent.parent / "config" / "refresh_tokens.json"
+
+# ============================================================================
+# DATABASE INITIALIZATION
+# ============================================================================
+
+SCHEMA = """
+-- Track every MCP tool call
+CREATE TABLE IF NOT EXISTS mcp_queries (
+    id INTEGER PRIMARY KEY,
+    query_id TEXT UNIQUE,
+    timestamp_utc TEXT,
+    tool_name TEXT,
+    tool_source TEXT,
+    parameters_json TEXT,
+    context_type TEXT,
+    context_token TEXT,
+    success INTEGER DEFAULT 1
+);
+
+-- Store raw API responses
+CREATE TABLE IF NOT EXISTS mcp_responses (
+    id INTEGER PRIMARY KEY,
+    query_id TEXT REFERENCES mcp_queries(query_id),
+    response_json TEXT,
+    response_size_bytes INTEGER,
+    created_at TEXT
+);
+
+-- Store LLM interpretations (for future evaluation)
+CREATE TABLE IF NOT EXISTS llm_interpretations (
+    id INTEGER PRIMARY KEY,
+    interpretation_id TEXT UNIQUE,
+    query_ids TEXT,
+    timestamp_utc TEXT,
+    interpretation_type TEXT,
+    token TEXT,
+    signal TEXT,
+    confidence TEXT,
+    summary TEXT,
+    model_version TEXT,
+    tokens_used INTEGER,
+    evaluation_score REAL,
+    evaluation_notes TEXT,
+    evaluated_by TEXT,
+    evaluated_at TEXT
+);
+
+-- Store complete Trade Cards
+CREATE TABLE IF NOT EXISTS trade_cards (
+    id INTEGER PRIMARY KEY,
+    card_id TEXT UNIQUE,
+    timestamp_utc TEXT,
+    token TEXT,
+    verdict TEXT,
+    full_markdown TEXT,
+    total_tokens_used INTEGER,
+    accuracy_score REAL,
+    price_at_evaluation REAL,
+    evaluated_at TEXT
+);
+
+-- CEX health snapshots (time-series alongside JSON)
+CREATE TABLE IF NOT EXISTS cex_snapshots (
+    id INTEGER PRIMARY KEY,
+    snapshot_id TEXT UNIQUE,
+    timestamp_utc TEXT,
+    asset TEXT,
+    exchange_inflows REAL,
+    exchange_outflows REAL,
+    net_flow REAL,
+    signal TEXT,
+    raw_json TEXT
+);
+
+-- Mentor consultations (Opus 4.6 second opinions)
+CREATE TABLE IF NOT EXISTS mentor_consultations (
+    id INTEGER PRIMARY KEY,
+    consultation_id TEXT UNIQUE,
+    timestamp_utc TEXT,
+
+    -- Context
+    token TEXT,
+    question_type TEXT,
+    initial_verdict TEXT,
+    initial_confidence REAL,
+
+    -- Query
+    question_asked TEXT,
+    context_provided TEXT,
+
+    -- Response
+    mentor_agrees INTEGER,
+    confidence_adjustment REAL,
+    mentor_reasoning TEXT,
+    suggested_action TEXT,
+
+    -- Tracking
+    tokens_used INTEGER,
+    model TEXT,
+    api_cost_usd REAL,
+
+    -- Evaluation (backtest later)
+    final_decision TEXT,
+    outcome_correct INTEGER,
+    evaluation_notes TEXT
+);
+
+-- Create indexes for common queries
+CREATE INDEX IF NOT EXISTS idx_mcp_queries_tool ON mcp_queries(tool_name);
+CREATE INDEX IF NOT EXISTS idx_mcp_queries_context ON mcp_queries(context_type, context_token);
+CREATE INDEX IF NOT EXISTS idx_mcp_queries_timestamp ON mcp_queries(timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_trade_cards_token ON trade_cards(token);
+CREATE INDEX IF NOT EXISTS idx_trade_cards_timestamp ON trade_cards(timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_cex_snapshots_asset ON cex_snapshots(asset, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_mentor_token ON mentor_consultations(token);
+CREATE INDEX IF NOT EXISTS idx_mentor_timestamp ON mentor_consultations(timestamp_utc);
+
+-- Track mentor-approved trade setups for backtesting
+CREATE TABLE IF NOT EXISTS trade_setups (
+    id INTEGER PRIMARY KEY,
+    setup_id TEXT UNIQUE,
+    timestamp_utc TEXT,
+
+    -- Token & Direction
+    token TEXT,
+    direction TEXT,  -- "LONG" or "SHORT"
+
+    -- Setup Definition
+    entry_price REAL,
+    stop_loss REAL,
+    target_1 REAL,
+    target_2 REAL,
+    target_3 REAL,  -- Third target for scaling out
+    risk_reward_ratio REAL,
+
+    -- Position Sizing (from Target Package)
+    position_size_units REAL,  -- Units of token to buy/sell
+    position_size_usd REAL,    -- Total position value in USD
+    account_balance_at_setup REAL,  -- Account balance when setup was created
+
+    -- Analysis Context (JSON for flexibility)
+    ta_summary TEXT,
+    onchain_summary TEXT,
+    accumulation_score INTEGER,  -- 0-5
+    signal_summary TEXT,  -- "RSI oversold + Smart money buying"
+
+    -- Mentor Verdict
+    mentor_agrees INTEGER,  -- Boolean
+    mentor_confidence_adj REAL,
+    mentor_reasoning TEXT,
+    mentor_action TEXT,  -- "proceed", "wait", "reverse", "reduce_size"
+    mentor_consultation_id TEXT,  -- FK to mentor_consultations
+
+    -- Skill/Strategy Reference
+    skill_name TEXT,  -- e.g., "pre-breakout-accumulator"
+    pattern_type TEXT,  -- e.g., "Range Deviation", "Accumulation Long", "Distribution Short"
+
+    -- Notes (free-text cross-reference: trade card path, thesis summary, context)
+    notes TEXT,
+
+    -- Execution Status
+    status TEXT,  -- "PENDING", "ENTERED", "CLOSED", "EXPIRED", "SKIPPED"
+    entered_at TEXT,
+    actual_entry_price REAL,
+
+    -- Outcome (populated after close)
+    closed_at TEXT,
+    close_price REAL,
+    pnl_percent REAL,
+    pnl_usd REAL,
+    outcome TEXT,  -- "WIN", "LOSS", "BREAKEVEN", "PARTIAL"
+    hit_target INTEGER,  -- Which target hit (1, 2, or 0 for stop)
+
+    -- Post-Trade Analysis
+    what_worked TEXT,
+    what_failed TEXT,
+    lessons_learned TEXT,
+    evaluation_notes TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_setups_token ON trade_setups(token);
+CREATE INDEX IF NOT EXISTS idx_setups_status ON trade_setups(status);
+CREATE INDEX IF NOT EXISTS idx_setups_outcome ON trade_setups(outcome);
+CREATE INDEX IF NOT EXISTS idx_setups_timestamp ON trade_setups(timestamp_utc);
+
+-- Token flow snapshots for time-series tracking
+CREATE TABLE IF NOT EXISTS flow_snapshots (
+    id INTEGER PRIMARY KEY,
+    snapshot_id TEXT UNIQUE,
+    timestamp_utc TEXT,
+    token TEXT,
+    chain TEXT,
+    token_address TEXT,
+    price_usd REAL,
+
+    -- Exchange flows (from token_recent_flows_summary)
+    exchange_net_flow REAL,
+    exchange_flow_ratio REAL,
+    exchange_wallets INTEGER,
+    exchange_signal TEXT,
+
+    -- Fresh wallet flows
+    fresh_wallet_net_flow REAL,
+    fresh_wallet_ratio REAL,
+    fresh_wallet_count INTEGER,
+    fresh_wallet_signal TEXT,
+
+    -- Smart money flows
+    smart_money_net_flow REAL,
+    smart_money_ratio REAL,
+    smart_money_wallets INTEGER,
+    smart_money_signal TEXT,
+
+    -- Top PnL trader flows
+    top_pnl_net_flow REAL,
+    top_pnl_ratio REAL,
+    top_pnl_wallets INTEGER,
+    top_pnl_signal TEXT,
+
+    -- Whale flows
+    whale_net_flow REAL,
+    whale_ratio REAL,
+    whale_wallets INTEGER,
+    whale_signal TEXT,
+
+    -- Aggregate metrics
+    accumulation_score INTEGER,  -- 0-5 count of bullish signals
+    overall_signal TEXT,  -- "ACCUMULATING", "DISTRIBUTING", "MIXED", "QUIET"
+
+    -- Raw data for debugging
+    raw_json TEXT,
+    lookback_period TEXT  -- "1d", "7d" etc
+);
+
+CREATE INDEX IF NOT EXISTS idx_flow_token ON flow_snapshots(token, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_flow_timestamp ON flow_snapshots(timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_flow_signal ON flow_snapshots(overall_signal);
+
+-- Signal validations (external signals validated against Titan data)
+CREATE TABLE IF NOT EXISTS signal_validations (
+    id INTEGER PRIMARY KEY,
+    validation_id TEXT UNIQUE,
+    timestamp_utc TEXT,
+
+    -- External signal reference
+    external_signal_id INTEGER,      -- ID from external signals.db
+    symbol TEXT,
+    direction TEXT,                  -- LONG/SHORT
+    provider TEXT,                   -- Always "MarketInsights" for now
+    signal_analysis TEXT,            -- MarketInsights commentary
+
+    -- Titan validation
+    accumulation_score INTEGER,      -- 0-5 Titan score
+    ta_verdict TEXT,                 -- Bullish/Bearish/Neutral
+    onchain_verdict TEXT,            -- Bullish/Bearish/Neutral/Mixed
+    signal_aligns INTEGER,           -- Boolean: Does signal match Titan?
+
+    -- Mentor review (if triggered)
+    mentor_consulted INTEGER,        -- Boolean
+    mentor_verdict TEXT,             -- Mentor's take
+    mentor_confidence_adj REAL,
+
+    -- Final recommendation
+    titan_recommendation TEXT,       -- VALID/INVALID/NEEDS_CONFIRMATION
+    recommendation_reason TEXT,
+
+    -- Chart analysis
+    chart_analyzed INTEGER,          -- Boolean: Was image reviewed?
+    chart_notes TEXT,
+    chart_path TEXT,                 -- Path to chart image
+
+    -- Suggested trade levels (if signal looks valid)
+    suggested_entry REAL,
+    suggested_stop REAL,
+    suggested_target REAL,
+
+    -- Tracking
+    trade_taken INTEGER,             -- Boolean: Did user take this trade?
+    trade_outcome TEXT,              -- WIN/LOSS/SKIP
+    notes TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_validation_symbol ON signal_validations(symbol);
+CREATE INDEX IF NOT EXISTS idx_validation_timestamp ON signal_validations(timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_validation_recommendation ON signal_validations(titan_recommendation);
+CREATE INDEX IF NOT EXISTS idx_validation_external_id ON signal_validations(external_signal_id);
+
+-- Signal watchlist for ongoing monitoring
+CREATE TABLE IF NOT EXISTS signal_watchlist (
+    id INTEGER PRIMARY KEY,
+    watch_id TEXT UNIQUE,
+    created_at TEXT,
+    updated_at TEXT,
+
+    -- What we're watching
+    symbol TEXT,
+    chain TEXT,
+    token_address TEXT,
+
+    -- Source reference
+    source_type TEXT,              -- 'telegram_signal' | 'manual' | 'skill'
+    external_signal_id INTEGER,    -- FK to signals.db if telegram
+    validation_id TEXT,            -- FK to signal_validations if from validation
+
+    -- Watch configuration
+    watch_type TEXT,               -- 'entry_timing' | 'confirmation' | 'structural' | 'invalidation'
+    direction TEXT,                -- LONG/SHORT (expected direction)
+
+    -- Thesis and conditions
+    original_thesis TEXT,          -- Why we're watching
+    entry_conditions TEXT,         -- JSON: What would trigger entry
+    invalidation_conditions TEXT,  -- JSON: What would remove from watchlist
+    confirmation_needed TEXT,      -- What we're waiting to see
+
+    -- Price context at creation
+    price_at_creation REAL,
+    support_level REAL,
+    resistance_level REAL,
+    stop_level REAL,
+    target_level REAL,
+
+    -- Snapshot of original analysis
+    original_accumulation_score INTEGER,
+    original_ta_verdict TEXT,
+    original_onchain_verdict TEXT,
+    original_perps_bias TEXT,      -- 'long_heavy' | 'short_heavy' | 'balanced'
+
+    -- Current state (updated on review)
+    last_checked TEXT,
+    last_price REAL,
+    current_accumulation_score INTEGER,
+    current_ta_verdict TEXT,
+    current_onchain_verdict TEXT,
+    current_perps_bias TEXT,
+    status_changed INTEGER,        -- Boolean: Has analysis changed since last check?
+    change_summary TEXT,           -- What changed
+
+    -- Status
+    status TEXT,                   -- 'active' | 'triggered' | 'invalidated' | 'expired' | 'taken' | 'removed'
+    status_reason TEXT,            -- Why status changed
+    triggered_at TEXT,
+    expires_at TEXT,               -- Optional expiration
+
+    -- Outcome tracking
+    trade_taken INTEGER,           -- Boolean
+    trade_setup_id TEXT,           -- FK to trade_setups if trade was taken
+    outcome_notes TEXT,
+
+    -- Review settings
+    check_frequency TEXT,          -- 'session' | 'daily' | 'hourly'
+    priority INTEGER DEFAULT 5,    -- 1-10, higher = more important
+    notify_on_change INTEGER DEFAULT 1  -- Boolean: Alert user if analysis changes
+);
+
+CREATE INDEX IF NOT EXISTS idx_watchlist_symbol ON signal_watchlist(symbol);
+CREATE INDEX IF NOT EXISTS idx_watchlist_status ON signal_watchlist(status);
+CREATE INDEX IF NOT EXISTS idx_watchlist_source ON signal_watchlist(source_type);
+CREATE INDEX IF NOT EXISTS idx_watchlist_last_checked ON signal_watchlist(last_checked);
+CREATE INDEX IF NOT EXISTS idx_watchlist_priority ON signal_watchlist(priority DESC);
+
+-- Daily exchange balance tracking (14-day trend — the SKY lesson)
+CREATE TABLE IF NOT EXISTS exchange_balance_daily (
+    id INTEGER PRIMARY KEY,
+    token TEXT NOT NULL,
+    date TEXT NOT NULL,
+    chain TEXT,
+    token_address TEXT,
+
+    -- Balance data
+    balance REAL,
+    balance_usd REAL,
+    inflows REAL,
+    inflows_usd REAL,
+    outflows REAL,
+    outflows_usd REAL,
+    net_flow REAL,
+    net_flow_usd REAL,
+    price REAL,
+
+    -- Metadata
+    source TEXT DEFAULT 'nansen',
+    created_at TEXT,
+
+    UNIQUE(token, date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_exbal_token ON exchange_balance_daily(token, date);
+CREATE INDEX IF NOT EXISTS idx_exbal_date ON exchange_balance_daily(date);
+
+-- Entity position snapshots (smart money tracking over time)
+CREATE TABLE IF NOT EXISTS entity_snapshots (
+    id INTEGER PRIMARY KEY,
+    snapshot_id TEXT,
+    token TEXT NOT NULL,
+    snapshot_date TEXT NOT NULL,
+    chain TEXT,
+    token_address TEXT,
+
+    -- Entity info
+    entity_name TEXT,
+    entity_address TEXT NOT NULL,
+    entity_type TEXT,
+    entity_label TEXT,
+
+    -- Position data
+    balance REAL,
+    balance_usd REAL,
+    change_1d REAL,
+    change_7d REAL,
+    change_30d REAL,
+    ownership_pct REAL,
+
+    -- Context
+    avg_entry_price REAL,
+    pnl_usd REAL,
+
+    -- Metadata
+    source TEXT DEFAULT 'nansen',
+    created_at TEXT,
+
+    UNIQUE(token, entity_address, snapshot_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_entity_token ON entity_snapshots(token, snapshot_date);
+CREATE INDEX IF NOT EXISTS idx_entity_address ON entity_snapshots(entity_address);
+CREATE INDEX IF NOT EXISTS idx_entity_name ON entity_snapshots(entity_name);
+CREATE INDEX IF NOT EXISTS idx_entity_type ON entity_snapshots(entity_type);
+
+-- Hunt results (scored accumulation candidates with outcome tracking)
+CREATE TABLE IF NOT EXISTS hunt_results (
+    id INTEGER PRIMARY KEY,
+    result_id TEXT UNIQUE,
+    hunt_id TEXT,
+    hunt_date TEXT,
+
+    -- Token info
+    token TEXT NOT NULL,
+    chain TEXT,
+    token_address TEXT,
+    price_at_hunt REAL,
+
+    -- Alpha Score breakdown (0-12)
+    alpha_score INTEGER,
+    entity_convergence_score INTEGER,
+    exchange_flow_score INTEGER,
+    volume_dry_up_score INTEGER,
+    perps_score INTEGER,
+
+    -- Key metrics at time of hunt
+    exchange_net_flow_usd REAL,
+    exchange_flow_ratio REAL,
+    num_entities_buying INTEGER,
+    num_entities_selling INTEGER,
+    top_entity TEXT,
+    top_entity_change TEXT,
+
+    -- Exchange balance trend
+    exbal_outflow_days INTEGER,
+    exbal_balance_change_pct REAL,
+
+    -- Verdict
+    verdict TEXT,
+    verdict_reason TEXT,
+
+    -- Outcome tracking (filled in later)
+    price_7d_later REAL,
+    price_14d_later REAL,
+    price_30d_later REAL,
+    pct_change_7d REAL,
+    pct_change_14d REAL,
+    pct_change_30d REAL,
+    outcome_notes TEXT,
+
+    -- Metadata
+    created_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_hunt_token ON hunt_results(token);
+CREATE INDEX IF NOT EXISTS idx_hunt_date ON hunt_results(hunt_date);
+CREATE INDEX IF NOT EXISTS idx_hunt_verdict ON hunt_results(verdict);
+CREATE INDEX IF NOT EXISTS idx_hunt_score ON hunt_results(alpha_score DESC);
+CREATE INDEX IF NOT EXISTS idx_hunt_id ON hunt_results(hunt_id);
+
+-- Derivatives time-series snapshots (one row per token per fetch)
+CREATE TABLE IF NOT EXISTS derivatives_snapshots (
+    id INTEGER PRIMARY KEY,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    source TEXT NOT NULL,
+
+    -- Price context
+    price_usd REAL,
+
+    -- Funding Rate
+    funding_rate_avg REAL,
+    funding_rate_max REAL,
+    funding_rate_max_exchange TEXT,
+    funding_bias TEXT,
+    funding_annualized_pct REAL,
+
+    -- Open Interest
+    oi_usd REAL,
+    oi_change_1h_pct REAL,
+    oi_change_4h_pct REAL,
+    oi_change_24h_pct REAL,
+    oi_trend TEXT,
+    oi_momentum TEXT,
+
+    -- Long/Short Ratios
+    ls_global_ratio REAL,
+    ls_global_long_pct REAL,
+    ls_top_account_ratio REAL,
+    ls_top_position_ratio REAL,
+    ls_smart_money_lean TEXT,
+    ls_extreme INTEGER DEFAULT 0,
+    ls_contrarian_signal TEXT,
+
+    -- Liquidation
+    liq_24h_usd REAL,
+    liq_long_24h_usd REAL,
+    liq_short_24h_usd REAL,
+    liq_ls_ratio REAL,
+    liq_bias TEXT,
+    liq_acceleration INTEGER DEFAULT 0,
+
+    -- Options (BTC/ETH only, NULL for others)
+    options_max_pain REAL,
+    options_max_pain_distance_pct REAL,
+    options_put_call_ratio REAL,
+
+    -- Market-level fields (only populated by market_pulse, NULL for per-token)
+    fear_greed_value INTEGER,
+    fear_greed_label TEXT,
+    coinbase_premium_rate REAL,
+    coinbase_premium_bias TEXT,
+    etf_latest_day_flow_usd REAL,
+    etf_weekly_net_flow_usd REAL,
+    etf_streak_days INTEGER,
+    etf_bias TEXT,
+
+    -- Setup detection
+    lgf_detected INTEGER DEFAULT 0,
+    lgf_direction TEXT,
+    lgf_confidence TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_deriv_symbol_time ON derivatives_snapshots(symbol, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_deriv_source ON derivatives_snapshots(source);
+CREATE INDEX IF NOT EXISTS idx_deriv_timestamp ON derivatives_snapshots(timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_deriv_funding_bias ON derivatives_snapshots(funding_bias);
+CREATE INDEX IF NOT EXISTS idx_deriv_ls_extreme ON derivatives_snapshots(ls_extreme);
+
+-- Wyckoff phase scan results (batch scans across token list)
+CREATE TABLE IF NOT EXISTS wyckoff_scans (
+    id INTEGER PRIMARY KEY,
+    scan_id TEXT UNIQUE,
+    batch_id TEXT,
+    scan_date TEXT,
+
+    -- Token info
+    token TEXT NOT NULL,
+    timeframe TEXT DEFAULT '1d',
+    price_at_scan REAL,
+
+    -- Wyckoff classification
+    cycle_type TEXT,
+    phase TEXT,
+    confidence INTEGER,
+
+    -- Key events detected
+    spring_detected INTEGER DEFAULT 0,
+    upthrust_detected INTEGER DEFAULT 0,
+    sos_detected INTEGER DEFAULT 0,
+    sow_detected INTEGER DEFAULT 0,
+    events_detail TEXT,
+
+    -- Range structure
+    support_level REAL,
+    resistance_level REAL,
+    range_width_pct REAL,
+    position_in_range TEXT,
+
+    -- Volume analysis
+    volume_trend TEXT,
+    obv_divergence INTEGER DEFAULT 0,
+    volume_confirmation TEXT,
+
+    -- Interpretation
+    phase_progression TEXT,
+    watch_conditions TEXT,
+    trading_implications TEXT,
+
+    -- Outcome tracking
+    price_7d_later REAL,
+    price_14d_later REAL,
+    price_30d_later REAL,
+    pct_change_7d REAL,
+    pct_change_14d REAL,
+    pct_change_30d REAL,
+    phase_7d_later TEXT,
+    outcome_notes TEXT,
+
+    -- Metadata
+    created_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_wyckoff_token ON wyckoff_scans(token);
+CREATE INDEX IF NOT EXISTS idx_wyckoff_date ON wyckoff_scans(scan_date);
+CREATE INDEX IF NOT EXISTS idx_wyckoff_phase ON wyckoff_scans(phase);
+CREATE INDEX IF NOT EXISTS idx_wyckoff_confidence ON wyckoff_scans(confidence DESC);
+CREATE INDEX IF NOT EXISTS idx_wyckoff_batch ON wyckoff_scans(batch_id);
+CREATE INDEX IF NOT EXISTS idx_wyckoff_cycle ON wyckoff_scans(cycle_type);
+"""
+
+
+def init_db() -> None:
+    """Initialize database with schema."""
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    # Execute statements individually to handle legacy table schema mismatches
+    # (e.g., cex_snapshots was created with different columns than SCHEMA defines)
+    for statement in SCHEMA.split(';'):
+        statement = statement.strip()
+        if statement:
+            try:
+                conn.execute(statement)
+            except sqlite3.OperationalError as e:
+                # Only suppress errors from legacy table schema mismatches
+                # (e.g., CREATE INDEX on columns that don't exist in old tables)
+                if 'already exists' not in str(e) and 'no such column' not in str(e):
+                    raise
+    conn.commit()
+    conn.close()
+
+
+def migrate_db() -> None:
+    """
+    Run database migrations for schema updates.
+    Adds new columns to existing tables if they don't exist.
+    """
+    conn = sqlite3.connect(DB_PATH)
+
+    # Get existing columns in trade_setups
+    cursor = conn.execute("PRAGMA table_info(trade_setups)")
+    existing_columns = {row[1] for row in cursor.fetchall()}
+
+    # New columns to add (column_name, type, default)
+    new_columns = [
+        ("target_3", "REAL", None),
+        ("position_size_units", "REAL", None),
+        ("position_size_usd", "REAL", None),
+        ("account_balance_at_setup", "REAL", None),
+        ("notes", "TEXT", None),
+    ]
+
+    for col_name, col_type, default in new_columns:
+        if col_name not in existing_columns:
+            default_clause = f" DEFAULT {default}" if default is not None else ""
+            conn.execute(f"ALTER TABLE trade_setups ADD COLUMN {col_name} {col_type}{default_clause}")
+
+    # Wyckoff scans table
+    try:
+        conn.execute("SELECT 1 FROM wyckoff_scans LIMIT 1")
+    except sqlite3.OperationalError:
+        for statement in [s.strip() for s in SCHEMA.split(';') if 'wyckoff_scans' in s.lower()]:
+            if statement:
+                conn.execute(statement + ';')
+        conn.commit()
+
+    # Create any new tables (safe — all use IF NOT EXISTS)
+    for statement in SCHEMA.split(';'):
+        statement = statement.strip()
+        if statement:
+            try:
+                conn.execute(statement)
+            except sqlite3.OperationalError as e:
+                if 'already exists' not in str(e) and 'no such column' not in str(e):
+                    raise
+
+    conn.commit()
+    conn.close()
+
+
+def get_connection() -> sqlite3.Connection:
+    """Get database connection, initializing if needed."""
+    if not DB_PATH.exists():
+        init_db()
+    else:
+        # Run migrations for existing databases
+        migrate_db()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+# ============================================================================
+# MCP QUERY LOGGING
+# ============================================================================
+
+def log_mcp_query(
+    tool_name: str,
+    tool_source: str,
+    parameters: Dict[str, Any],
+    context_type: Optional[str] = None,
+    context_token: Optional[str] = None
+) -> str:
+    """
+    Log an MCP tool call.
+
+    Returns:
+        query_id for linking to response
+    """
+    query_id = str(uuid.uuid4())
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO mcp_queries
+           (query_id, timestamp_utc, tool_name, tool_source, parameters_json, context_type, context_token)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (query_id, timestamp, tool_name, tool_source, json.dumps(parameters), context_type, context_token)
+    )
+    conn.commit()
+    conn.close()
+
+    return query_id
+
+
+def log_mcp_response(query_id: str, response: Any) -> None:
+    """Store the raw response for a query."""
+    response_json = json.dumps(response) if not isinstance(response, str) else response
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO mcp_responses (query_id, response_json, response_size_bytes, created_at)
+           VALUES (?, ?, ?, ?)""",
+        (query_id, response_json, len(response_json), timestamp)
+    )
+    conn.commit()
+    conn.close()
+
+
+def mark_query_failed(query_id: str) -> None:
+    """Mark a query as failed."""
+    conn = get_connection()
+    conn.execute("UPDATE mcp_queries SET success = 0 WHERE query_id = ?", (query_id,))
+    conn.commit()
+    conn.close()
+
+
+# ============================================================================
+# LLM INTERPRETATION LOGGING
+# ============================================================================
+
+def log_interpretation(
+    interpretation_type: str,
+    token: str,
+    signal: str,
+    summary: str,
+    query_ids: Optional[List[str]] = None,
+    confidence: str = "medium",
+    model_version: str = "claude-opus-4-5",
+    tokens_used: Optional[int] = None
+) -> str:
+    """
+    Log an LLM interpretation for future evaluation.
+
+    Returns:
+        interpretation_id
+    """
+    interpretation_id = str(uuid.uuid4())
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO llm_interpretations
+           (interpretation_id, query_ids, timestamp_utc, interpretation_type, token,
+            signal, confidence, summary, model_version, tokens_used)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (interpretation_id, json.dumps(query_ids or []), timestamp, interpretation_type,
+         token, signal, confidence, summary, model_version, tokens_used)
+    )
+    conn.commit()
+    conn.close()
+
+    return interpretation_id
+
+
+# ============================================================================
+# TRADE CARD LOGGING
+# ============================================================================
+
+def log_trade_card(
+    token: str,
+    verdict: str,
+    full_markdown: str,
+    total_tokens_used: Optional[int] = None
+) -> str:
+    """
+    Log a complete trade card.
+
+    Returns:
+        card_id
+    """
+    card_id = str(uuid.uuid4())
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO trade_cards
+           (card_id, timestamp_utc, token, verdict, full_markdown, total_tokens_used)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (card_id, timestamp, token, verdict, full_markdown, total_tokens_used)
+    )
+    conn.commit()
+    conn.close()
+
+    return card_id
+
+
+# ============================================================================
+# CEX SNAPSHOT LOGGING
+# ============================================================================
+
+def log_cex_snapshot(
+    asset: str,
+    exchange_inflows: float,
+    exchange_outflows: float,
+    net_flow: float,
+    signal: str,
+    raw_data: Optional[Dict] = None
+) -> str:
+    """Log a CEX health snapshot."""
+    snapshot_id = str(uuid.uuid4())
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO cex_snapshots
+           (snapshot_id, timestamp_utc, asset, exchange_inflows, exchange_outflows,
+            net_flow, signal, raw_json)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (snapshot_id, timestamp, asset, exchange_inflows, exchange_outflows,
+         net_flow, signal, json.dumps(raw_data) if raw_data else None)
+    )
+    conn.commit()
+    conn.close()
+
+    return snapshot_id
+
+
+# ============================================================================
+# MENTOR CONSULTATION LOGGING
+# ============================================================================
+
+def log_mentor_consultation(
+    token: str,
+    question_type: str,
+    initial_verdict: str,
+    initial_confidence: float,
+    question_asked: str,
+    context_provided: str,
+    mentor_agrees: bool,
+    confidence_adjustment: float,
+    mentor_reasoning: str,
+    suggested_action: str,
+    tokens_used: int,
+    model: str
+) -> str:
+    """
+    Log a mentor consultation.
+
+    Returns:
+        consultation_id
+    """
+    consultation_id = str(uuid.uuid4())
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    cost = 0.0  # v2: No API cost — Claude Code uses subscription
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO mentor_consultations
+           (consultation_id, timestamp_utc, token, question_type, initial_verdict,
+            initial_confidence, question_asked, context_provided, mentor_agrees,
+            confidence_adjustment, mentor_reasoning, suggested_action, tokens_used,
+            model, api_cost_usd)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (consultation_id, timestamp, token.upper(), question_type, initial_verdict,
+         initial_confidence, question_asked, context_provided, 1 if mentor_agrees else 0,
+         confidence_adjustment, mentor_reasoning, suggested_action, tokens_used,
+         model, cost)
+    )
+    conn.commit()
+    conn.close()
+
+    return consultation_id
+
+
+def get_mentor_consultations(token: Optional[str] = None, limit: int = 20) -> List[Dict]:
+    """Get recent mentor consultations."""
+    conn = get_connection()
+
+    if token:
+        cursor = conn.execute(
+            """SELECT * FROM mentor_consultations
+               WHERE token = ?
+               ORDER BY timestamp_utc DESC LIMIT ?""",
+            (token.upper(), limit)
+        )
+    else:
+        cursor = conn.execute(
+            "SELECT * FROM mentor_consultations ORDER BY timestamp_utc DESC LIMIT ?",
+            (limit,)
+        )
+
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_mentor_stats() -> Dict:
+    """Get mentor consultation statistics."""
+    conn = get_connection()
+    stats = {}
+
+    # Total consultations
+    cursor = conn.execute("SELECT COUNT(*) FROM mentor_consultations")
+    stats['total_consultations'] = cursor.fetchone()[0]
+
+    # Total cost
+    cursor = conn.execute("SELECT SUM(api_cost_usd) FROM mentor_consultations")
+    stats['total_cost_usd'] = cursor.fetchone()[0] or 0
+
+    # Total tokens
+    cursor = conn.execute("SELECT SUM(tokens_used) FROM mentor_consultations")
+    stats['total_tokens'] = cursor.fetchone()[0] or 0
+
+    # Agreement rate
+    cursor = conn.execute("SELECT AVG(mentor_agrees) FROM mentor_consultations")
+    stats['agreement_rate'] = cursor.fetchone()[0] or 0
+
+    # By question type
+    cursor = conn.execute(
+        """SELECT question_type, COUNT(*) as count
+           FROM mentor_consultations
+           GROUP BY question_type"""
+    )
+    stats['by_question_type'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # By suggested action
+    cursor = conn.execute(
+        """SELECT suggested_action, COUNT(*) as count
+           FROM mentor_consultations
+           GROUP BY suggested_action"""
+    )
+    stats['by_suggested_action'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    conn.close()
+    return stats
+
+
+# ============================================================================
+# TRADE SETUP TRACKING
+# ============================================================================
+
+def log_trade_setup(
+    token: str,
+    direction: str,
+    entry_price: float,
+    stop_loss: float,
+    target_1: float,
+    target_2: float = None,
+    risk_reward_ratio: float = None,
+    ta_summary: str = None,
+    onchain_summary: str = None,
+    accumulation_score: int = None,
+    signal_summary: str = None,
+    mentor_agrees: bool = None,
+    mentor_confidence_adj: float = None,
+    mentor_reasoning: str = None,
+    mentor_action: str = None,
+    mentor_consultation_id: str = None,
+    skill_name: str = None,
+    pattern_type: str = None,
+    notes: str = None
+) -> str:
+    """
+    Log a new trade setup.
+
+    Returns:
+        setup_id for tracking
+    """
+    setup_id = str(uuid.uuid4())[:8]  # Short ID for easier CLI use
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    # Calculate R:R if not provided
+    if risk_reward_ratio is None and entry_price and stop_loss and target_1:
+        risk = abs(entry_price - stop_loss)
+        reward = abs(target_1 - entry_price)
+        risk_reward_ratio = round(reward / risk, 2) if risk > 0 else None
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO trade_setups
+           (setup_id, timestamp_utc, token, direction, entry_price, stop_loss,
+            target_1, target_2, risk_reward_ratio, ta_summary, onchain_summary,
+            accumulation_score, signal_summary, mentor_agrees, mentor_confidence_adj,
+            mentor_reasoning, mentor_action, mentor_consultation_id, skill_name,
+            pattern_type, notes, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (setup_id, timestamp, token.upper(), direction.upper(), entry_price, stop_loss,
+         target_1, target_2, risk_reward_ratio, ta_summary, onchain_summary,
+         accumulation_score, signal_summary, 1 if mentor_agrees else (0 if mentor_agrees is not None else None),
+         mentor_confidence_adj, mentor_reasoning, mentor_action, mentor_consultation_id,
+         skill_name, pattern_type, notes, "PENDING")
+    )
+    conn.commit()
+    conn.close()
+
+    return setup_id
+
+
+def update_setup_metadata(
+    setup_id: str,
+    pattern_type: str = None,
+    notes: str = None,
+    signal_summary: str = None,
+) -> bool:
+    """
+    Update editable pre-trade fields on an existing setup.
+    Only updates fields that are explicitly provided (not None).
+
+    Returns:
+        True if a row was updated, False if setup_id not found.
+    """
+    updates, params = [], []
+    if pattern_type is not None:
+        updates.append("pattern_type = ?")
+        params.append(pattern_type)
+    if notes is not None:
+        updates.append("notes = ?")
+        params.append(notes)
+    if signal_summary is not None:
+        updates.append("signal_summary = ?")
+        params.append(signal_summary)
+
+    if not updates:
+        return False
+
+    params.append(setup_id)
+    conn = get_connection()
+    cur = conn.execute(
+        f"UPDATE trade_setups SET {', '.join(updates)} WHERE setup_id = ?", params
+    )
+    conn.commit()
+    affected = cur.rowcount
+    conn.close()
+    return affected > 0
+
+
+def log_trade_setup_with_sizing(
+    token: str,
+    direction: str,
+    entry_price: float,
+    stop_loss: float,
+    target_1: float = None,
+    target_2: float = None,
+    target_3: float = None,
+    risk_reward_ratio: float = None,
+    position_size_units: float = None,
+    position_size_usd: float = None,
+    account_balance_at_setup: float = None,
+    ta_summary: str = None,
+    onchain_summary: str = None,
+    accumulation_score: int = None,
+    signal_summary: str = None,
+    skill_name: str = None,
+    pattern_type: str = None
+) -> str:
+    """
+    Log a new trade setup with position sizing from Target Package.
+
+    This is an extended version of log_trade_setup that includes:
+    - target_3: Third profit target for scaling out
+    - position_size_units: Number of units to buy/sell
+    - position_size_usd: Total position value in USD
+    - account_balance_at_setup: Account balance when setup was created
+
+    Returns:
+        setup_id for tracking
+    """
+    setup_id = str(uuid.uuid4())[:8]
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    # Calculate R:R from T3 if not provided (T3 is the main target for RR)
+    if risk_reward_ratio is None and entry_price and stop_loss:
+        target = target_3 or target_2 or target_1
+        if target:
+            risk = abs(entry_price - stop_loss)
+            reward = abs(target - entry_price)
+            risk_reward_ratio = round(reward / risk, 2) if risk > 0 else None
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO trade_setups
+           (setup_id, timestamp_utc, token, direction, entry_price, stop_loss,
+            target_1, target_2, target_3, risk_reward_ratio,
+            position_size_units, position_size_usd, account_balance_at_setup,
+            ta_summary, onchain_summary, accumulation_score, signal_summary,
+            skill_name, pattern_type, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (setup_id, timestamp, token.upper(), direction.upper(), entry_price, stop_loss,
+         target_1, target_2, target_3, risk_reward_ratio,
+         position_size_units, position_size_usd, account_balance_at_setup,
+         ta_summary, onchain_summary, accumulation_score, signal_summary,
+         skill_name, pattern_type, "PENDING")
+    )
+    conn.commit()
+    conn.close()
+
+    return setup_id
+
+
+def update_setup_entered(setup_id: str, actual_entry_price: float) -> None:
+    """Mark setup as entered with actual price."""
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    conn = get_connection()
+    conn.execute(
+        """UPDATE trade_setups
+           SET status = 'ENTERED', entered_at = ?, actual_entry_price = ?
+           WHERE setup_id = ?""",
+        (timestamp, actual_entry_price, setup_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def update_setup_closed(
+    setup_id: str,
+    close_price: float,
+    outcome: str,
+    hit_target: int = None,
+    pnl_percent: float = None,
+    pnl_usd: float = None
+) -> None:
+    """Close a setup and record outcome."""
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    # Calculate PnL percent if not provided
+    conn = get_connection()
+    cursor = conn.execute(
+        "SELECT actual_entry_price, entry_price, direction FROM trade_setups WHERE setup_id = ?",
+        (setup_id,)
+    )
+    row = cursor.fetchone()
+
+    if row and pnl_percent is None:
+        entry = row['actual_entry_price'] or row['entry_price']
+        direction = row['direction']
+        if entry and close_price:
+            if direction == 'LONG':
+                pnl_percent = round(((close_price - entry) / entry) * 100, 2)
+            else:  # SHORT
+                pnl_percent = round(((entry - close_price) / entry) * 100, 2)
+
+    conn.execute(
+        """UPDATE trade_setups
+           SET status = 'CLOSED', closed_at = ?, close_price = ?, outcome = ?,
+               hit_target = ?, pnl_percent = ?, pnl_usd = ?
+           WHERE setup_id = ?""",
+        (timestamp, close_price, outcome.upper(), hit_target, pnl_percent, pnl_usd, setup_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def add_setup_lessons(
+    setup_id: str,
+    what_worked: str = None,
+    what_failed: str = None,
+    lessons_learned: str = None,
+    evaluation_notes: str = None
+) -> None:
+    """Add post-trade analysis to a setup."""
+    conn = get_connection()
+    conn.execute(
+        """UPDATE trade_setups
+           SET what_worked = ?, what_failed = ?, lessons_learned = ?, evaluation_notes = ?
+           WHERE setup_id = ?""",
+        (what_worked, what_failed, lessons_learned, evaluation_notes, setup_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_setup_stats(
+    token: str = None,
+    skill_name: str = None,
+    days: int = 90
+) -> Dict:
+    """Get win rate, avg PnL, best/worst setups."""
+    conn = get_connection()
+    stats = {}
+
+    # Build WHERE clause
+    conditions = ["status = 'CLOSED'", f"timestamp_utc >= datetime('now', '-{days} days')"]
+    params = []
+
+    if token:
+        conditions.append("token = ?")
+        params.append(token.upper())
+    if skill_name:
+        conditions.append("skill_name = ?")
+        params.append(skill_name)
+
+    where_clause = " AND ".join(conditions)
+
+    # Total closed setups
+    cursor = conn.execute(f"SELECT COUNT(*) FROM trade_setups WHERE {where_clause}", params)
+    stats['total_closed'] = cursor.fetchone()[0]
+
+    # Win/loss counts
+    cursor = conn.execute(
+        f"SELECT outcome, COUNT(*) FROM trade_setups WHERE {where_clause} GROUP BY outcome",
+        params
+    )
+    outcome_counts = {row[0]: row[1] for row in cursor.fetchall()}
+    stats['wins'] = outcome_counts.get('WIN', 0)
+    stats['losses'] = outcome_counts.get('LOSS', 0)
+    stats['breakeven'] = outcome_counts.get('BREAKEVEN', 0)
+    stats['partial'] = outcome_counts.get('PARTIAL', 0)
+
+    # Win rate
+    total_decided = stats['wins'] + stats['losses']
+    stats['win_rate'] = round(stats['wins'] / total_decided, 2) if total_decided > 0 else 0
+
+    # Average PnL
+    cursor = conn.execute(
+        f"SELECT AVG(pnl_percent) FROM trade_setups WHERE {where_clause} AND pnl_percent IS NOT NULL",
+        params
+    )
+    stats['avg_pnl_percent'] = round(cursor.fetchone()[0] or 0, 2)
+
+    # Average winning trade
+    cursor = conn.execute(
+        f"SELECT AVG(pnl_percent) FROM trade_setups WHERE {where_clause} AND outcome = 'WIN'",
+        params
+    )
+    stats['avg_win_percent'] = round(cursor.fetchone()[0] or 0, 2)
+
+    # Average losing trade
+    cursor = conn.execute(
+        f"SELECT AVG(pnl_percent) FROM trade_setups WHERE {where_clause} AND outcome = 'LOSS'",
+        params
+    )
+    stats['avg_loss_percent'] = round(cursor.fetchone()[0] or 0, 2)
+
+    # Best trade
+    cursor = conn.execute(
+        f"""SELECT setup_id, token, pnl_percent FROM trade_setups
+            WHERE {where_clause} AND pnl_percent IS NOT NULL
+            ORDER BY pnl_percent DESC LIMIT 1""",
+        params
+    )
+    row = cursor.fetchone()
+    stats['best_trade'] = dict(row) if row else None
+
+    # Worst trade
+    cursor = conn.execute(
+        f"""SELECT setup_id, token, pnl_percent FROM trade_setups
+            WHERE {where_clause} AND pnl_percent IS NOT NULL
+            ORDER BY pnl_percent ASC LIMIT 1""",
+        params
+    )
+    row = cursor.fetchone()
+    stats['worst_trade'] = dict(row) if row else None
+
+    # By direction
+    cursor = conn.execute(
+        f"""SELECT direction, COUNT(*), AVG(pnl_percent)
+            FROM trade_setups WHERE {where_clause}
+            GROUP BY direction""",
+        params
+    )
+    stats['by_direction'] = {row[0]: {'count': row[1], 'avg_pnl': round(row[2] or 0, 2)}
+                            for row in cursor.fetchall()}
+
+    # Pending setups count
+    cursor = conn.execute("SELECT COUNT(*) FROM trade_setups WHERE status = 'PENDING'")
+    stats['pending'] = cursor.fetchone()[0]
+
+    # Entered but not closed
+    cursor = conn.execute("SELECT COUNT(*) FROM trade_setups WHERE status = 'ENTERED'")
+    stats['active'] = cursor.fetchone()[0]
+
+    conn.close()
+    return stats
+
+
+def get_recent_setups(
+    status: str = None,
+    limit: int = 20
+) -> List[Dict]:
+    """Get recent setups, optionally filtered by status."""
+    conn = get_connection()
+
+    if status:
+        cursor = conn.execute(
+            """SELECT * FROM trade_setups
+               WHERE status = ?
+               ORDER BY timestamp_utc DESC LIMIT ?""",
+            (status.upper(), limit)
+        )
+    else:
+        cursor = conn.execute(
+            "SELECT * FROM trade_setups ORDER BY timestamp_utc DESC LIMIT ?",
+            (limit,)
+        )
+
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_setup_by_id(setup_id: str) -> Optional[Dict]:
+    """Get a specific setup by ID."""
+    conn = get_connection()
+    cursor = conn.execute("SELECT * FROM trade_setups WHERE setup_id = ?", (setup_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_latest_cached_price(token: str) -> Optional[float]:
+    """
+    Fetch the most recent close price from the local OHLCV cache.
+    Prefers 4h data, falls back to 1d. No API calls.
+    """
+    ohlcv_db = DB_PATH.parent / "titan_data.db"
+    if not ohlcv_db.exists():
+        return None
+    try:
+        conn = sqlite3.connect(ohlcv_db)
+        for tf in ("4h", "1d", "1w"):
+            row = conn.execute(
+                "SELECT close FROM ohlcv WHERE symbol = ? AND timeframe = ? ORDER BY timestamp DESC LIMIT 1",
+                (token.upper(), tf)
+            ).fetchone()
+            if row:
+                conn.close()
+                return float(row[0])
+        conn.close()
+    except Exception:
+        pass
+    return None
+
+
+def monitor_active_setups() -> str:
+    """
+    Pull live prices from OHLCV cache and assess all PENDING and ENTERED setups.
+    Returns a formatted dashboard string.
+    """
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT * FROM trade_setups WHERE status IN ('PENDING', 'ENTERED') ORDER BY timestamp_utc DESC"
+    ).fetchall()
+    conn.close()
+
+    setups = [dict(r) for r in rows]
+    if not setups:
+        return "No active setups to monitor."
+
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    lines = [f"{'─' * 68}", f"  📊 TITAN TRADE MONITOR — {now_str}", f"{'─' * 68}", ""]
+
+    alerts = []
+
+    for s in setups:
+        token   = s["token"]
+        sid     = s["setup_id"]
+        dirn    = s["direction"]
+        status  = s["status"]
+        entry   = float(s["entry_price"])
+        stop    = float(s["stop_loss"])
+        t1      = float(s["target_1"]) if s["target_1"] else None
+        t2      = float(s["target_2"]) if s["target_2"] else None
+        actual  = float(s["actual_entry_price"]) if s["actual_entry_price"] else None
+        rr      = s["risk_reward_ratio"]
+
+        price = get_latest_cached_price(token)
+
+        # ── price unavailable ────────────────────────────────────────────────
+        if price is None:
+            lines.append(f"  [{sid}] {token} {dirn} ({status})")
+            lines.append(f"    ⚠️  Price unavailable — run: python3 src/data/ohlcv_client.py download {token} --timeframe 4h")
+            lines.append("")
+            continue
+
+        ref_price = actual if actual else entry
+        is_long   = dirn.upper() == "LONG"
+
+        # ── P&L and direction math ───────────────────────────────────────────
+        if is_long:
+            pnl_pct      = (price - ref_price) / ref_price * 100
+            stop_dist    = (price - stop) / price * 100       # % above stop
+            t1_dist      = ((t1 - price) / price * 100) if t1 else None
+            t2_dist      = ((t2 - price) / price * 100) if t2 else None
+            stop_hit     = price <= stop
+            t1_hit       = t1 and price >= t1
+            t2_hit       = t2 and price >= t2
+            entry_triggered = price <= entry  # price came down to entry zone
+        else:  # SHORT
+            pnl_pct      = (ref_price - price) / ref_price * 100
+            stop_dist    = (stop - price) / price * 100       # % below stop
+            t1_dist      = ((price - t1) / price * 100) if t1 else None
+            t2_dist      = ((price - t2) / price * 100) if t2 else None
+            stop_hit     = price >= stop
+            t1_hit       = t1 and price <= t1
+            t2_hit       = t2 and price <= t2
+            entry_triggered = price >= entry  # price came up to entry zone
+
+        # ── status icon ──────────────────────────────────────────────────────
+        if status == "ENTERED":
+            if stop_hit:
+                icon = "🔴 STOP HIT"
+                alerts.append(f"  🔴 {token} [{sid}] — STOP HIT at ${price:.4g} (stop ${stop:.4g}). Close immediately.")
+            elif t2_hit:
+                icon = "🟢 T2 HIT"
+                alerts.append(f"  🟢 {token} [{sid}] — T2 HIT at ${price:.4g}. Consider closing full or scaling out.")
+            elif t1_hit:
+                icon = "🟢 T1 HIT"
+                alerts.append(f"  🟡 {token} [{sid}] — T1 HIT at ${price:.4g}. Consider partial close / move stop to breakeven.")
+            elif pnl_pct > 0:
+                icon = "📈 IN PROFIT"
+            else:
+                icon = "📉 UNDERWATER"
+        else:  # PENDING
+            if entry_triggered:
+                icon = "🟡 ENTRY ZONE"
+                alerts.append(f"  🟡 {token} [{sid}] — Price ${price:.4g} is at/past entry ${entry:.4g}. Trigger check needed.")
+            elif stop_hit:
+                icon = "❌ INVALIDATED"
+                alerts.append(f"  ❌ {token} [{sid}] — Setup INVALIDATED. Price ${price:.4g} hit stop before entry.")
+            else:
+                icon = "⏳ WAITING"
+
+        # ── format row ───────────────────────────────────────────────────────
+        pnl_str  = f"{pnl_pct:+.2f}%" if status == "ENTERED" else "—"
+        label    = s.get("pattern_type") or ""
+        label_str = f"  [{label}]" if label else ""
+        lines.append(f"  [{sid}]  {token} {dirn}{label_str}  |  {icon}")
+        lines.append(f"    Price: ${price:.4g}  |  Entry: ${entry:.4g}  |  Stop: ${stop:.4g}  |  R:R {rr}")
+
+        level_parts = []
+        if t1:
+            dist_str = f"{t1_dist:+.1f}%" if t1_dist is not None else ""
+            level_parts.append(f"T1 ${t1:.4g} ({dist_str})")
+        if t2:
+            dist_str = f"{t2_dist:+.1f}%" if t2_dist is not None else ""
+            level_parts.append(f"T2 ${t2:.4g} ({dist_str})")
+        if level_parts:
+            lines.append(f"    Targets: {' | '.join(level_parts)}")
+
+        if status == "ENTERED":
+            stop_side = "above" if not is_long else "below"
+            lines.append(f"    P&L: {pnl_str}  |  Stop {stop_side} by {abs(stop_dist):.1f}%")
+        else:
+            lines.append(f"    Status: waiting for entry trigger")
+
+        if s.get("notes"):
+            lines.append(f"    📎 {s['notes']}")
+
+        lines.append("")
+
+    # ── alerts block ─────────────────────────────────────────────────────────
+    if alerts:
+        lines.insert(2, "")
+        lines.insert(2, f"{'─' * 68}")
+        for a in reversed(alerts):
+            lines.insert(2, a)
+        lines.insert(2, "  ⚡ ACTION REQUIRED:")
+        lines.insert(2, f"{'─' * 68}")
+
+    lines.append(f"{'─' * 68}")
+    lines.append("  Commands: enter-setup | close-setup | list-setups --status ENTERED")
+    lines.append(f"{'─' * 68}")
+    return "\n".join(lines)
+
+
+# ============================================================================
+# OHLCV REFRESH LIST
+# ============================================================================
+
+def get_refresh_token_list() -> List[str]:
+    """Return the always-on token list from config/refresh_tokens.json."""
+    if not REFRESH_CONFIG_PATH.exists():
+        return []
+    data = json.loads(REFRESH_CONFIG_PATH.read_text())
+    return [t.upper() for t in data.get("tokens", [])]
+
+
+def add_to_refresh_list(token: str) -> bool:
+    """Add token to the always-on refresh list. Returns True if added, False if already present."""
+    token = token.upper()
+    if REFRESH_CONFIG_PATH.exists():
+        data = json.loads(REFRESH_CONFIG_PATH.read_text())
+    else:
+        data = {"tokens": [], "timeframes": ["4h", "1d"]}
+    if token in [t.upper() for t in data["tokens"]]:
+        return False
+    data["tokens"].append(token)
+    REFRESH_CONFIG_PATH.write_text(json.dumps(data, indent=2))
+    return True
+
+
+def remove_from_refresh_list(token: str) -> bool:
+    """Remove token from the always-on refresh list. Returns True if removed."""
+    token = token.upper()
+    if not REFRESH_CONFIG_PATH.exists():
+        return False
+    data = json.loads(REFRESH_CONFIG_PATH.read_text())
+    original_len = len(data["tokens"])
+    data["tokens"] = [t for t in data["tokens"] if t.upper() != token]
+    if len(data["tokens"]) == original_len:
+        return False
+    REFRESH_CONFIG_PATH.write_text(json.dumps(data, indent=2))
+    return True
+
+
+def refresh_active_tokens() -> Dict:
+    """
+    Download fresh OHLCV data for:
+      1. All tokens in config/refresh_tokens.json (constant list)
+      2. All tokens with PENDING or ENTERED trade setups
+
+    Returns a summary dict with tokens refreshed and any errors.
+    """
+    import subprocess
+
+    # Get constant list
+    constant_tokens = get_refresh_token_list()
+
+    # Get active setup tokens
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT DISTINCT token FROM trade_setups WHERE status IN ('PENDING', 'ENTERED')"
+    ).fetchall()
+    conn.close()
+    setup_tokens = [row[0] for row in rows]
+
+    # Merge and deduplicate (constant list first, preserving order)
+    seen: Dict[str, None] = {}
+    for t in constant_tokens + setup_tokens:
+        seen[t.upper()] = None
+    all_tokens = list(seen.keys())
+
+    if not all_tokens:
+        return {"tokens": [], "constant_list": [], "setup_tokens": [],
+                "refreshed": [], "errors": []}
+
+    # Timeframes from config
+    timeframes = ["4h", "1d"]
+    if REFRESH_CONFIG_PATH.exists():
+        cfg = json.loads(REFRESH_CONFIG_PATH.read_text())
+        timeframes = cfg.get("timeframes", timeframes)
+
+    ohlcv_script = Path(__file__).parent.parent / "data" / "ohlcv_client.py"
+
+    refreshed = []
+    errors = []
+
+    for token in all_tokens:
+        token_ok = True
+        for tf in timeframes:
+            result = subprocess.run(
+                ["python3", str(ohlcv_script), "download", token, "--timeframe", tf],
+                capture_output=True, text=True, timeout=120
+            )
+            if result.returncode != 0:
+                err_msg = (result.stderr or result.stdout or "unknown error").strip()[:120]
+                errors.append(f"{token} {tf}: {err_msg}")
+                token_ok = False
+        if token_ok:
+            refreshed.append(token)
+
+    return {
+        "tokens": all_tokens,
+        "constant_list": constant_tokens,
+        "setup_tokens": setup_tokens,
+        "refreshed": refreshed,
+        "errors": errors,
+    }
+
+
+# ============================================================================
+# FLOW SNAPSHOT LOGGING
+# ============================================================================
+
+def log_flow_snapshot(
+    token: str,
+    chain: str = None,
+    token_address: str = None,
+    price_usd: float = None,
+    exchange_net_flow: float = None,
+    exchange_flow_ratio: float = None,
+    exchange_wallets: int = None,
+    exchange_signal: str = None,
+    fresh_wallet_net_flow: float = None,
+    fresh_wallet_ratio: float = None,
+    fresh_wallet_count: int = None,
+    fresh_wallet_signal: str = None,
+    smart_money_net_flow: float = None,
+    smart_money_ratio: float = None,
+    smart_money_wallets: int = None,
+    smart_money_signal: str = None,
+    top_pnl_net_flow: float = None,
+    top_pnl_ratio: float = None,
+    top_pnl_wallets: int = None,
+    top_pnl_signal: str = None,
+    whale_net_flow: float = None,
+    whale_ratio: float = None,
+    whale_wallets: int = None,
+    whale_signal: str = None,
+    lookback_period: str = "1d",
+    raw_data: Dict = None
+) -> str:
+    """
+    Log a token flow snapshot.
+
+    Returns:
+        snapshot_id
+    """
+    snapshot_id = str(uuid.uuid4())
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    # Calculate accumulation score (count bullish signals)
+    signals = [exchange_signal, fresh_wallet_signal, smart_money_signal, top_pnl_signal, whale_signal]
+    bullish_count = sum(1 for s in signals if s and s.lower() in ['bullish', 'accumulating', 'buying'])
+    bearish_count = sum(1 for s in signals if s and s.lower() in ['bearish', 'distributing', 'selling'])
+
+    # Determine overall signal
+    if bullish_count >= 4:
+        overall_signal = "ACCUMULATING"
+    elif bearish_count >= 4:
+        overall_signal = "DISTRIBUTING"
+    elif bullish_count == 0 and bearish_count == 0:
+        overall_signal = "QUIET"
+    else:
+        overall_signal = "MIXED"
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO flow_snapshots
+           (snapshot_id, timestamp_utc, token, chain, token_address, price_usd,
+            exchange_net_flow, exchange_flow_ratio, exchange_wallets, exchange_signal,
+            fresh_wallet_net_flow, fresh_wallet_ratio, fresh_wallet_count, fresh_wallet_signal,
+            smart_money_net_flow, smart_money_ratio, smart_money_wallets, smart_money_signal,
+            top_pnl_net_flow, top_pnl_ratio, top_pnl_wallets, top_pnl_signal,
+            whale_net_flow, whale_ratio, whale_wallets, whale_signal,
+            accumulation_score, overall_signal, raw_json, lookback_period)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (snapshot_id, timestamp, token.upper(), chain, token_address, price_usd,
+         exchange_net_flow, exchange_flow_ratio, exchange_wallets, exchange_signal,
+         fresh_wallet_net_flow, fresh_wallet_ratio, fresh_wallet_count, fresh_wallet_signal,
+         smart_money_net_flow, smart_money_ratio, smart_money_wallets, smart_money_signal,
+         top_pnl_net_flow, top_pnl_ratio, top_pnl_wallets, top_pnl_signal,
+         whale_net_flow, whale_ratio, whale_wallets, whale_signal,
+         bullish_count, overall_signal, json.dumps(raw_data) if raw_data else None, lookback_period)
+    )
+    conn.commit()
+    conn.close()
+
+    return snapshot_id
+
+
+# ============================================================================
+# ON-CHAIN RESEARCH DATA STORAGE
+# ============================================================================
+
+def log_exchange_balance_daily(
+    token: str,
+    daily_data: List[Dict],
+    chain: str = None,
+    token_address: str = None
+) -> int:
+    """
+    Store daily exchange balance data for trend analysis.
+
+    Args:
+        token: Token symbol
+        daily_data: List of dicts with keys: date, balance, balance_usd,
+                    inflows, inflows_usd, outflows, outflows_usd,
+                    net_flow, net_flow_usd, price
+        chain: Blockchain
+        token_address: Contract address
+
+    Returns:
+        Number of rows upserted
+    """
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    count = 0
+
+    for day in daily_data:
+        conn.execute(
+            """INSERT OR REPLACE INTO exchange_balance_daily
+               (token, date, chain, token_address, balance, balance_usd,
+                inflows, inflows_usd, outflows, outflows_usd,
+                net_flow, net_flow_usd, price, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (token.upper(), day.get('date'), chain, token_address,
+             day.get('balance'), day.get('balance_usd'),
+             day.get('inflows'), day.get('inflows_usd'),
+             day.get('outflows'), day.get('outflows_usd'),
+             day.get('net_flow'), day.get('net_flow_usd'),
+             day.get('price'), timestamp)
+        )
+        count += 1
+
+    conn.commit()
+    conn.close()
+    return count
+
+
+def log_entity_snapshot(
+    token: str,
+    snapshot_date: str,
+    entities: List[Dict],
+    chain: str = None,
+    token_address: str = None
+) -> int:
+    """
+    Store entity position snapshots for diff tracking.
+
+    Args:
+        token: Token symbol
+        snapshot_date: YYYY-MM-DD
+        entities: List of dicts with keys: entity_name, entity_address,
+                  entity_type, entity_label, balance, balance_usd,
+                  change_1d, change_7d, change_30d, ownership_pct,
+                  avg_entry_price, pnl_usd
+        chain: Blockchain
+        token_address: Contract address
+
+    Returns:
+        Number of rows upserted
+    """
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    count = 0
+
+    for entity in entities:
+        snapshot_id = str(uuid.uuid4())[:8]
+        conn.execute(
+            """INSERT OR REPLACE INTO entity_snapshots
+               (snapshot_id, token, snapshot_date, chain, token_address,
+                entity_name, entity_address, entity_type, entity_label,
+                balance, balance_usd, change_1d, change_7d, change_30d,
+                ownership_pct, avg_entry_price, pnl_usd, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (snapshot_id, token.upper(), snapshot_date, chain, token_address,
+             entity.get('entity_name'), entity.get('entity_address'),
+             entity.get('entity_type'), entity.get('entity_label'),
+             entity.get('balance'), entity.get('balance_usd'),
+             entity.get('change_1d'), entity.get('change_7d'),
+             entity.get('change_30d'), entity.get('ownership_pct'),
+             entity.get('avg_entry_price'), entity.get('pnl_usd'),
+             timestamp)
+        )
+        count += 1
+
+    conn.commit()
+    conn.close()
+    return count
+
+
+def log_hunt_result(
+    hunt_date: str,
+    candidates: List[Dict],
+    hunt_id: str = None
+) -> str:
+    """
+    Store scored hunt candidates with outcome tracking.
+
+    Args:
+        hunt_date: YYYY-MM-DD
+        candidates: List of dicts with scored candidate data
+        hunt_id: Optional hunt ID (auto-generated if not provided)
+
+    Returns:
+        hunt_id for the batch
+    """
+    if hunt_id is None:
+        hunt_id = str(uuid.uuid4())[:8]
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+
+    for candidate in candidates:
+        result_id = str(uuid.uuid4())[:8]
+        conn.execute(
+            """INSERT INTO hunt_results
+               (result_id, hunt_id, hunt_date, token, chain, token_address,
+                price_at_hunt, alpha_score, entity_convergence_score,
+                exchange_flow_score, volume_dry_up_score, perps_score,
+                exchange_net_flow_usd, exchange_flow_ratio,
+                num_entities_buying, num_entities_selling,
+                top_entity, top_entity_change,
+                exbal_outflow_days, exbal_balance_change_pct,
+                verdict, verdict_reason, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (result_id, hunt_id, hunt_date,
+             candidate.get('token', '').upper(),
+             candidate.get('chain'), candidate.get('token_address'),
+             candidate.get('price_at_hunt'), candidate.get('alpha_score'),
+             candidate.get('entity_convergence_score'),
+             candidate.get('exchange_flow_score'),
+             candidate.get('volume_dry_up_score'),
+             candidate.get('perps_score'),
+             candidate.get('exchange_net_flow_usd'),
+             candidate.get('exchange_flow_ratio'),
+             candidate.get('num_entities_buying'),
+             candidate.get('num_entities_selling'),
+             candidate.get('top_entity'),
+             candidate.get('top_entity_change'),
+             candidate.get('exbal_outflow_days'),
+             candidate.get('exbal_balance_change_pct'),
+             (candidate.get('verdict') or '').upper() or None,
+             candidate.get('verdict_reason'),
+             timestamp)
+        )
+
+    conn.commit()
+    conn.close()
+    return hunt_id
+
+
+# ============================================================================
+# ON-CHAIN RESEARCH DATA QUERIES
+# ============================================================================
+
+def get_exchange_balance_trend(
+    token: str,
+    days: int = 14
+) -> Dict:
+    """
+    Get exchange balance trend with summary stats.
+
+    Returns:
+        Dict with 'days' (list of daily data) and 'summary' (computed stats)
+    """
+    conn = get_connection()
+    cursor = conn.execute(
+        """SELECT * FROM exchange_balance_daily
+           WHERE token = ?
+           ORDER BY date DESC
+           LIMIT ?""",
+        (token.upper(), days)
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+
+    if not rows:
+        return {'days': [], 'summary': {}}
+
+    # Compute summary stats
+    outflow_days = sum(1 for r in rows if r.get('net_flow') and r['net_flow'] < 0)
+    inflow_days = sum(1 for r in rows if r.get('net_flow') and r['net_flow'] > 0)
+
+    balances = [r['balance'] for r in rows if r.get('balance')]
+    if len(balances) >= 2:
+        # rows are DESC, so first = newest, last = oldest
+        newest_balance = balances[0]
+        oldest_balance = balances[-1]
+        balance_change_pct = ((newest_balance - oldest_balance) / oldest_balance * 100) if oldest_balance else 0
+    else:
+        balance_change_pct = 0
+
+    total_inflows = sum(r.get('inflows_usd') or 0 for r in rows)
+    total_outflows = sum(r.get('outflows_usd') or 0 for r in rows)
+
+    summary = {
+        'token': token.upper(),
+        'data_days': len(rows),
+        'outflow_days': outflow_days,
+        'inflow_days': inflow_days,
+        'balance_change_pct': round(balance_change_pct, 2),
+        'total_inflows_usd': total_inflows,
+        'total_outflows_usd': total_outflows,
+        'net_flow_usd': total_inflows - total_outflows,
+        'newest_date': rows[0]['date'] if rows else None,
+        'oldest_date': rows[-1]['date'] if rows else None,
+    }
+
+    return {'days': rows, 'summary': summary}
+
+
+def get_entity_diff(
+    token: str,
+    current_entities: List[Dict] = None,
+    days_back: int = 7
+) -> Dict:
+    """
+    Compare current entity positions vs stored snapshot.
+
+    Args:
+        token: Token symbol
+        current_entities: List of current entity dicts (with entity_address, balance).
+                         If None, compares two most recent stored snapshots.
+        days_back: How far back to look for comparison snapshot
+
+    Returns:
+        Dict with 'new', 'removed', 'changed', 'unchanged' entity lists
+    """
+    conn = get_connection()
+
+    # Get stored snapshot from days_back ago (or the oldest available)
+    cursor = conn.execute(
+        """SELECT * FROM entity_snapshots
+           WHERE token = ?
+           AND snapshot_date <= date('now', ?)
+           ORDER BY snapshot_date DESC""",
+        (token.upper(), f'-{days_back} days')
+    )
+    stored_rows = [dict(row) for row in cursor.fetchall()]
+
+    # If no current_entities provided, use the latest stored snapshot as "current"
+    if current_entities is None:
+        cursor = conn.execute(
+            """SELECT * FROM entity_snapshots
+               WHERE token = ?
+               ORDER BY snapshot_date DESC""",
+            (token.upper(),)
+        )
+        latest_rows = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+
+        if not latest_rows:
+            return {'new': [], 'removed': [], 'changed': [], 'unchanged': [],
+                    'latest_date': None, 'comparison_date': None}
+
+        latest_date = latest_rows[0]['snapshot_date']
+        current_by_addr = {}
+        for r in latest_rows:
+            if r['snapshot_date'] == latest_date:
+                current_by_addr[r['entity_address']] = r
+    else:
+        conn.close()
+        latest_date = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+        current_by_addr = {e['entity_address']: e for e in current_entities if e.get('entity_address')}
+
+    # Build stored lookup (most recent per address from the older snapshot)
+    stored_by_addr = {}
+    comparison_date = None
+    for r in stored_rows:
+        addr = r['entity_address']
+        if addr not in stored_by_addr:
+            stored_by_addr[addr] = r
+            if comparison_date is None:
+                comparison_date = r['snapshot_date']
+
+    # Compute diffs
+    new_entities = []
+    removed_entities = []
+    changed_entities = []
+    unchanged_entities = []
+
+    for addr, curr in current_by_addr.items():
+        if addr not in stored_by_addr:
+            new_entities.append(curr)
+        else:
+            stored = stored_by_addr[addr]
+            curr_bal = curr.get('balance') or 0
+            stored_bal = stored.get('balance') or 0
+            if stored_bal != 0:
+                change_pct = ((curr_bal - stored_bal) / abs(stored_bal)) * 100
+            else:
+                change_pct = 100 if curr_bal > 0 else 0
+
+            if abs(change_pct) > 1:  # >1% change threshold
+                changed_entities.append({
+                    'entity_name': curr.get('entity_name') or stored.get('entity_name'),
+                    'entity_address': addr,
+                    'old_balance': stored_bal,
+                    'new_balance': curr_bal,
+                    'change': curr_bal - stored_bal,
+                    'change_pct': round(change_pct, 2),
+                    'entity_type': curr.get('entity_type') or stored.get('entity_type'),
+                })
+            else:
+                unchanged_entities.append(curr)
+
+    for addr, stored in stored_by_addr.items():
+        if addr not in current_by_addr:
+            removed_entities.append(stored)
+
+    return {
+        'new': new_entities,
+        'removed': removed_entities,
+        'changed': sorted(changed_entities, key=lambda x: abs(x.get('change_pct', 0)), reverse=True),
+        'unchanged': unchanged_entities,
+        'latest_date': latest_date,
+        'comparison_date': comparison_date,
+    }
+
+
+def get_entity_history(
+    token: str,
+    entity_address: str = None,
+    days: int = 30,
+    limit: int = 100
+) -> List[Dict]:
+    """Get entity snapshot history for a token."""
+    conn = get_connection()
+
+    conditions = ["token = ?", "snapshot_date >= date('now', ?)"]
+    params: list = [token.upper(), f'-{days} days']
+
+    if entity_address:
+        conditions.append("entity_address = ?")
+        params.append(entity_address)
+
+    params.append(limit)
+    where = " AND ".join(conditions)
+
+    cursor = conn.execute(
+        f"""SELECT * FROM entity_snapshots
+            WHERE {where}
+            ORDER BY snapshot_date DESC, balance DESC
+            LIMIT ?""",
+        params
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_hunt_history(
+    token: str = None,
+    days: int = 90,
+    verdict: str = None,
+    limit: int = 20
+) -> List[Dict]:
+    """Get past hunt results with optional filters."""
+    conn = get_connection()
+
+    conditions = ["hunt_date >= date('now', ?)"]
+    params: list = [f'-{int(days)} days']
+
+    if token:
+        conditions.append("token = ?")
+        params.append(token.upper())
+    if verdict:
+        conditions.append("verdict = ?")
+        params.append(verdict.upper())
+
+    params.append(limit)
+    where = " AND ".join(conditions)
+
+    cursor = conn.execute(
+        f"""SELECT * FROM hunt_results
+            WHERE {where}
+            ORDER BY hunt_date DESC, alpha_score DESC
+            LIMIT ?""",
+        params
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def update_hunt_outcome(
+    result_id: str,
+    price_7d_later: float = None,
+    price_14d_later: float = None,
+    price_30d_later: float = None
+) -> None:
+    """Fill in outcome prices for a hunt result."""
+    conn = get_connection()
+
+    # Get the original hunt price
+    cursor = conn.execute(
+        "SELECT price_at_hunt FROM hunt_results WHERE result_id = ?",
+        (result_id,)
+    )
+    row = cursor.fetchone()
+    if not row or not row['price_at_hunt']:
+        conn.close()
+        return
+
+    price_at = row['price_at_hunt']
+
+    updates = []
+    params: list = []
+
+    if price_7d_later is not None:
+        updates.extend(["price_7d_later = ?", "pct_change_7d = ?"])
+        params.extend([price_7d_later, round((price_7d_later - price_at) / price_at * 100, 2)])
+    if price_14d_later is not None:
+        updates.extend(["price_14d_later = ?", "pct_change_14d = ?"])
+        params.extend([price_14d_later, round((price_14d_later - price_at) / price_at * 100, 2)])
+    if price_30d_later is not None:
+        updates.extend(["price_30d_later = ?", "pct_change_30d = ?"])
+        params.extend([price_30d_later, round((price_30d_later - price_at) / price_at * 100, 2)])
+
+    if updates:
+        params.append(result_id)
+        conn.execute(
+            f"UPDATE hunt_results SET {', '.join(updates)} WHERE result_id = ?",
+            params
+        )
+        conn.commit()
+    conn.close()
+
+
+def get_flow_history(
+    token: str,
+    days: int = 30,
+    limit: int = 100
+) -> List[Dict]:
+    """Get flow history for a token."""
+    conn = get_connection()
+    cursor = conn.execute(
+        """SELECT * FROM flow_snapshots
+           WHERE token = ?
+           AND timestamp_utc >= datetime('now', ?)
+           ORDER BY timestamp_utc DESC
+           LIMIT ?""",
+        (token.upper(), f'-{days} days', limit)
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_latest_flow(token: str) -> Optional[Dict]:
+    """Get most recent flow snapshot for a token."""
+    conn = get_connection()
+    cursor = conn.execute(
+        """SELECT * FROM flow_snapshots
+           WHERE token = ?
+           ORDER BY timestamp_utc DESC
+           LIMIT 1""",
+        (token.upper(),)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_flow_comparison(token: str, days_back: int = 7) -> Dict:
+    """
+    Compare current flow to historical average.
+
+    Returns dict with current values and % change from average.
+    """
+    conn = get_connection()
+
+    # Get latest snapshot
+    cursor = conn.execute(
+        """SELECT * FROM flow_snapshots
+           WHERE token = ?
+           ORDER BY timestamp_utc DESC LIMIT 1""",
+        (token.upper(),)
+    )
+    latest = cursor.fetchone()
+    if not latest:
+        conn.close()
+        return {}
+
+    latest = dict(latest)
+
+    # Get historical averages
+    cursor = conn.execute(
+        """SELECT
+           AVG(exchange_net_flow) as avg_exchange,
+           AVG(fresh_wallet_net_flow) as avg_fresh,
+           AVG(smart_money_net_flow) as avg_smart,
+           AVG(top_pnl_net_flow) as avg_pnl,
+           AVG(whale_net_flow) as avg_whale,
+           COUNT(*) as snapshot_count
+           FROM flow_snapshots
+           WHERE token = ?
+           AND timestamp_utc >= datetime('now', ?)
+           AND timestamp_utc < datetime('now', '-1 day')""",
+        (token.upper(), f'-{days_back} days')
+    )
+    avgs = dict(cursor.fetchone())
+    conn.close()
+
+    comparison = {
+        'token': token.upper(),
+        'latest_timestamp': latest['timestamp_utc'],
+        'snapshot_count': avgs['snapshot_count'],
+        'current': {
+            'exchange': latest['exchange_net_flow'],
+            'fresh_wallet': latest['fresh_wallet_net_flow'],
+            'smart_money': latest['smart_money_net_flow'],
+            'top_pnl': latest['top_pnl_net_flow'],
+            'whale': latest['whale_net_flow'],
+            'overall_signal': latest['overall_signal'],
+            'accumulation_score': latest['accumulation_score']
+        },
+        'historical_avg': {
+            'exchange': avgs['avg_exchange'],
+            'fresh_wallet': avgs['avg_fresh'],
+            'smart_money': avgs['avg_smart'],
+            'top_pnl': avgs['avg_pnl'],
+            'whale': avgs['avg_whale']
+        }
+    }
+
+    return comparison
+
+
+def get_all_latest_flows(tokens: List[str] = None) -> List[Dict]:
+    """Get latest flow for multiple tokens."""
+    conn = get_connection()
+
+    if tokens:
+        placeholders = ','.join('?' * len(tokens))
+        cursor = conn.execute(
+            f"""SELECT f1.* FROM flow_snapshots f1
+               INNER JOIN (
+                   SELECT token, MAX(timestamp_utc) as max_ts
+                   FROM flow_snapshots
+                   WHERE token IN ({placeholders})
+                   GROUP BY token
+               ) f2 ON f1.token = f2.token AND f1.timestamp_utc = f2.max_ts
+               ORDER BY f1.token""",
+            [t.upper() for t in tokens]
+        )
+    else:
+        cursor = conn.execute(
+            """SELECT f1.* FROM flow_snapshots f1
+               INNER JOIN (
+                   SELECT token, MAX(timestamp_utc) as max_ts
+                   FROM flow_snapshots
+                   GROUP BY token
+               ) f2 ON f1.token = f2.token AND f1.timestamp_utc = f2.max_ts
+               ORDER BY f1.token"""
+        )
+
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_flow_stats() -> Dict:
+    """Get flow logging statistics."""
+    conn = get_connection()
+    stats = {}
+
+    # Total snapshots
+    cursor = conn.execute("SELECT COUNT(*) FROM flow_snapshots")
+    stats['total_snapshots'] = cursor.fetchone()[0]
+
+    # Unique tokens tracked
+    cursor = conn.execute("SELECT COUNT(DISTINCT token) FROM flow_snapshots")
+    stats['tokens_tracked'] = cursor.fetchone()[0]
+
+    # Snapshots by token
+    cursor = conn.execute(
+        """SELECT token, COUNT(*) as count,
+           MIN(timestamp_utc) as first_snapshot,
+           MAX(timestamp_utc) as last_snapshot
+           FROM flow_snapshots
+           GROUP BY token
+           ORDER BY count DESC"""
+    )
+    stats['by_token'] = {row[0]: {'count': row[1], 'first': row[2], 'last': row[3]}
+                        for row in cursor.fetchall()}
+
+    # Signal distribution
+    cursor = conn.execute(
+        """SELECT overall_signal, COUNT(*) as count
+           FROM flow_snapshots
+           GROUP BY overall_signal"""
+    )
+    stats['signal_distribution'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    conn.close()
+    return stats
+
+
+# ============================================================================
+# WYCKOFF SCAN LOGGING
+# ============================================================================
+
+
+def log_wyckoff_scan(
+    scan_date: str,
+    results: List[Dict],
+    batch_id: str = None
+) -> str:
+    """
+    Store Wyckoff scan results for a batch of tokens.
+
+    Args:
+        scan_date: YYYY-MM-DD
+        results: List of dicts with Wyckoff classification data
+        batch_id: Optional batch ID (auto-generated if not provided)
+
+    Returns:
+        batch_id for the scan batch
+    """
+    if batch_id is None:
+        batch_id = str(uuid.uuid4())[:8]
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+
+    for result in results:
+        scan_id = str(uuid.uuid4())[:8]
+        events_detail = json.dumps(result.get('events_detail', [])) if result.get('events_detail') else None
+        conn.execute(
+            """INSERT INTO wyckoff_scans
+               (scan_id, batch_id, scan_date, token, timeframe, price_at_scan,
+                cycle_type, phase, confidence,
+                spring_detected, upthrust_detected, sos_detected, sow_detected,
+                events_detail, support_level, resistance_level, range_width_pct,
+                position_in_range, volume_trend, obv_divergence, volume_confirmation,
+                phase_progression, watch_conditions, trading_implications, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (scan_id, batch_id, scan_date,
+             result.get('token', '').upper(),
+             result.get('timeframe', '1d'),
+             result.get('price_at_scan'),
+             result.get('cycle_type'),
+             result.get('phase'),
+             result.get('confidence'),
+             1 if result.get('spring_detected') else 0,
+             1 if result.get('upthrust_detected') else 0,
+             1 if result.get('sos_detected') else 0,
+             1 if result.get('sow_detected') else 0,
+             events_detail,
+             result.get('support_level'),
+             result.get('resistance_level'),
+             result.get('range_width_pct'),
+             result.get('position_in_range'),
+             result.get('volume_trend'),
+             1 if result.get('obv_divergence') else 0,
+             result.get('volume_confirmation'),
+             result.get('phase_progression'),
+             result.get('watch_conditions'),
+             result.get('trading_implications'),
+             timestamp)
+        )
+
+    conn.commit()
+    conn.close()
+    return batch_id
+
+
+def get_wyckoff_history(
+    token: Optional[str] = None,
+    phase: Optional[str] = None,
+    cycle_type: Optional[str] = None,
+    min_confidence: int = 0,
+    days: int = 90,
+    limit: int = 50
+) -> List[Dict]:
+    """
+    Query historical Wyckoff scan results with filters.
+
+    Args:
+        token: Filter by token symbol
+        phase: Filter by phase (A/B/C/D/E)
+        cycle_type: Filter by 'accumulation' or 'distribution'
+        min_confidence: Minimum confidence threshold
+        days: Lookback period in days
+        limit: Max results
+
+    Returns:
+        List of scan result dicts, most recent first
+    """
+    conn = get_connection()
+    conditions = [f"scan_date >= date('now', '-{days} days')"]
+    params = []
+
+    if token:
+        conditions.append("token = ?")
+        params.append(token.upper())
+    if phase:
+        conditions.append("phase = ?")
+        params.append(phase.upper())
+    if cycle_type:
+        conditions.append("cycle_type = ?")
+        params.append(cycle_type.lower())
+    if min_confidence > 0:
+        conditions.append("confidence >= ?")
+        params.append(min_confidence)
+
+    where = " AND ".join(conditions)
+    params.append(limit)
+
+    rows = conn.execute(
+        f"SELECT * FROM wyckoff_scans WHERE {where} ORDER BY scan_date DESC, confidence DESC LIMIT ?",
+        params
+    ).fetchall()
+    conn.close()
+
+    columns = [
+        'id', 'scan_id', 'batch_id', 'scan_date', 'token', 'timeframe', 'price_at_scan',
+        'cycle_type', 'phase', 'confidence',
+        'spring_detected', 'upthrust_detected', 'sos_detected', 'sow_detected',
+        'events_detail', 'support_level', 'resistance_level', 'range_width_pct',
+        'position_in_range', 'volume_trend', 'obv_divergence', 'volume_confirmation',
+        'phase_progression', 'watch_conditions', 'trading_implications',
+        'price_7d_later', 'price_14d_later', 'price_30d_later',
+        'pct_change_7d', 'pct_change_14d', 'pct_change_30d',
+        'phase_7d_later', 'outcome_notes', 'created_at'
+    ]
+    return [dict(zip(columns, row)) for row in rows]
+
+
+def get_wyckoff_latest(tokens: List[str] = None) -> List[Dict]:
+    """
+    Get the most recent Wyckoff scan for each token.
+
+    Args:
+        tokens: Optional list of tokens to filter. If None, returns all.
+
+    Returns:
+        List of the latest scan per token, sorted by confidence DESC
+    """
+    conn = get_connection()
+
+    query = """
+        SELECT w.* FROM wyckoff_scans w
+        INNER JOIN (
+            SELECT token, MAX(scan_date) as max_date
+            FROM wyckoff_scans
+            GROUP BY token
+        ) latest ON w.token = latest.token AND w.scan_date = latest.max_date
+    """
+    params = []
+
+    if tokens:
+        placeholders = ','.join(['?' for _ in tokens])
+        query += f" WHERE w.token IN ({placeholders})"
+        params = [t.upper() for t in tokens]
+
+    query += " ORDER BY w.confidence DESC"
+
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+
+    columns = [
+        'id', 'scan_id', 'batch_id', 'scan_date', 'token', 'timeframe', 'price_at_scan',
+        'cycle_type', 'phase', 'confidence',
+        'spring_detected', 'upthrust_detected', 'sos_detected', 'sow_detected',
+        'events_detail', 'support_level', 'resistance_level', 'range_width_pct',
+        'position_in_range', 'volume_trend', 'obv_divergence', 'volume_confirmation',
+        'phase_progression', 'watch_conditions', 'trading_implications',
+        'price_7d_later', 'price_14d_later', 'price_30d_later',
+        'pct_change_7d', 'pct_change_14d', 'pct_change_30d',
+        'phase_7d_later', 'outcome_notes', 'created_at'
+    ]
+    return [dict(zip(columns, row)) for row in rows]
+
+
+def get_wyckoff_phase_transitions(token: str, days: int = 90) -> List[Dict]:
+    """
+    Show how a token's Wyckoff phase has changed over time.
+    Useful for spotting phase progression (B->C->D = accumulation advancing).
+
+    Args:
+        token: Token symbol
+        days: Lookback period
+
+    Returns:
+        List of scans for this token, oldest first, for timeline view
+    """
+    conn = get_connection()
+    rows = conn.execute(
+        """SELECT scan_date, cycle_type, phase, confidence,
+                  spring_detected, upthrust_detected, sos_detected, sow_detected,
+                  price_at_scan, volume_trend, watch_conditions
+           FROM wyckoff_scans
+           WHERE token = ? AND scan_date >= date('now', ? || ' days')
+           ORDER BY scan_date ASC""",
+        (token.upper(), f"-{days}")
+    ).fetchall()
+    conn.close()
+
+    columns = ['scan_date', 'cycle_type', 'phase', 'confidence',
+               'spring_detected', 'upthrust_detected', 'sos_detected', 'sow_detected',
+               'price_at_scan', 'volume_trend', 'watch_conditions']
+    return [dict(zip(columns, row)) for row in rows]
+
+
+def update_wyckoff_outcome(
+    scan_id: str,
+    price_7d: float = None,
+    price_14d: float = None,
+    price_30d: float = None,
+    phase_7d_later: str = None,
+    outcome_notes: str = None
+) -> None:
+    """
+    Fill in outcome data for a past Wyckoff scan.
+
+    Args:
+        scan_id: The scan_id to update
+        price_7d/14d/30d: Price at those intervals after the scan
+        phase_7d_later: Did the phase change?
+        outcome_notes: Any notes on the outcome
+    """
+    conn = get_connection()
+
+    # Get original price for % calculation
+    row = conn.execute(
+        "SELECT price_at_scan FROM wyckoff_scans WHERE scan_id = ?",
+        (scan_id,)
+    ).fetchone()
+    if not row or not row[0]:
+        conn.close()
+        return
+
+    price_at_scan = row[0]
+    updates = []
+    params = []
+
+    if price_7d is not None:
+        updates.extend(["price_7d_later = ?", "pct_change_7d = ?"])
+        params.extend([price_7d, ((price_7d - price_at_scan) / price_at_scan) * 100])
+    if price_14d is not None:
+        updates.extend(["price_14d_later = ?", "pct_change_14d = ?"])
+        params.extend([price_14d, ((price_14d - price_at_scan) / price_at_scan) * 100])
+    if price_30d is not None:
+        updates.extend(["price_30d_later = ?", "pct_change_30d = ?"])
+        params.extend([price_30d, ((price_30d - price_at_scan) / price_at_scan) * 100])
+    if phase_7d_later:
+        updates.append("phase_7d_later = ?")
+        params.append(phase_7d_later)
+    if outcome_notes:
+        updates.append("outcome_notes = ?")
+        params.append(outcome_notes)
+
+    if updates:
+        params.append(scan_id)
+        conn.execute(
+            f"UPDATE wyckoff_scans SET {', '.join(updates)} WHERE scan_id = ?",
+            params
+        )
+        conn.commit()
+    conn.close()
+
+
+# ============================================================================
+# SIGNAL VALIDATION LOGGING
+# ============================================================================
+
+def log_signal_validation(
+    external_signal_id: int,
+    symbol: str,
+    direction: str,
+    provider: str = "MarketInsights",
+    signal_analysis: str = None,
+    accumulation_score: int = None,
+    ta_verdict: str = None,
+    onchain_verdict: str = None,
+    signal_aligns: bool = None,
+    mentor_consulted: bool = False,
+    mentor_verdict: str = None,
+    mentor_confidence_adj: float = None,
+    titan_recommendation: str = None,
+    recommendation_reason: str = None,
+    chart_analyzed: bool = False,
+    chart_notes: str = None,
+    chart_path: str = None,
+    suggested_entry: float = None,
+    suggested_stop: float = None,
+    suggested_target: float = None
+) -> str:
+    """
+    Log a signal validation result.
+
+    Args:
+        external_signal_id: ID from external signals.db
+        symbol: Token symbol
+        direction: LONG or SHORT
+        provider: Signal provider (default: MarketInsights)
+        signal_analysis: MarketInsights commentary
+        accumulation_score: Titan's 0-5 score
+        ta_verdict: Technical analysis verdict
+        onchain_verdict: On-chain verdict
+        signal_aligns: Whether signal matches Titan analysis
+        mentor_consulted: Whether mentor was consulted
+        mentor_verdict: Mentor's assessment
+        mentor_confidence_adj: Confidence adjustment from mentor
+        titan_recommendation: VALID/INVALID/NEEDS_CONFIRMATION
+        recommendation_reason: Reason for recommendation
+        chart_analyzed: Whether chart was reviewed
+        chart_notes: Notes from chart analysis
+        chart_path: Path to chart image
+        suggested_entry: Suggested entry price
+        suggested_stop: Suggested stop loss
+        suggested_target: Suggested target price
+
+    Returns:
+        validation_id for tracking
+    """
+    validation_id = str(uuid.uuid4())[:8]
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO signal_validations
+           (validation_id, timestamp_utc, external_signal_id, symbol, direction,
+            provider, signal_analysis, accumulation_score, ta_verdict, onchain_verdict,
+            signal_aligns, mentor_consulted, mentor_verdict, mentor_confidence_adj,
+            titan_recommendation, recommendation_reason, chart_analyzed, chart_notes,
+            chart_path, suggested_entry, suggested_stop, suggested_target)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (validation_id, timestamp, external_signal_id, symbol.upper(), direction.upper(),
+         provider, signal_analysis, accumulation_score, ta_verdict, onchain_verdict,
+         1 if signal_aligns else (0 if signal_aligns is not None else None),
+         1 if mentor_consulted else 0, mentor_verdict, mentor_confidence_adj,
+         titan_recommendation, recommendation_reason,
+         1 if chart_analyzed else 0, chart_notes, chart_path,
+         suggested_entry, suggested_stop, suggested_target)
+    )
+    conn.commit()
+    conn.close()
+
+    return validation_id
+
+
+def get_validation_by_id(validation_id: str) -> Optional[Dict]:
+    """Get a specific validation by ID."""
+    conn = get_connection()
+    cursor = conn.execute(
+        "SELECT * FROM signal_validations WHERE validation_id = ?",
+        (validation_id,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_validation_by_signal_id(external_signal_id: int) -> Optional[Dict]:
+    """Get validation by external signal ID."""
+    conn = get_connection()
+    cursor = conn.execute(
+        "SELECT * FROM signal_validations WHERE external_signal_id = ? ORDER BY timestamp_utc DESC LIMIT 1",
+        (external_signal_id,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_recent_validations(
+    symbol: str = None,
+    recommendation: str = None,
+    limit: int = 20
+) -> List[Dict]:
+    """
+    Get recent signal validations.
+
+    Args:
+        symbol: Filter by token symbol
+        recommendation: Filter by recommendation (VALID/INVALID/NEEDS_CONFIRMATION)
+        limit: Maximum number of results
+
+    Returns:
+        List of validation dictionaries
+    """
+    conn = get_connection()
+
+    conditions = []
+    params = []
+
+    if symbol:
+        conditions.append("symbol = ?")
+        params.append(symbol.upper())
+
+    if recommendation:
+        conditions.append("titan_recommendation = ?")
+        params.append(recommendation.upper())
+
+    params.append(limit)
+
+    if conditions:
+        where_clause = "WHERE " + " AND ".join(conditions)
+    else:
+        where_clause = ""
+
+    cursor = conn.execute(
+        f"""SELECT * FROM signal_validations
+            {where_clause}
+            ORDER BY timestamp_utc DESC LIMIT ?""",
+        params
+    )
+
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_validation_stats(days: int = 30) -> Dict:
+    """
+    Get signal validation statistics.
+
+    Args:
+        days: Lookback period in days
+
+    Returns:
+        Dictionary with validation statistics
+    """
+    conn = get_connection()
+    stats = {}
+
+    cutoff = f"-{days} days"
+
+    # Total validations
+    cursor = conn.execute(
+        """SELECT COUNT(*) FROM signal_validations
+           WHERE timestamp_utc >= datetime('now', ?)""",
+        (cutoff,)
+    )
+    stats['total_validations'] = cursor.fetchone()[0]
+
+    # By recommendation
+    cursor = conn.execute(
+        """SELECT titan_recommendation, COUNT(*) as count
+           FROM signal_validations
+           WHERE timestamp_utc >= datetime('now', ?)
+           GROUP BY titan_recommendation""",
+        (cutoff,)
+    )
+    stats['by_recommendation'] = {row[0] or 'UNKNOWN': row[1] for row in cursor.fetchall()}
+
+    # Signal alignment rate
+    cursor = conn.execute(
+        """SELECT AVG(signal_aligns) FROM signal_validations
+           WHERE timestamp_utc >= datetime('now', ?) AND signal_aligns IS NOT NULL""",
+        (cutoff,)
+    )
+    stats['alignment_rate'] = cursor.fetchone()[0] or 0
+
+    # Mentor consultation rate
+    cursor = conn.execute(
+        """SELECT AVG(mentor_consulted) FROM signal_validations
+           WHERE timestamp_utc >= datetime('now', ?)""",
+        (cutoff,)
+    )
+    stats['mentor_consultation_rate'] = cursor.fetchone()[0] or 0
+
+    # By symbol
+    cursor = conn.execute(
+        """SELECT symbol, COUNT(*) as count
+           FROM signal_validations
+           WHERE timestamp_utc >= datetime('now', ?)
+           GROUP BY symbol
+           ORDER BY count DESC
+           LIMIT 10""",
+        (cutoff,)
+    )
+    stats['by_symbol'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # Accuracy (if outcomes tracked)
+    cursor = conn.execute(
+        """SELECT trade_outcome, COUNT(*) as count
+           FROM signal_validations
+           WHERE timestamp_utc >= datetime('now', ?)
+           AND trade_outcome IS NOT NULL
+           GROUP BY trade_outcome""",
+        (cutoff,)
+    )
+    stats['by_outcome'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    conn.close()
+    return stats
+
+
+def update_validation_outcome(
+    validation_id: str,
+    trade_taken: bool,
+    trade_outcome: str = None,
+    notes: str = None
+) -> None:
+    """
+    Update validation with trade outcome.
+
+    Args:
+        validation_id: Validation ID
+        trade_taken: Whether user took the trade
+        trade_outcome: WIN/LOSS/SKIP
+        notes: Additional notes
+    """
+    conn = get_connection()
+    conn.execute(
+        """UPDATE signal_validations
+           SET trade_taken = ?, trade_outcome = ?, notes = ?
+           WHERE validation_id = ?""",
+        (1 if trade_taken else 0, trade_outcome, notes, validation_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+# ============================================================================
+# SIGNAL WATCHLIST FUNCTIONS
+# ============================================================================
+
+def add_to_watchlist(
+    symbol: str,
+    source_type: str,
+    watch_type: str,
+    direction: str = None,
+    chain: str = None,
+    token_address: str = None,
+    external_signal_id: int = None,
+    validation_id: str = None,
+    original_thesis: str = None,
+    entry_conditions: Dict = None,
+    invalidation_conditions: Dict = None,
+    confirmation_needed: str = None,
+    price_at_creation: float = None,
+    support_level: float = None,
+    resistance_level: float = None,
+    stop_level: float = None,
+    target_level: float = None,
+    original_accumulation_score: int = None,
+    original_ta_verdict: str = None,
+    original_onchain_verdict: str = None,
+    original_perps_bias: str = None,
+    check_frequency: str = "session",
+    priority: int = 5,
+    expires_at: str = None
+) -> str:
+    """
+    Add a token/signal to the watchlist for ongoing monitoring.
+
+    Args:
+        symbol: Token symbol (e.g., HYPE, BTC)
+        source_type: 'telegram_signal' | 'manual' | 'skill'
+        watch_type: 'entry_timing' | 'confirmation' | 'structural' | 'invalidation'
+        direction: Expected direction LONG/SHORT
+        chain: Blockchain (ethereum, hyperevm, etc.)
+        token_address: Contract address
+        external_signal_id: Reference to external signals.db
+        validation_id: Reference to signal_validations
+        original_thesis: Why we're watching this
+        entry_conditions: Dict of conditions that would trigger entry
+        invalidation_conditions: Dict of conditions that would invalidate
+        confirmation_needed: What we're waiting to see
+        price_at_creation: Current price when added
+        support_level: Key support level
+        resistance_level: Key resistance level
+        stop_level: Where stop loss would be
+        target_level: Target price
+        original_accumulation_score: Score at time of adding (0-5)
+        original_ta_verdict: TA verdict when added
+        original_onchain_verdict: On-chain verdict when added
+        original_perps_bias: Perps positioning when added
+        check_frequency: 'session' | 'daily' | 'hourly'
+        priority: 1-10 (higher = more important)
+        expires_at: Optional expiration date
+
+    Returns:
+        watch_id
+    """
+    watch_id = str(uuid.uuid4())[:8]
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    conn = get_connection()
+    conn.execute(
+        """INSERT INTO signal_watchlist (
+            watch_id, created_at, updated_at, symbol, chain, token_address,
+            source_type, external_signal_id, validation_id, watch_type, direction,
+            original_thesis, entry_conditions, invalidation_conditions, confirmation_needed,
+            price_at_creation, support_level, resistance_level, stop_level, target_level,
+            original_accumulation_score, original_ta_verdict, original_onchain_verdict, original_perps_bias,
+            last_checked, last_price, current_accumulation_score, current_ta_verdict,
+            current_onchain_verdict, current_perps_bias, status, check_frequency, priority, expires_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (
+            watch_id, timestamp, timestamp, symbol.upper(), chain, token_address,
+            source_type, external_signal_id, validation_id, watch_type, direction,
+            original_thesis,
+            json.dumps(entry_conditions) if entry_conditions else None,
+            json.dumps(invalidation_conditions) if invalidation_conditions else None,
+            confirmation_needed,
+            price_at_creation, support_level, resistance_level, stop_level, target_level,
+            original_accumulation_score, original_ta_verdict, original_onchain_verdict, original_perps_bias,
+            timestamp, price_at_creation, original_accumulation_score, original_ta_verdict,
+            original_onchain_verdict, original_perps_bias, 'active', check_frequency, priority, expires_at
+        )
+    )
+    conn.commit()
+    conn.close()
+    return watch_id
+
+
+def get_active_watchlist(
+    source_type: str = None,
+    watch_type: str = None,
+    symbol: str = None,
+    check_frequency: str = None
+) -> List[Dict]:
+    """
+    Get all active watchlist items, optionally filtered.
+
+    Args:
+        source_type: Filter by source ('telegram_signal', 'manual', 'skill')
+        watch_type: Filter by type ('entry_timing', 'confirmation', etc.)
+        symbol: Filter by symbol
+        check_frequency: Filter by check frequency
+
+    Returns:
+        List of watchlist items
+    """
+    conn = get_connection()
+    conditions = ["status = 'active'"]
+    params = []
+
+    if source_type:
+        conditions.append("source_type = ?")
+        params.append(source_type)
+    if watch_type:
+        conditions.append("watch_type = ?")
+        params.append(watch_type)
+    if symbol:
+        conditions.append("symbol = ?")
+        params.append(symbol.upper())
+    if check_frequency:
+        conditions.append("check_frequency = ?")
+        params.append(check_frequency)
+
+    where_clause = " AND ".join(conditions)
+    cursor = conn.execute(
+        f"""SELECT * FROM signal_watchlist
+            WHERE {where_clause}
+            ORDER BY priority DESC, created_at DESC""",
+        params
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+
+    # Parse JSON fields
+    for row in rows:
+        if row.get('entry_conditions'):
+            try:
+                row['entry_conditions'] = json.loads(row['entry_conditions'])
+            except:
+                pass
+        if row.get('invalidation_conditions'):
+            try:
+                row['invalidation_conditions'] = json.loads(row['invalidation_conditions'])
+            except:
+                pass
+
+    return rows
+
+
+def get_watchlist_item(watch_id: str) -> Optional[Dict]:
+    """Get a single watchlist item by ID."""
+    conn = get_connection()
+    cursor = conn.execute("SELECT * FROM signal_watchlist WHERE watch_id = ?", (watch_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        item = dict(row)
+        if item.get('entry_conditions'):
+            try:
+                item['entry_conditions'] = json.loads(item['entry_conditions'])
+            except:
+                pass
+        if item.get('invalidation_conditions'):
+            try:
+                item['invalidation_conditions'] = json.loads(item['invalidation_conditions'])
+            except:
+                pass
+        return item
+    return None
+
+
+def update_watchlist_check(
+    watch_id: str,
+    last_price: float = None,
+    current_accumulation_score: int = None,
+    current_ta_verdict: str = None,
+    current_onchain_verdict: str = None,
+    current_perps_bias: str = None,
+    status_changed: bool = False,
+    change_summary: str = None
+) -> None:
+    """
+    Update a watchlist item after a review check.
+
+    Args:
+        watch_id: Watchlist item ID
+        last_price: Current price
+        current_accumulation_score: Current accumulation score (0-5)
+        current_ta_verdict: Current TA verdict
+        current_onchain_verdict: Current on-chain verdict
+        current_perps_bias: Current perps bias
+        status_changed: Whether analysis has changed
+        change_summary: Description of what changed
+    """
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    conn.execute(
+        """UPDATE signal_watchlist
+           SET updated_at = ?, last_checked = ?, last_price = ?,
+               current_accumulation_score = ?, current_ta_verdict = ?,
+               current_onchain_verdict = ?, current_perps_bias = ?,
+               status_changed = ?, change_summary = ?
+           WHERE watch_id = ?""",
+        (timestamp, timestamp, last_price, current_accumulation_score,
+         current_ta_verdict, current_onchain_verdict, current_perps_bias,
+         1 if status_changed else 0, change_summary, watch_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def update_watchlist_status(
+    watch_id: str,
+    status: str,
+    status_reason: str = None,
+    trade_taken: bool = None,
+    trade_setup_id: str = None,
+    outcome_notes: str = None
+) -> None:
+    """
+    Update the status of a watchlist item.
+
+    Args:
+        watch_id: Watchlist item ID
+        status: New status ('active', 'triggered', 'invalidated', 'expired', 'taken', 'removed')
+        status_reason: Why status changed
+        trade_taken: Whether a trade was taken
+        trade_setup_id: Reference to trade_setups if trade taken
+        outcome_notes: Notes about the outcome
+    """
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+
+    updates = ["updated_at = ?", "status = ?", "status_reason = ?"]
+    params = [timestamp, status, status_reason]
+
+    if status == 'triggered':
+        updates.append("triggered_at = ?")
+        params.append(timestamp)
+
+    if trade_taken is not None:
+        updates.append("trade_taken = ?")
+        params.append(1 if trade_taken else 0)
+
+    if trade_setup_id:
+        updates.append("trade_setup_id = ?")
+        params.append(trade_setup_id)
+
+    if outcome_notes:
+        updates.append("outcome_notes = ?")
+        params.append(outcome_notes)
+
+    params.append(watch_id)
+
+    conn.execute(
+        f"UPDATE signal_watchlist SET {', '.join(updates)} WHERE watch_id = ?",
+        params
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_watchlist_stats() -> Dict:
+    """Get statistics about the watchlist."""
+    conn = get_connection()
+    stats = {}
+
+    # Total by status
+    cursor = conn.execute(
+        "SELECT status, COUNT(*) FROM signal_watchlist GROUP BY status"
+    )
+    stats['by_status'] = {row[0]: row[1] for row in cursor.fetchall()}
+    stats['active'] = stats['by_status'].get('active', 0)
+
+    # By source type (active only)
+    cursor = conn.execute(
+        "SELECT source_type, COUNT(*) FROM signal_watchlist WHERE status = 'active' GROUP BY source_type"
+    )
+    stats['by_source'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # By watch type (active only)
+    cursor = conn.execute(
+        "SELECT watch_type, COUNT(*) FROM signal_watchlist WHERE status = 'active' GROUP BY watch_type"
+    )
+    stats['by_watch_type'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # Items needing review (active, not checked in 24h)
+    cursor = conn.execute(
+        """SELECT COUNT(*) FROM signal_watchlist
+           WHERE status = 'active'
+           AND (last_checked IS NULL OR last_checked < datetime('now', '-24 hours'))"""
+    )
+    stats['needs_review'] = cursor.fetchone()[0]
+
+    # Items with changed analysis
+    cursor = conn.execute(
+        "SELECT COUNT(*) FROM signal_watchlist WHERE status = 'active' AND status_changed = 1"
+    )
+    stats['analysis_changed'] = cursor.fetchone()[0]
+
+    # Expired items (still marked active but past expires_at)
+    cursor = conn.execute(
+        """SELECT COUNT(*) FROM signal_watchlist
+           WHERE status = 'active'
+           AND expires_at IS NOT NULL
+           AND expires_at < datetime('now')"""
+    )
+    stats['expired_pending'] = cursor.fetchone()[0]
+
+    # Trades taken from watchlist
+    cursor = conn.execute(
+        "SELECT COUNT(*) FROM signal_watchlist WHERE trade_taken = 1"
+    )
+    stats['trades_taken'] = cursor.fetchone()[0]
+
+    conn.close()
+    return stats
+
+
+def get_watchlist_for_review(check_frequency: str = "session") -> List[Dict]:
+    """
+    Get watchlist items that need review based on check frequency.
+
+    Args:
+        check_frequency: 'session' | 'daily' | 'hourly'
+
+    Returns:
+        List of items needing review
+    """
+    conn = get_connection()
+
+    # Determine the check interval
+    if check_frequency == "hourly":
+        interval = "-1 hours"
+    elif check_frequency == "daily":
+        interval = "-24 hours"
+    else:  # session - check if not checked today
+        interval = "-12 hours"
+
+    cursor = conn.execute(
+        """SELECT * FROM signal_watchlist
+           WHERE status = 'active'
+           AND check_frequency = ?
+           AND (last_checked IS NULL OR last_checked < datetime('now', ?))
+           ORDER BY priority DESC, created_at DESC""",
+        (check_frequency, interval)
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def remove_from_watchlist(watch_id: str, reason: str = "Manual removal") -> None:
+    """Remove an item from the watchlist."""
+    update_watchlist_status(watch_id, 'removed', status_reason=reason)
+
+
+def expire_old_watchlist_items() -> int:
+    """
+    Mark expired watchlist items as expired.
+
+    Returns:
+        Number of items expired
+    """
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    cursor = conn.execute(
+        """UPDATE signal_watchlist
+           SET status = 'expired', updated_at = ?, status_reason = 'Auto-expired'
+           WHERE status = 'active'
+           AND expires_at IS NOT NULL
+           AND expires_at < datetime('now')""",
+        (timestamp,)
+    )
+    count = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return count
+
+
+def get_watchlist_by_validation(validation_id: str) -> Optional[Dict]:
+    """Get watchlist item by its validation_id."""
+    conn = get_connection()
+    cursor = conn.execute(
+        "SELECT * FROM signal_watchlist WHERE validation_id = ?",
+        (validation_id,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_watchlist_by_signal(external_signal_id: int) -> Optional[Dict]:
+    """Get watchlist item by its external signal ID."""
+    conn = get_connection()
+    cursor = conn.execute(
+        "SELECT * FROM signal_watchlist WHERE external_signal_id = ?",
+        (external_signal_id,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+# ============================================================================
+# QUERY FUNCTIONS
+# ============================================================================
+
+def get_recent_queries(limit: int = 50, tool_name: Optional[str] = None) -> List[Dict]:
+    """Get recent MCP queries."""
+    conn = get_connection()
+
+    if tool_name:
+        cursor = conn.execute(
+            """SELECT * FROM mcp_queries
+               WHERE tool_name = ?
+               ORDER BY timestamp_utc DESC LIMIT ?""",
+            (tool_name, limit)
+        )
+    else:
+        cursor = conn.execute(
+            "SELECT * FROM mcp_queries ORDER BY timestamp_utc DESC LIMIT ?",
+            (limit,)
+        )
+
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_trade_cards_for_token(token: str, limit: int = 10) -> List[Dict]:
+    """Get historical trade cards for a token."""
+    conn = get_connection()
+    cursor = conn.execute(
+        """SELECT * FROM trade_cards
+           WHERE token = ?
+           ORDER BY timestamp_utc DESC LIMIT ?""",
+        (token.upper(), limit)
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_cex_history(asset: str, days: int = 7) -> List[Dict]:
+    """Get CEX flow history for an asset."""
+    conn = get_connection()
+    cursor = conn.execute(
+        """SELECT * FROM cex_snapshots
+           WHERE asset = ?
+           AND timestamp_utc >= datetime('now', ?)
+           ORDER BY timestamp_utc DESC""",
+        (asset.upper(), f'-{days} days')
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_query_stats() -> Dict:
+    """Get query statistics."""
+    conn = get_connection()
+
+    stats = {}
+
+    # Total queries
+    cursor = conn.execute("SELECT COUNT(*) FROM mcp_queries")
+    stats['total_queries'] = cursor.fetchone()[0]
+
+    # Success rate
+    cursor = conn.execute("SELECT AVG(success) FROM mcp_queries")
+    stats['success_rate'] = cursor.fetchone()[0] or 0
+
+    # Queries by tool
+    cursor = conn.execute(
+        """SELECT tool_name, COUNT(*) as count
+           FROM mcp_queries
+           GROUP BY tool_name
+           ORDER BY count DESC LIMIT 10"""
+    )
+    stats['queries_by_tool'] = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # Total trade cards
+    cursor = conn.execute("SELECT COUNT(*) FROM trade_cards")
+    stats['total_trade_cards'] = cursor.fetchone()[0]
+
+    conn.close()
+    return stats
+
+
+# ============================================================================
+# DERIVATIVES TIME-SERIES LOGGING
+# ============================================================================
+
+def log_derivatives_snapshot(analysis: dict) -> int:
+    """
+    Log a derivatives analysis result as a flat row in derivatives_snapshots.
+    Called after run_derivatives_analysis() returns.
+
+    Returns row id, or -1 on error.
+    """
+    try:
+        conn = get_connection()
+        timestamp = datetime.now(timezone.utc).isoformat()
+        symbol = analysis.get("symbol", "UNKNOWN").upper()
+
+        funding = analysis.get("funding", {})
+        oi_hist = analysis.get("open_interest", {}).get("history", {})
+        oi_ex = analysis.get("open_interest", {}).get("exchanges", {})
+        gl = analysis.get("long_short", {}).get("global", {})
+        tl = analysis.get("long_short", {}).get("top_traders", {})
+        liq = analysis.get("liquidation", {})
+        mp = analysis.get("max_pain", {})
+        setup = analysis.get("setup", {})
+
+        cursor = conn.execute("""
+            INSERT INTO derivatives_snapshots (
+                timestamp_utc, symbol, source, price_usd,
+                funding_rate_avg, funding_rate_max, funding_rate_max_exchange,
+                funding_bias, funding_annualized_pct,
+                oi_usd, oi_change_1h_pct, oi_change_4h_pct, oi_change_24h_pct,
+                oi_trend, oi_momentum,
+                ls_global_ratio, ls_global_long_pct,
+                ls_top_account_ratio, ls_top_position_ratio,
+                ls_smart_money_lean, ls_extreme, ls_contrarian_signal,
+                liq_24h_usd, liq_long_24h_usd, liq_short_24h_usd,
+                liq_ls_ratio, liq_bias, liq_acceleration,
+                options_max_pain, options_max_pain_distance_pct, options_put_call_ratio,
+                lgf_detected, lgf_direction, lgf_confidence
+            ) VALUES (
+                ?, ?, 'derivatives', ?,
+                ?, ?, ?,
+                ?, ?,
+                ?, ?, ?, ?,
+                ?, ?,
+                ?, ?,
+                ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?
+            )
+        """, (
+            timestamp, symbol, analysis.get("current_price", 0),
+            funding.get("avg_rate", 0), funding.get("max_rate", 0),
+            funding.get("max_exchange"), funding.get("bias"),
+            funding.get("annualized_cost_pct", 0),
+            oi_ex.get("total_oi_usd", 0),
+            oi_ex.get("change_1h_pct", 0), oi_ex.get("change_4h_pct", 0),
+            oi_ex.get("change_24h_pct", 0),
+            oi_hist.get("oi_trend"), oi_ex.get("momentum"),
+            gl.get("current_ratio", 0), gl.get("current_long_pct", 0),
+            tl.get("top_account_ratio", 0), tl.get("top_position_ratio", 0),
+            tl.get("smart_money_lean"), 1 if gl.get("extreme") else 0,
+            gl.get("contrarian_signal"),
+            liq.get("total_24h_usd", 0), liq.get("long_liq_24h_usd", 0),
+            liq.get("short_liq_24h_usd", 0), liq.get("long_short_ratio", 0),
+            liq.get("bias"), 1 if liq.get("recent_acceleration") else 0,
+            mp.get("max_pain_price", 0), mp.get("distance_pct", 0),
+            mp.get("put_call_oi_ratio", 0),
+            1 if setup.get("detected") else 0,
+            setup.get("direction"), setup.get("confidence"),
+        ))
+        conn.commit()
+        row_id = cursor.lastrowid
+        conn.close()
+        return row_id
+    except Exception as e:
+        import sys as _sys
+        print(f"  ⚠️  Derivatives snapshot logging failed: {e}", file=_sys.stderr)
+        return -1
+
+
+def log_market_snapshot(pulse: dict) -> list:
+    """
+    Log a market pulse result as two rows (BTC + ETH) in derivatives_snapshots.
+    Called after run_market_pulse() returns.
+
+    Returns list of row ids, or empty list on error.
+    """
+    try:
+        conn = get_connection()
+        timestamp = datetime.now(timezone.utc).isoformat()
+        row_ids = []
+
+        # Shared market-level fields
+        fg = pulse.get("fear_greed", {})
+        cb = pulse.get("coinbase_premium", {})
+        etf = pulse.get("etf", {})
+
+        fg_value = fg.get("value")
+        fg_label = fg.get("label")
+        cb_rate = cb.get("premium_rate", 0)
+        cb_bias = cb.get("bias")
+        etf_latest = etf.get("latest_day_flow_usd", 0)
+        etf_weekly = etf.get("weekly_net_flow_usd", 0)
+        etf_streak = etf.get("streak_days", 0)
+        etf_bias = etf.get("bias")
+
+        # BTC row — full data
+        btc_f = pulse.get("btc_funding", {})
+        btc_oi = pulse.get("btc_oi", {})
+        btc_ls = pulse.get("btc_ls", {})
+        btc_top = pulse.get("btc_top_ls", {})
+
+        cursor = conn.execute("""
+            INSERT INTO derivatives_snapshots (
+                timestamp_utc, symbol, source, price_usd,
+                funding_rate_avg, funding_rate_max, funding_rate_max_exchange,
+                funding_bias, funding_annualized_pct,
+                oi_usd, oi_change_1h_pct, oi_change_4h_pct, oi_change_24h_pct,
+                oi_momentum,
+                ls_global_ratio, ls_global_long_pct,
+                ls_top_account_ratio, ls_top_position_ratio,
+                ls_smart_money_lean, ls_extreme, ls_contrarian_signal,
+                fear_greed_value, fear_greed_label,
+                coinbase_premium_rate, coinbase_premium_bias,
+                etf_latest_day_flow_usd, etf_weekly_net_flow_usd,
+                etf_streak_days, etf_bias
+            ) VALUES (
+                ?, 'BTC', 'market_pulse', NULL,
+                ?, ?, ?,
+                ?, ?,
+                ?, ?, ?, ?,
+                ?,
+                ?, ?,
+                ?, ?,
+                ?, ?, ?,
+                ?, ?,
+                ?, ?,
+                ?, ?,
+                ?, ?
+            )
+        """, (
+            timestamp,
+            btc_f.get("avg_rate", 0), btc_f.get("max_rate", 0),
+            btc_f.get("max_exchange"), btc_f.get("bias"),
+            btc_f.get("annualized_cost_pct", 0),
+            btc_oi.get("total_oi_usd", 0), btc_oi.get("change_1h_pct", 0),
+            btc_oi.get("change_4h_pct", 0), btc_oi.get("change_24h_pct", 0),
+            btc_oi.get("momentum"),
+            btc_ls.get("current_ratio", 0), btc_ls.get("current_long_pct", 0),
+            btc_top.get("top_account_ratio", 0), btc_top.get("top_position_ratio", 0),
+            btc_top.get("smart_money_lean"), 1 if btc_ls.get("extreme") else 0,
+            btc_ls.get("contrarian_signal"),
+            fg_value, fg_label, cb_rate, cb_bias,
+            etf_latest, etf_weekly, etf_streak, etf_bias,
+        ))
+        row_ids.append(cursor.lastrowid)
+
+        # ETH row — funding + OI only, no L/S
+        eth_f = pulse.get("eth_funding", {})
+        eth_oi = pulse.get("eth_oi", {})
+
+        cursor = conn.execute("""
+            INSERT INTO derivatives_snapshots (
+                timestamp_utc, symbol, source, price_usd,
+                funding_rate_avg, funding_rate_max, funding_rate_max_exchange,
+                funding_bias, funding_annualized_pct,
+                oi_usd, oi_change_1h_pct, oi_change_4h_pct, oi_change_24h_pct,
+                oi_momentum,
+                fear_greed_value, fear_greed_label,
+                coinbase_premium_rate, coinbase_premium_bias,
+                etf_latest_day_flow_usd, etf_weekly_net_flow_usd,
+                etf_streak_days, etf_bias
+            ) VALUES (
+                ?, 'ETH', 'market_pulse', NULL,
+                ?, ?, ?,
+                ?, ?,
+                ?, ?, ?, ?,
+                ?,
+                ?, ?,
+                ?, ?,
+                ?, ?,
+                ?, ?
+            )
+        """, (
+            timestamp,
+            eth_f.get("avg_rate", 0), eth_f.get("max_rate", 0),
+            eth_f.get("max_exchange"), eth_f.get("bias"),
+            eth_f.get("annualized_cost_pct", 0),
+            eth_oi.get("total_oi_usd", 0), eth_oi.get("change_1h_pct", 0),
+            eth_oi.get("change_4h_pct", 0), eth_oi.get("change_24h_pct", 0),
+            eth_oi.get("momentum"),
+            fg_value, fg_label, cb_rate, cb_bias,
+            etf_latest, etf_weekly, etf_streak, etf_bias,
+        ))
+        row_ids.append(cursor.lastrowid)
+
+        conn.commit()
+        conn.close()
+        return row_ids
+    except Exception as e:
+        import sys as _sys
+        print(f"  ⚠️  Market snapshot logging failed: {e}", file=_sys.stderr)
+        return []
+
+
+# ============================================================================
+# DERIVATIVES QUERY FUNCTIONS
+# ============================================================================
+
+def get_derivatives_history(symbol: str = None, days: int = 7,
+                            source: str = None, limit: int = 50) -> list:
+    """Get recent derivatives snapshots."""
+    conn = get_connection()
+    conditions = []
+    params = []
+
+    if symbol:
+        conditions.append("symbol = ?")
+        params.append(symbol.upper())
+    if source:
+        conditions.append("source = ?")
+        params.append(source)
+
+    conditions.append("timestamp_utc >= datetime('now', ?)")
+    params.append(f"-{days} days")
+
+    where = " AND ".join(conditions)
+    params.append(limit)
+
+    cursor = conn.execute(f"""
+        SELECT * FROM derivatives_snapshots
+        WHERE {where}
+        ORDER BY timestamp_utc DESC
+        LIMIT ?
+    """, params)
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_derivatives_stats(symbol: str, days: int = 30) -> dict:
+    """Get summary statistics for a token's derivatives history."""
+    conn = get_connection()
+    cutoff_param = f"-{days} days"
+
+    cursor = conn.execute("""
+        SELECT COUNT(*) as cnt,
+               AVG(funding_rate_avg) as avg_funding,
+               MIN(funding_rate_avg) as min_funding,
+               MAX(funding_rate_avg) as max_funding,
+               AVG(oi_usd) as avg_oi,
+               MIN(oi_usd) as min_oi,
+               MAX(oi_usd) as max_oi,
+               AVG(ls_global_ratio) as avg_ls,
+               MIN(ls_global_ratio) as min_ls,
+               MAX(ls_global_ratio) as max_ls,
+               AVG(liq_24h_usd) as avg_liq,
+               SUM(liq_24h_usd) as total_liq,
+               AVG(fear_greed_value) as avg_fg,
+               MIN(fear_greed_value) as min_fg,
+               MAX(fear_greed_value) as max_fg,
+               AVG(etf_weekly_net_flow_usd) as avg_etf_weekly,
+               MIN(etf_weekly_net_flow_usd) as min_etf_weekly,
+               MAX(etf_weekly_net_flow_usd) as max_etf_weekly
+        FROM derivatives_snapshots
+        WHERE symbol = ? AND timestamp_utc >= datetime('now', ?)
+    """, (symbol.upper(), cutoff_param))
+    row = cursor.fetchone()
+
+    # Count extreme events
+    cursor2 = conn.execute("""
+        SELECT
+            SUM(CASE WHEN funding_rate_avg > 0.0003 THEN 1 ELSE 0 END) as funding_high,
+            SUM(CASE WHEN funding_rate_avg < -0.0003 THEN 1 ELSE 0 END) as funding_low,
+            SUM(CASE WHEN ls_global_ratio > 2.5 THEN 1 ELSE 0 END) as ls_high,
+            SUM(CASE WHEN ls_global_ratio < 0.4 THEN 1 ELSE 0 END) as ls_low,
+            SUM(CASE WHEN lgf_detected = 1 THEN 1 ELSE 0 END) as lgf_count
+        FROM derivatives_snapshots
+        WHERE symbol = ? AND timestamp_utc >= datetime('now', ?)
+    """, (symbol.upper(), cutoff_param))
+    extremes = cursor2.fetchone()
+
+    conn.close()
+
+    return {
+        "symbol": symbol.upper(),
+        "days": days,
+        "snapshot_count": row["cnt"] if row else 0,
+        "avg_funding": row["avg_funding"] if row else 0,
+        "min_funding": row["min_funding"] if row else 0,
+        "max_funding": row["max_funding"] if row else 0,
+        "avg_oi": row["avg_oi"] if row else 0,
+        "min_oi": row["min_oi"] if row else 0,
+        "max_oi": row["max_oi"] if row else 0,
+        "avg_ls": row["avg_ls"] if row else 0,
+        "min_ls": row["min_ls"] if row else 0,
+        "max_ls": row["max_ls"] if row else 0,
+        "avg_liq": row["avg_liq"] if row else 0,
+        "total_liq": row["total_liq"] if row else 0,
+        "avg_fg": row["avg_fg"] if row else 0,
+        "min_fg": row["min_fg"] if row else 0,
+        "max_fg": row["max_fg"] if row else 0,
+        "avg_etf_weekly": row["avg_etf_weekly"] if row else 0,
+        "min_etf_weekly": row["min_etf_weekly"] if row else 0,
+        "max_etf_weekly": row["max_etf_weekly"] if row else 0,
+        "funding_high_count": extremes["funding_high"] if extremes else 0,
+        "funding_low_count": extremes["funding_low"] if extremes else 0,
+        "ls_high_count": extremes["ls_high"] if extremes else 0,
+        "ls_low_count": extremes["ls_low"] if extremes else 0,
+        "lgf_count": extremes["lgf_count"] if extremes else 0,
+    }
+
+
+def export_derivatives_csv(symbol: str = None, days: int = 30,
+                           output_path: str = None) -> str:
+    """Export derivatives snapshots to CSV."""
+    import csv
+    import io
+
+    conn = get_connection()
+    conditions = ["timestamp_utc >= datetime('now', ?)"]
+    params = [f"-{days} days"]
+
+    if symbol:
+        conditions.append("symbol = ?")
+        params.append(symbol.upper())
+
+    where = " AND ".join(conditions)
+    cursor = conn.execute(f"""
+        SELECT * FROM derivatives_snapshots
+        WHERE {where}
+        ORDER BY timestamp_utc ASC
+    """, params)
+
+    rows = cursor.fetchall()
+    if not rows:
+        conn.close()
+        return ""
+
+    columns = [desc[0] for desc in cursor.description]
+    conn.close()
+
+    if output_path:
+        with open(output_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(columns)
+            for row in rows:
+                writer.writerow(row)
+        return output_path
+    else:
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(columns)
+        for row in rows:
+            writer.writerow(row)
+        return buf.getvalue()
+
+
+# ============================================================================
+# HELPERS
+# ============================================================================
+
+def _parse_json_input(data_str: str) -> Any:
+    """Parse JSON from string or file path."""
+    if not data_str:
+        return None
+    # If it looks like a file path
+    if not data_str.strip().startswith(('[', '{')):
+        path = Path(data_str)
+        if path.exists():
+            return json.loads(path.read_text())
+    return json.loads(data_str)
+
+
+def _format_number(n: float) -> str:
+    """Format large numbers: 1.2B, 338.2M, 12.5K."""
+    if n is None:
+        return '-'
+    abs_n = abs(n)
+    sign = '-' if n < 0 else ''
+    if abs_n >= 1e9:
+        return f"{sign}{abs_n/1e9:.1f}B"
+    elif abs_n >= 1e6:
+        return f"{sign}{abs_n/1e6:.1f}M"
+    elif abs_n >= 1e3:
+        return f"{sign}{abs_n/1e3:.1f}K"
+    else:
+        return f"{sign}{abs_n:.2f}"
+
+
+# ============================================================================
+# CLI
+# ============================================================================
+
+def main():
+    """CLI for database management."""
+    import sys
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Titan Intelligence Database CLI")
+    subparsers = parser.add_subparsers(dest='command', help='Commands')
+
+    # init
+    subparsers.add_parser('init', help='Initialize database')
+
+    # stats
+    subparsers.add_parser('stats', help='Query statistics')
+
+    # recent
+    subparsers.add_parser('recent', help='Recent MCP queries')
+
+    # mentor-stats
+    subparsers.add_parser('mentor-stats', help='Mentor consultation statistics')
+
+    # log-setup
+    log_setup_parser = subparsers.add_parser('log-setup', help='Log a new trade setup')
+    log_setup_parser.add_argument('--token', required=True, help='Token symbol')
+    log_setup_parser.add_argument('--direction', required=True, choices=['LONG', 'SHORT', 'long', 'short'])
+    log_setup_parser.add_argument('--entry', required=True, type=float, help='Entry price')
+    log_setup_parser.add_argument('--stop', required=True, type=float, help='Stop loss price')
+    log_setup_parser.add_argument('--target1', required=True, type=float, help='Target 1 price')
+    log_setup_parser.add_argument('--target2', type=float, help='Target 2 price')
+    log_setup_parser.add_argument('--rr', type=float, help='Risk/reward ratio (auto-calculated if not provided)')
+    log_setup_parser.add_argument('--ta-summary', help='Technical analysis summary')
+    log_setup_parser.add_argument('--onchain-summary', help='On-chain analysis summary')
+    log_setup_parser.add_argument('--accum-score', type=int, choices=[0,1,2,3,4,5], help='Accumulation score 0-5')
+    log_setup_parser.add_argument('--signal-summary', help='Signal summary')
+    log_setup_parser.add_argument('--mentor-agrees', action='store_true', help='Mentor agrees with setup')
+    log_setup_parser.add_argument('--mentor-disagrees', action='store_true', help='Mentor disagrees')
+    log_setup_parser.add_argument('--mentor-action', choices=['proceed', 'wait', 'reverse', 'reduce_size'])
+    log_setup_parser.add_argument('--mentor-reasoning', help='Mentor reasoning')
+    log_setup_parser.add_argument('--skill', help='Skill name (e.g., pre-breakout-accumulator)')
+    log_setup_parser.add_argument('--pattern', help='Pattern type (e.g., distribution-short)')
+
+    # enter-setup
+    enter_parser = subparsers.add_parser('enter-setup', help='Mark setup as entered')
+    enter_parser.add_argument('--setup-id', required=True, help='Setup ID')
+    enter_parser.add_argument('--price', required=True, type=float, help='Actual entry price')
+
+    # close-setup
+    close_parser = subparsers.add_parser('close-setup', help='Close setup and record outcome')
+    close_parser.add_argument('--setup-id', required=True, help='Setup ID')
+    close_parser.add_argument('--price', required=True, type=float, help='Close price')
+    close_parser.add_argument('--outcome', required=True, choices=['WIN', 'LOSS', 'BREAKEVEN', 'PARTIAL', 'win', 'loss', 'breakeven', 'partial'])
+    close_parser.add_argument('--target', type=int, choices=[0,1,2], help='Which target hit (0=stop, 1=T1, 2=T2)')
+    close_parser.add_argument('--pnl-percent', type=float, help='PnL percentage (auto-calculated if not provided)')
+    close_parser.add_argument('--pnl-usd', type=float, help='PnL in USD')
+
+    # add-lessons
+    lessons_parser = subparsers.add_parser('add-lessons', help='Add post-trade analysis')
+    lessons_parser.add_argument('--setup-id', required=True, help='Setup ID')
+    lessons_parser.add_argument('--what-worked', help='What worked well')
+    lessons_parser.add_argument('--what-failed', help='What failed')
+    lessons_parser.add_argument('--lessons', help='Lessons learned')
+    lessons_parser.add_argument('--notes', help='Evaluation notes')
+
+    # setup-stats
+    stats_parser = subparsers.add_parser('setup-stats', help='Trade setup statistics')
+    stats_parser.add_argument('--token', help='Filter by token')
+    stats_parser.add_argument('--skill', help='Filter by skill name')
+    stats_parser.add_argument('--days', type=int, default=90, help='Lookback days (default: 90)')
+
+    # list-setups
+    list_parser = subparsers.add_parser('list-setups', help='List recent setups')
+    list_parser.add_argument('--status', choices=['PENDING', 'ENTERED', 'CLOSED', 'EXPIRED', 'SKIPPED'])
+    list_parser.add_argument('--limit', type=int, default=20, help='Number of setups (default: 20)')
+
+    # show-setup
+    show_parser = subparsers.add_parser('show-setup', help='Show setup details')
+    show_parser.add_argument('setup_id', help='Setup ID')
+
+    # update-setup
+    update_setup_parser = subparsers.add_parser('update-setup', help='Update label/notes on an existing setup')
+    update_setup_parser.add_argument('--setup-id', required=True, help='Setup ID')
+    update_setup_parser.add_argument('--label', help='Trade type label (e.g. "Range Deviation")')
+    update_setup_parser.add_argument('--notes', help='Free-text notes / cross-reference')
+    update_setup_parser.add_argument('--trigger', help='Update trigger/signal summary')
+
+    # monitor-setups
+    subparsers.add_parser('monitor-setups', help='Live price check on all active setups')
+
+    # flow-stats
+    subparsers.add_parser('flow-stats', help='Flow logging statistics')
+
+    # flow-history
+    flow_hist_parser = subparsers.add_parser('flow-history', help='Flow history for a token')
+    flow_hist_parser.add_argument('token', help='Token symbol')
+    flow_hist_parser.add_argument('--days', type=int, default=30, help='Lookback days (default: 30)')
+    flow_hist_parser.add_argument('--limit', type=int, default=20, help='Max results (default: 20)')
+
+    # flow-latest
+    flow_latest_parser = subparsers.add_parser('flow-latest', help='Latest flows for all tracked tokens')
+    flow_latest_parser.add_argument('--tokens', help='Comma-separated token list (default: all)')
+
+    # flow-compare
+    flow_compare_parser = subparsers.add_parser('flow-compare', help='Compare current vs historical flows')
+    flow_compare_parser.add_argument('token', help='Token symbol')
+    flow_compare_parser.add_argument('--days', type=int, default=7, help='Historical lookback (default: 7)')
+
+    # validation-stats
+    val_stats_parser = subparsers.add_parser('validation-stats', help='Signal validation statistics')
+    val_stats_parser.add_argument('--days', type=int, default=30, help='Lookback days (default: 30)')
+
+    # list-validations
+    list_val_parser = subparsers.add_parser('list-validations', help='List recent signal validations')
+    list_val_parser.add_argument('--token', help='Filter by token')
+    list_val_parser.add_argument('--recommendation', choices=['VALID', 'INVALID', 'NEEDS_CONFIRMATION'])
+    list_val_parser.add_argument('--limit', type=int, default=20, help='Max results (default: 20)')
+
+    # show-validation
+    show_val_parser = subparsers.add_parser('show-validation', help='Show validation details')
+    show_val_parser.add_argument('validation_id', help='Validation ID')
+
+    # update-validation-outcome
+    update_val_parser = subparsers.add_parser('update-validation', help='Update validation with trade outcome')
+    update_val_parser.add_argument('--validation-id', required=True, help='Validation ID')
+    update_val_parser.add_argument('--taken', action='store_true', help='Trade was taken')
+    update_val_parser.add_argument('--outcome', choices=['WIN', 'LOSS', 'SKIP'], help='Trade outcome')
+    update_val_parser.add_argument('--notes', help='Additional notes')
+
+    # ========== WATCHLIST COMMANDS ==========
+
+    # watchlist-add
+    watch_add_parser = subparsers.add_parser('watchlist-add', help='Add token to watchlist')
+    watch_add_parser.add_argument('--symbol', required=True, help='Token symbol')
+    watch_add_parser.add_argument('--source', choices=['telegram_signal', 'manual', 'skill'], default='manual', help='Source type')
+    watch_add_parser.add_argument('--type', choices=['entry_timing', 'confirmation', 'structural', 'invalidation'], default='structural', help='Watch type')
+    watch_add_parser.add_argument('--direction', choices=['LONG', 'SHORT'], help='Expected direction')
+    watch_add_parser.add_argument('--thesis', help='Why watching this token')
+    watch_add_parser.add_argument('--price', type=float, help='Current price')
+    watch_add_parser.add_argument('--support', type=float, help='Support level')
+    watch_add_parser.add_argument('--resistance', type=float, help='Resistance level')
+    watch_add_parser.add_argument('--priority', type=int, default=5, help='Priority 1-10')
+    watch_add_parser.add_argument('--frequency', choices=['session', 'daily', 'hourly'], default='session', help='Check frequency')
+    watch_add_parser.add_argument('--signal-id', type=int, help='External signal ID')
+    watch_add_parser.add_argument('--validation-id', help='Validation ID')
+
+    # watchlist (list active items)
+    watch_list_parser = subparsers.add_parser('watchlist', help='List active watchlist items')
+    watch_list_parser.add_argument('--source', choices=['telegram_signal', 'manual', 'skill'], help='Filter by source')
+    watch_list_parser.add_argument('--type', choices=['entry_timing', 'confirmation', 'structural', 'invalidation'], help='Filter by type')
+    watch_list_parser.add_argument('--symbol', help='Filter by symbol')
+
+    # watchlist-show
+    watch_show_parser = subparsers.add_parser('watchlist-show', help='Show watchlist item details')
+    watch_show_parser.add_argument('watch_id', help='Watchlist item ID')
+
+    # watchlist-update
+    watch_update_parser = subparsers.add_parser('watchlist-update', help='Update watchlist item status')
+    watch_update_parser.add_argument('--watch-id', required=True, help='Watchlist item ID')
+    watch_update_parser.add_argument('--status', choices=['active', 'triggered', 'invalidated', 'expired', 'taken', 'removed'], help='New status')
+    watch_update_parser.add_argument('--reason', help='Reason for status change')
+    watch_update_parser.add_argument('--trade-taken', action='store_true', help='Trade was taken')
+    watch_update_parser.add_argument('--setup-id', help='Trade setup ID')
+
+    # watchlist-remove
+    watch_remove_parser = subparsers.add_parser('watchlist-remove', help='Remove item from watchlist')
+    watch_remove_parser.add_argument('watch_id', help='Watchlist item ID')
+    watch_remove_parser.add_argument('--reason', default='Manual removal', help='Removal reason')
+
+    # watchlist-stats
+    subparsers.add_parser('watchlist-stats', help='Watchlist statistics')
+
+    # watchlist-review
+    watch_review_parser = subparsers.add_parser('watchlist-review', help='Get items needing review')
+    watch_review_parser.add_argument('--frequency', choices=['session', 'daily', 'hourly'], default='session', help='Check frequency')
+
+    # watchlist-expire
+    subparsers.add_parser('watchlist-expire', help='Expire old watchlist items')
+
+    # ========== ON-CHAIN RESEARCH DATA COMMANDS ==========
+
+    # store-exchange-balance
+    store_exbal_parser = subparsers.add_parser('store-exchange-balance', help='Store daily exchange balance data')
+    store_exbal_parser.add_argument('--token', required=True, help='Token symbol')
+    store_exbal_parser.add_argument('--chain', help='Blockchain (e.g., ethereum)')
+    store_exbal_parser.add_argument('--address', help='Token contract address')
+    store_exbal_parser.add_argument('--data', required=True, help='JSON array of daily data (or file path)')
+
+    # store-entities
+    store_ent_parser = subparsers.add_parser('store-entities', help='Store entity position snapshots')
+    store_ent_parser.add_argument('--token', required=True, help='Token symbol')
+    store_ent_parser.add_argument('--date', required=True, help='Snapshot date (YYYY-MM-DD)')
+    store_ent_parser.add_argument('--chain', help='Blockchain')
+    store_ent_parser.add_argument('--address', help='Token contract address')
+    store_ent_parser.add_argument('--data', required=True, help='JSON array of entities (or file path)')
+
+    # store-hunt
+    store_hunt_parser = subparsers.add_parser('store-hunt', help='Store hunt results')
+    store_hunt_parser.add_argument('--date', required=True, help='Hunt date (YYYY-MM-DD)')
+    store_hunt_parser.add_argument('--hunt-id', help='Hunt ID (auto-generated if not provided)')
+    store_hunt_parser.add_argument('--data', required=True, help='JSON array of candidates (or file path)')
+
+    # exchange-trend
+    extrend_parser = subparsers.add_parser('exchange-trend', help='Show exchange balance trend')
+    extrend_parser.add_argument('token', help='Token symbol')
+    extrend_parser.add_argument('--days', type=int, default=14, help='Number of days (default: 14)')
+
+    # entity-diff
+    entdiff_parser = subparsers.add_parser('entity-diff', help='Show entity changes vs stored snapshot')
+    entdiff_parser.add_argument('token', help='Token symbol')
+    entdiff_parser.add_argument('--days-back', type=int, default=7, help='Compare against snapshot from N days ago')
+    entdiff_parser.add_argument('--data', help='Current entities JSON (omit to compare two stored snapshots)')
+
+    # entity-history
+    enthist_parser = subparsers.add_parser('entity-history', help='Show entity position history')
+    enthist_parser.add_argument('token', help='Token symbol')
+    enthist_parser.add_argument('--address', help='Filter by entity address')
+    enthist_parser.add_argument('--days', type=int, default=30, help='Lookback days (default: 30)')
+    enthist_parser.add_argument('--limit', type=int, default=50, help='Max results (default: 50)')
+
+    # hunt-history
+    hunthist_parser = subparsers.add_parser('hunt-history', help='Show past hunt results')
+    hunthist_parser.add_argument('--token', help='Filter by token')
+    hunthist_parser.add_argument('--verdict', choices=['STRONG', 'MODERATE', 'WEAK', 'ELIMINATED'], help='Filter by verdict')
+    hunthist_parser.add_argument('--days', type=int, default=90, help='Lookback days (default: 90)')
+    hunthist_parser.add_argument('--limit', type=int, default=20, help='Max results (default: 20)')
+
+    # backtest-hunts
+    backtest_parser = subparsers.add_parser('backtest-hunts', help='Fill in outcome prices for old hunts')
+    backtest_parser.add_argument('--result-id', help='Specific result ID to update')
+    backtest_parser.add_argument('--price-7d', type=float, help='Price 7 days later')
+    backtest_parser.add_argument('--price-14d', type=float, help='Price 14 days later')
+    backtest_parser.add_argument('--price-30d', type=float, help='Price 30 days later')
+
+    # ========== OHLCV REFRESH COMMANDS ==========
+
+    # refresh-setups
+    subparsers.add_parser('refresh-setups', help='Download OHLCV for constant list + active setup tokens')
+
+    # refresh-list
+    subparsers.add_parser('refresh-list', help='Show the always-on refresh token list')
+
+    # refresh-add
+    refresh_add_parser = subparsers.add_parser('refresh-add', help='Add token to always-on refresh list')
+    refresh_add_parser.add_argument('token', help='Token symbol (e.g., BTC)')
+
+    # refresh-remove
+    refresh_remove_parser = subparsers.add_parser('refresh-remove', help='Remove token from always-on refresh list')
+    refresh_remove_parser.add_argument('token', help='Token symbol to remove')
+
+    # ========== DERIVATIVES HISTORY COMMANDS ==========
+
+    # derivatives-history
+    deriv_hist_parser = subparsers.add_parser('derivatives-history', help='Show recent derivatives snapshots')
+    deriv_hist_parser.add_argument('--symbol', help='Token symbol (default: all)')
+    deriv_hist_parser.add_argument('--days', type=int, default=7, help='Lookback days (default: 7)')
+    deriv_hist_parser.add_argument('--source', choices=['derivatives', 'market_pulse'], help='Filter by source')
+    deriv_hist_parser.add_argument('--limit', type=int, default=50, help='Max results (default: 50)')
+
+    # derivatives-stats
+    deriv_stats_parser = subparsers.add_parser('derivatives-stats', help='Derivatives summary statistics')
+    deriv_stats_parser.add_argument('--symbol', required=True, help='Token symbol')
+    deriv_stats_parser.add_argument('--days', type=int, default=30, help='Lookback days (default: 30)')
+
+    # derivatives-export
+    deriv_export_parser = subparsers.add_parser('derivatives-export', help='Export derivatives data to CSV')
+    deriv_export_parser.add_argument('--symbol', help='Token symbol (default: all)')
+    deriv_export_parser.add_argument('--days', type=int, default=30, help='Lookback days (default: 30)')
+    deriv_export_parser.add_argument('--output', help='Output file path (default: stdout)')
+
+    # ========== WYCKOFF SCAN COMMANDS ==========
+
+    # log-wyckoff
+    log_wyckoff_parser = subparsers.add_parser('log-wyckoff', help='Log a Wyckoff scan result')
+    log_wyckoff_parser.add_argument('--date', required=True, help='Scan date YYYY-MM-DD')
+    log_wyckoff_parser.add_argument('--data', required=True, help='JSON string or @filepath with scan results array')
+    log_wyckoff_parser.add_argument('--batch-id', help='Optional batch ID')
+
+    # wyckoff-history
+    wyckoff_hist_parser = subparsers.add_parser('wyckoff-history', help='Query Wyckoff scan history')
+    wyckoff_hist_parser.add_argument('--token', help='Filter by token')
+    wyckoff_hist_parser.add_argument('--phase', choices=['A', 'B', 'C', 'D', 'E'], help='Filter by phase')
+    wyckoff_hist_parser.add_argument('--cycle', choices=['accumulation', 'distribution'], help='Filter by cycle type')
+    wyckoff_hist_parser.add_argument('--min-confidence', type=int, default=0, help='Minimum confidence (default: 0)')
+    wyckoff_hist_parser.add_argument('--days', type=int, default=90, help='Lookback days (default: 90)')
+    wyckoff_hist_parser.add_argument('--limit', type=int, default=20, help='Max results (default: 20)')
+
+    # wyckoff-latest
+    wyckoff_latest_parser = subparsers.add_parser('wyckoff-latest', help='Latest Wyckoff scan per token')
+    wyckoff_latest_parser.add_argument('--tokens', nargs='+', help='Filter to specific tokens')
+
+    # wyckoff-transitions
+    wyckoff_trans_parser = subparsers.add_parser('wyckoff-transitions', help='Phase transitions for a token over time')
+    wyckoff_trans_parser.add_argument('--token', required=True, help='Token symbol')
+    wyckoff_trans_parser.add_argument('--days', type=int, default=90, help='Lookback days (default: 90)')
+
+    args = parser.parse_args()
+
+    if args.command == "init":
+        init_db()
+        print(f"Database initialized at {DB_PATH}")
+
+    elif args.command == "stats":
+        stats = get_query_stats()
+        print(f"Total MCP queries: {stats['total_queries']}")
+        print(f"Success rate: {stats['success_rate']:.1%}")
+        print(f"Total trade cards: {stats['total_trade_cards']}")
+        print("\nQueries by tool:")
+        for tool, count in stats['queries_by_tool'].items():
+            print(f"  {tool}: {count}")
+
+    elif args.command == "recent":
+        queries = get_recent_queries(10)
+        for q in queries:
+            print(f"{q['timestamp_utc'][:19]} | {q['tool_name']} | {q['context_token'] or '-'}")
+
+    elif args.command == "mentor-stats":
+        stats = get_mentor_stats()
+        print(f"Total mentor consultations: {stats['total_consultations']}")
+        print(f"Total tokens used: {stats['total_tokens']:,}")
+        print(f"Total cost: ${stats['total_cost_usd']:.4f}")
+        print(f"Agreement rate: {stats['agreement_rate']:.1%}")
+        if stats['by_question_type']:
+            print("\nBy question type:")
+            for qtype, count in stats['by_question_type'].items():
+                print(f"  {qtype}: {count}")
+        if stats['by_suggested_action']:
+            print("\nBy suggested action:")
+            for action, count in stats['by_suggested_action'].items():
+                print(f"  {action}: {count}")
+
+    elif args.command == "log-setup":
+        mentor_agrees = None
+        if args.mentor_agrees:
+            mentor_agrees = True
+        elif args.mentor_disagrees:
+            mentor_agrees = False
+
+        setup_id = log_trade_setup(
+            token=args.token,
+            direction=args.direction,
+            entry_price=args.entry,
+            stop_loss=args.stop,
+            target_1=args.target1,
+            target_2=args.target2,
+            risk_reward_ratio=args.rr,
+            ta_summary=args.ta_summary,
+            onchain_summary=args.onchain_summary,
+            accumulation_score=args.accum_score,
+            signal_summary=args.signal_summary,
+            mentor_agrees=mentor_agrees,
+            mentor_reasoning=args.mentor_reasoning,
+            mentor_action=args.mentor_action,
+            skill_name=args.skill,
+            pattern_type=args.pattern
+        )
+        print(f"Setup logged: {setup_id}")
+        print(f"  Token: {args.token.upper()} {args.direction.upper()}")
+        print(f"  Entry: ${args.entry} | Stop: ${args.stop} | T1: ${args.target1}")
+
+    elif args.command == "enter-setup":
+        update_setup_entered(args.setup_id, args.price)
+        print(f"Setup {args.setup_id} marked as ENTERED at ${args.price}")
+
+    elif args.command == "close-setup":
+        update_setup_closed(
+            setup_id=args.setup_id,
+            close_price=args.price,
+            outcome=args.outcome.upper(),
+            hit_target=args.target,
+            pnl_percent=args.pnl_percent,
+            pnl_usd=args.pnl_usd
+        )
+        print(f"Setup {args.setup_id} CLOSED: {args.outcome.upper()} at ${args.price}")
+
+    elif args.command == "add-lessons":
+        add_setup_lessons(
+            setup_id=args.setup_id,
+            what_worked=args.what_worked,
+            what_failed=args.what_failed,
+            lessons_learned=args.lessons,
+            evaluation_notes=args.notes
+        )
+        print(f"Lessons added to setup {args.setup_id}")
+
+    elif args.command == "setup-stats":
+        stats = get_setup_stats(token=args.token, skill_name=args.skill, days=args.days)
+        print(f"\n=== Trade Setup Statistics ({args.days} days) ===\n")
+        print(f"Closed: {stats['total_closed']} | Pending: {stats['pending']} | Active: {stats['active']}")
+        print(f"Wins: {stats['wins']} | Losses: {stats['losses']} | BE: {stats['breakeven']} | Partial: {stats['partial']}")
+        print(f"Win Rate: {stats['win_rate']:.0%}")
+        print(f"\nAvg PnL: {stats['avg_pnl_percent']:+.2f}%")
+        print(f"Avg Win: {stats['avg_win_percent']:+.2f}% | Avg Loss: {stats['avg_loss_percent']:+.2f}%")
+        if stats['best_trade']:
+            print(f"\nBest: {stats['best_trade']['token']} ({stats['best_trade']['setup_id']}) +{stats['best_trade']['pnl_percent']:.2f}%")
+        if stats['worst_trade']:
+            print(f"Worst: {stats['worst_trade']['token']} ({stats['worst_trade']['setup_id']}) {stats['worst_trade']['pnl_percent']:.2f}%")
+        if stats['by_direction']:
+            print("\nBy Direction:")
+            for direction, data in stats['by_direction'].items():
+                print(f"  {direction}: {data['count']} trades, avg {data['avg_pnl']:+.2f}%")
+
+    elif args.command == "list-setups":
+        setups = get_recent_setups(status=args.status, limit=args.limit)
+        if not setups:
+            print("No setups found.")
+            return
+        print(f"\n{'ID':<10} {'Token':<8} {'Dir':<6} {'Entry':<10} {'Status':<10} {'Outcome':<10} {'PnL':<10}")
+        print("-" * 70)
+        for s in setups:
+            pnl_str = f"{s['pnl_percent']:+.2f}%" if s['pnl_percent'] else "-"
+            print(f"{s['setup_id']:<10} {s['token']:<8} {s['direction']:<6} ${s['entry_price']:<9.4f} {s['status']:<10} {s['outcome'] or '-':<10} {pnl_str:<10}")
+
+    elif args.command == "show-setup":
+        setup = get_setup_by_id(args.setup_id)
+        if not setup:
+            print(f"Setup {args.setup_id} not found.")
+            return
+        print(f"\n=== Setup {setup['setup_id']} ===\n")
+        print(f"Token:   {setup['token']} {setup['direction']}")
+        print(f"Label:   {setup['pattern_type'] or '—'}")
+        print(f"Created: {setup['timestamp_utc'][:19]}")
+        print(f"Status:  {setup['status']}")
+        if setup.get('notes'):
+            print(f"Notes:   {setup['notes']}")
+        print(f"\nEntry: ${setup['entry_price']} | Stop: ${setup['stop_loss']} | T1: ${setup['target_1']} | T2: ${setup['target_2'] or '-'}")
+        print(f"R:R Ratio: {setup['risk_reward_ratio']}")
+        if setup['signal_summary']:
+            print(f"\nTrigger: {setup['signal_summary']}")
+        if setup['ta_summary']:
+            print(f"\nTA Summary: {setup['ta_summary']}")
+        if setup['onchain_summary']:
+            print(f"On-chain Summary: {setup['onchain_summary']}")
+        if setup['accumulation_score'] is not None:
+            print(f"Accumulation Score: {setup['accumulation_score']}/5")
+        if setup['mentor_agrees'] is not None:
+            agrees = "Yes" if setup['mentor_agrees'] else "No"
+            print(f"\nMentor Agrees: {agrees}")
+            print(f"Mentor Action: {setup['mentor_action'] or '-'}")
+            if setup['mentor_reasoning']:
+                print(f"Mentor Reasoning: {setup['mentor_reasoning']}")
+        if setup['status'] == 'CLOSED':
+            print(f"\n--- Outcome ---")
+            print(f"Close Price: ${setup['close_price']}")
+            print(f"Outcome: {setup['outcome']}")
+            print(f"PnL: {setup['pnl_percent']:+.2f}%" if setup['pnl_percent'] else "PnL: -")
+            if setup['what_worked']:
+                print(f"\nWhat Worked: {setup['what_worked']}")
+            if setup['what_failed']:
+                print(f"What Failed: {setup['what_failed']}")
+            if setup['lessons_learned']:
+                print(f"Lessons: {setup['lessons_learned']}")
+
+    elif args.command == "update-setup":
+        ok = update_setup_metadata(
+            setup_id=args.setup_id,
+            pattern_type=args.label,
+            notes=args.notes,
+            signal_summary=args.trigger,
+        )
+        if ok:
+            print(f"Updated setup {args.setup_id}.")
+            setup = get_setup_by_id(args.setup_id)
+            if setup:
+                print(f"  Label: {setup['pattern_type'] or '—'}")
+                if setup.get('notes'):
+                    print(f"  Notes: {setup['notes']}")
+        else:
+            print(f"Setup {args.setup_id} not found.")
+
+    elif args.command == "monitor-setups":
+        print(monitor_active_setups())
+
+    elif args.command == "flow-stats":
+        stats = get_flow_stats()
+        print(f"\n=== Flow Logging Statistics ===\n")
+        print(f"Total snapshots: {stats['total_snapshots']}")
+        print(f"Tokens tracked: {stats['tokens_tracked']}")
+        if stats['by_token']:
+            print("\nBy Token:")
+            for token, data in stats['by_token'].items():
+                print(f"  {token}: {data['count']} snapshots ({data['first'][:10]} to {data['last'][:10]})")
+        if stats['signal_distribution']:
+            print("\nSignal Distribution:")
+            for signal, count in stats['signal_distribution'].items():
+                print(f"  {signal}: {count}")
+
+    elif args.command == "flow-history":
+        flows = get_flow_history(args.token, days=args.days, limit=args.limit)
+        if not flows:
+            print(f"No flow history for {args.token.upper()}")
+            return
+        print(f"\n=== Flow History: {args.token.upper()} ({len(flows)} snapshots) ===\n")
+        print(f"{'Date':<12} {'Price':<10} {'Exchange':<12} {'Fresh':<12} {'Smart$':<12} {'PnL':<12} {'Signal':<12} {'Score'}")
+        print("-" * 100)
+        for f in flows:
+            date = f['timestamp_utc'][:10] if f['timestamp_utc'] else '-'
+            price = f"${f['price_usd']:.2f}" if f['price_usd'] else '-'
+            exch = f"${f['exchange_net_flow']/1e6:.1f}M" if f['exchange_net_flow'] else '-'
+            fresh = f"${f['fresh_wallet_net_flow']/1e6:.1f}M" if f['fresh_wallet_net_flow'] else '-'
+            smart = f"${f['smart_money_net_flow']/1e6:.1f}M" if f['smart_money_net_flow'] else '-'
+            pnl = f"${f['top_pnl_net_flow']/1e6:.1f}M" if f['top_pnl_net_flow'] else '-'
+            signal = f['overall_signal'] or '-'
+            score = f"{f['accumulation_score']}/5" if f['accumulation_score'] is not None else '-'
+            print(f"{date:<12} {price:<10} {exch:<12} {fresh:<12} {smart:<12} {pnl:<12} {signal:<12} {score}")
+
+    elif args.command == "flow-latest":
+        tokens = args.tokens.split(',') if args.tokens else None
+        flows = get_all_latest_flows(tokens)
+        if not flows:
+            print("No flow data found.")
+            return
+        print(f"\n=== Latest Flows ({len(flows)} tokens) ===\n")
+        print(f"{'Token':<8} {'Date':<12} {'Exchange':<12} {'Fresh':<12} {'Smart$':<12} {'Signal':<12} {'Score'}")
+        print("-" * 85)
+        for f in flows:
+            date = f['timestamp_utc'][:10] if f['timestamp_utc'] else '-'
+            exch = f"${f['exchange_net_flow']/1e6:.1f}M" if f['exchange_net_flow'] else '-'
+            fresh = f"${f['fresh_wallet_net_flow']/1e6:.1f}M" if f['fresh_wallet_net_flow'] else '-'
+            smart = f"${f['smart_money_net_flow']/1e6:.1f}M" if f['smart_money_net_flow'] else '-'
+            signal = f['overall_signal'] or '-'
+            score = f"{f['accumulation_score']}/5" if f['accumulation_score'] is not None else '-'
+            print(f"{f['token']:<8} {date:<12} {exch:<12} {fresh:<12} {smart:<12} {signal:<12} {score}")
+
+    elif args.command == "flow-compare":
+        comparison = get_flow_comparison(args.token, days_back=args.days)
+        if not comparison:
+            print(f"No flow data for {args.token.upper()}")
+            return
+        print(f"\n=== Flow Comparison: {comparison['token']} ===")
+        print(f"Latest: {comparison['latest_timestamp'][:19]}")
+        print(f"Historical samples: {comparison['snapshot_count']} (past {args.days} days)\n")
+        print(f"{'Segment':<15} {'Current':<15} {'Avg ({args.days}d)':<15}")
+        print("-" * 45)
+        curr = comparison['current']
+        hist = comparison['historical_avg']
+        for seg in ['exchange', 'fresh_wallet', 'smart_money', 'top_pnl', 'whale']:
+            c = f"${curr[seg]/1e6:.2f}M" if curr[seg] else '-'
+            h = f"${hist[seg]/1e6:.2f}M" if hist[seg] else '-'
+            print(f"{seg:<15} {c:<15} {h:<15}")
+        print(f"\nOverall Signal: {curr['overall_signal']} | Accumulation Score: {curr['accumulation_score']}/5")
+
+    elif args.command == "validation-stats":
+        stats = get_validation_stats(days=args.days)
+        print(f"\n=== Signal Validation Statistics ({args.days} days) ===\n")
+        print(f"Total validations: {stats['total_validations']}")
+        print(f"Signal alignment rate: {stats['alignment_rate']:.1%}")
+        print(f"Mentor consultation rate: {stats['mentor_consultation_rate']:.1%}")
+        if stats['by_recommendation']:
+            print("\nBy Recommendation:")
+            for rec, count in stats['by_recommendation'].items():
+                print(f"  {rec}: {count}")
+        if stats['by_symbol']:
+            print("\nBy Symbol:")
+            for symbol, count in stats['by_symbol'].items():
+                print(f"  {symbol}: {count}")
+        if stats['by_outcome']:
+            print("\nBy Outcome:")
+            for outcome, count in stats['by_outcome'].items():
+                print(f"  {outcome}: {count}")
+
+    elif args.command == "list-validations":
+        validations = get_recent_validations(
+            symbol=args.token,
+            recommendation=args.recommendation,
+            limit=args.limit
+        )
+        if not validations:
+            print("No validations found.")
+            return
+        print(f"\n{'ID':<10} {'Symbol':<8} {'Dir':<6} {'Titan':<20} {'Aligns':<8} {'Date':<12}")
+        print("-" * 70)
+        for v in validations:
+            aligns = "Yes" if v['signal_aligns'] else ("No" if v['signal_aligns'] == 0 else "-")
+            date = v['timestamp_utc'][:10] if v['timestamp_utc'] else '-'
+            print(f"{v['validation_id']:<10} {v['symbol']:<8} {v['direction']:<6} {v['titan_recommendation'] or '-':<20} {aligns:<8} {date:<12}")
+
+    elif args.command == "show-validation":
+        val = get_validation_by_id(args.validation_id)
+        if not val:
+            print(f"Validation {args.validation_id} not found.")
+            return
+        print(f"\n=== Validation {val['validation_id']} ===\n")
+        print(f"Symbol: {val['symbol']} {val['direction']}")
+        print(f"Provider: {val['provider']}")
+        print(f"External Signal ID: {val['external_signal_id']}")
+        print(f"Created: {val['timestamp_utc'][:19]}")
+        print(f"\n--- Titan Validation ---")
+        print(f"Accumulation Score: {val['accumulation_score']}/5" if val['accumulation_score'] is not None else "Accumulation Score: -")
+        print(f"TA Verdict: {val['ta_verdict'] or '-'}")
+        print(f"On-Chain Verdict: {val['onchain_verdict'] or '-'}")
+        print(f"Signal Aligns: {'Yes' if val['signal_aligns'] else 'No' if val['signal_aligns'] == 0 else '-'}")
+        print(f"\n--- Recommendation ---")
+        print(f"Titan Says: {val['titan_recommendation'] or '-'}")
+        if val['recommendation_reason']:
+            print(f"Reason: {val['recommendation_reason']}")
+        if val['mentor_consulted']:
+            print(f"\n--- Mentor Review ---")
+            print(f"Mentor Verdict: {val['mentor_verdict'] or '-'}")
+            print(f"Confidence Adj: {val['mentor_confidence_adj'] or 0:+.2f}")
+        if val['chart_analyzed']:
+            print(f"\n--- Chart Notes ---")
+            print(val['chart_notes'] or 'No notes')
+        if val['suggested_entry']:
+            print(f"\n--- Suggested Levels ---")
+            print(f"Entry: ${val['suggested_entry']} | Stop: ${val['suggested_stop'] or '-'} | Target: ${val['suggested_target'] or '-'}")
+        if val['trade_outcome']:
+            print(f"\n--- Outcome ---")
+            print(f"Trade Taken: {'Yes' if val['trade_taken'] else 'No'}")
+            print(f"Outcome: {val['trade_outcome']}")
+            if val['notes']:
+                print(f"Notes: {val['notes']}")
+
+    elif args.command == "update-validation":
+        update_validation_outcome(
+            validation_id=args.validation_id,
+            trade_taken=args.taken,
+            trade_outcome=args.outcome,
+            notes=args.notes
+        )
+        print(f"Validation {args.validation_id} updated")
+
+    # ========== WATCHLIST HANDLERS ==========
+
+    elif args.command == "watchlist-add":
+        watch_id = add_to_watchlist(
+            symbol=args.symbol,
+            source_type=args.source,
+            watch_type=args.type,
+            direction=args.direction,
+            original_thesis=args.thesis,
+            price_at_creation=args.price,
+            support_level=args.support,
+            resistance_level=args.resistance,
+            priority=args.priority,
+            check_frequency=args.frequency,
+            external_signal_id=args.signal_id,
+            validation_id=args.validation_id
+        )
+        print(f"Added {args.symbol} to watchlist: {watch_id}")
+
+    elif args.command == "watchlist":
+        items = get_active_watchlist(
+            source_type=args.source,
+            watch_type=args.type,
+            symbol=args.symbol
+        )
+        if not items:
+            print("No active watchlist items.")
+            return
+        print(f"\n=== Active Watchlist ({len(items)} items) ===\n")
+        print(f"{'ID':<10} {'Symbol':<8} {'Dir':<6} {'Type':<15} {'Source':<15} {'Price':<10} {'Priority'}")
+        print("-" * 80)
+        for item in items:
+            direction = item['direction'] or '-'
+            price = f"${item['last_price']:.2f}" if item['last_price'] else '-'
+            print(f"{item['watch_id']:<10} {item['symbol']:<8} {direction:<6} {item['watch_type']:<15} {item['source_type']:<15} {price:<10} {item['priority']}")
+
+    elif args.command == "watchlist-show":
+        item = get_watchlist_item(args.watch_id)
+        if not item:
+            print(f"Watchlist item {args.watch_id} not found.")
+            return
+        print(f"\n=== Watchlist Item: {item['watch_id']} ===\n")
+        print(f"Symbol: {item['symbol']} {item['direction'] or ''}")
+        print(f"Source: {item['source_type']} | Type: {item['watch_type']}")
+        print(f"Status: {item['status']}")
+        print(f"Priority: {item['priority']} | Check: {item['check_frequency']}")
+        print(f"\nCreated: {item['created_at'][:19]}")
+        print(f"Last Checked: {item['last_checked'][:19] if item['last_checked'] else 'Never'}")
+        if item['original_thesis']:
+            print(f"\nThesis: {item['original_thesis']}")
+        print(f"\n--- Price Levels ---")
+        print(f"At Creation: ${item['price_at_creation']:.2f}" if item['price_at_creation'] else "At Creation: -")
+        print(f"Current: ${item['last_price']:.2f}" if item['last_price'] else "Current: -")
+        if item['support_level']:
+            print(f"Support: ${item['support_level']}")
+        if item['resistance_level']:
+            print(f"Resistance: ${item['resistance_level']}")
+        print(f"\n--- Analysis ---")
+        print(f"Original: Score {item['original_accumulation_score']}/5 | TA: {item['original_ta_verdict']} | On-chain: {item['original_onchain_verdict']}")
+        print(f"Current:  Score {item['current_accumulation_score']}/5 | TA: {item['current_ta_verdict']} | On-chain: {item['current_onchain_verdict']}")
+        if item['status_changed']:
+            print(f"\n⚠️  Analysis Changed: {item['change_summary']}")
+        if item['entry_conditions']:
+            print(f"\nEntry Conditions: {item['entry_conditions']}")
+        if item['invalidation_conditions']:
+            print(f"Invalidation: {item['invalidation_conditions']}")
+
+    elif args.command == "watchlist-update":
+        update_watchlist_status(
+            watch_id=args.watch_id,
+            status=args.status,
+            status_reason=args.reason,
+            trade_taken=args.trade_taken if hasattr(args, 'trade_taken') else None,
+            trade_setup_id=args.setup_id if hasattr(args, 'setup_id') else None
+        )
+        print(f"Watchlist item {args.watch_id} updated to '{args.status}'")
+
+    elif args.command == "watchlist-remove":
+        remove_from_watchlist(args.watch_id, reason=args.reason)
+        print(f"Removed {args.watch_id} from watchlist")
+
+    elif args.command == "watchlist-stats":
+        stats = get_watchlist_stats()
+        print(f"\n=== Watchlist Statistics ===\n")
+        print(f"Active items: {stats['active']}")
+        print(f"Needs review: {stats['needs_review']}")
+        print(f"Analysis changed: {stats['analysis_changed']}")
+        print(f"Expired pending: {stats['expired_pending']}")
+        print(f"Trades taken: {stats['trades_taken']}")
+        if stats['by_status']:
+            print("\nBy Status:")
+            for status, count in stats['by_status'].items():
+                print(f"  {status}: {count}")
+        if stats['by_source']:
+            print("\nBy Source:")
+            for source, count in stats['by_source'].items():
+                print(f"  {source}: {count}")
+        if stats['by_watch_type']:
+            print("\nBy Type:")
+            for wtype, count in stats['by_watch_type'].items():
+                print(f"  {wtype}: {count}")
+
+    elif args.command == "watchlist-review":
+        items = get_watchlist_for_review(check_frequency=args.frequency)
+        if not items:
+            print(f"No items need {args.frequency} review.")
+            return
+        print(f"\n=== Items Needing Review ({len(items)}) ===\n")
+        for item in items:
+            last_check = item['last_checked'][:10] if item['last_checked'] else 'Never'
+            print(f"[{item['watch_id']}] {item['symbol']} {item['direction'] or ''} - {item['watch_type']} (last: {last_check})")
+            if item['original_thesis']:
+                print(f"    Thesis: {item['original_thesis'][:60]}...")
+
+    elif args.command == "watchlist-expire":
+        count = expire_old_watchlist_items()
+        print(f"Expired {count} watchlist items")
+
+    # ========== ON-CHAIN RESEARCH DATA HANDLERS ==========
+
+    elif args.command == "store-exchange-balance":
+        data = _parse_json_input(args.data)
+        count = log_exchange_balance_daily(
+            token=args.token, daily_data=data,
+            chain=args.chain, token_address=args.address
+        )
+        print(f"Stored {count} daily balance rows for {args.token.upper()}")
+
+    elif args.command == "store-entities":
+        data = _parse_json_input(args.data)
+        count = log_entity_snapshot(
+            token=args.token, snapshot_date=args.date,
+            entities=data, chain=args.chain, token_address=args.address
+        )
+        print(f"Stored {count} entity snapshots for {args.token.upper()} on {args.date}")
+
+    elif args.command == "store-hunt":
+        data = _parse_json_input(args.data)
+        hunt_id = log_hunt_result(
+            hunt_date=args.date, candidates=data,
+            hunt_id=args.hunt_id
+        )
+        print(f"Stored {len(data)} hunt candidates (hunt_id: {hunt_id})")
+
+    elif args.command == "exchange-trend":
+        result = get_exchange_balance_trend(args.token, days=args.days)
+        if not result['days']:
+            print(f"No exchange balance data for {args.token.upper()}")
+            return
+        s = result['summary']
+        print(f"\n=== Exchange Balance Trend: {s['token']} ({s['data_days']} days) ===")
+        print(f"Period: {s['oldest_date']} -> {s['newest_date']}")
+        print(f"Balance Change: {s['balance_change_pct']:+.1f}%")
+        print(f"Outflow Days: {s['outflow_days']}/{s['data_days']} | Inflow Days: {s['inflow_days']}/{s['data_days']}")
+        print(f"Total Inflows: ${_format_number(s['total_inflows_usd'])} | Outflows: ${_format_number(s['total_outflows_usd'])}")
+        print(f"Net: ${_format_number(s['net_flow_usd'])}\n")
+        print(f"{'Date':<12} {'Balance':<15} {'Inflows':<12} {'Outflows':<12} {'Net':<12} {'Price':<10}")
+        print("-" * 75)
+        for d in result['days']:
+            bal = _format_number(d['balance']) if d.get('balance') else '-'
+            inf = f"${_format_number(d['inflows_usd'])}" if d.get('inflows_usd') else '-'
+            outf = f"${_format_number(d['outflows_usd'])}" if d.get('outflows_usd') else '-'
+            net = f"${_format_number(d['net_flow_usd'])}" if d.get('net_flow_usd') else '-'
+            price = f"${d['price']:.4f}" if d.get('price') else '-'
+            print(f"{d['date']:<12} {bal:<15} {inf:<12} {outf:<12} {net:<12} {price:<10}")
+
+    elif args.command == "entity-diff":
+        current = _parse_json_input(args.data) if args.data else None
+        diff = get_entity_diff(args.token, current_entities=current, days_back=args.days_back)
+        print(f"\n=== Entity Diff: {args.token.upper()} ===")
+        print(f"Latest: {diff['latest_date']} vs Stored: {diff['comparison_date'] or 'N/A'}\n")
+        if diff['new']:
+            print(f"NEW ENTITIES ({len(diff['new'])}):")
+            for e in diff['new']:
+                name = e.get('entity_name') or e.get('entity_address', '?')[:12]
+                bal = _format_number(e.get('balance'))
+                print(f"  + {name}: {bal}")
+        if diff['removed']:
+            print(f"\nREMOVED ({len(diff['removed'])}):")
+            for e in diff['removed']:
+                name = e.get('entity_name') or e.get('entity_address', '?')[:12]
+                print(f"  - {name}")
+        if diff['changed']:
+            print(f"\nCHANGED ({len(diff['changed'])}):")
+            for e in diff['changed']:
+                name = e.get('entity_name') or e.get('entity_address', '?')[:12]
+                print(f"  ~ {name}: {_format_number(e['old_balance'])} -> {_format_number(e['new_balance'])} ({e['change_pct']:+.1f}%)")
+        if not diff['new'] and not diff['removed'] and not diff['changed']:
+            print("No changes detected.")
+
+    elif args.command == "entity-history":
+        rows = get_entity_history(
+            args.token, entity_address=args.address,
+            days=args.days, limit=args.limit
+        )
+        if not rows:
+            print(f"No entity history for {args.token.upper()}")
+            return
+        print(f"\n=== Entity History: {args.token.upper()} ({len(rows)} records) ===\n")
+        print(f"{'Date':<12} {'Entity':<25} {'Type':<15} {'Balance':<15} {'30d Chg':<12} {'Own%':<8}")
+        print("-" * 90)
+        for r in rows:
+            name = (r.get('entity_name') or r.get('entity_address', '?')[:12])[:24]
+            etype = (r.get('entity_type') or '-')[:14]
+            bal = _format_number(r.get('balance'))
+            chg = _format_number(r.get('change_30d')) if r.get('change_30d') else '-'
+            own = f"{r['ownership_pct']:.2f}%" if r.get('ownership_pct') else '-'
+            print(f"{r['snapshot_date']:<12} {name:<25} {etype:<15} {bal:<15} {chg:<12} {own:<8}")
+
+    elif args.command == "hunt-history":
+        results = get_hunt_history(
+            token=args.token, days=args.days,
+            verdict=args.verdict, limit=args.limit
+        )
+        if not results:
+            print("No hunt results found.")
+            return
+        print(f"\n=== Hunt History ({len(results)} results) ===\n")
+        print(f"{'Date':<12} {'Token':<8} {'Score':<7} {'Verdict':<12} {'Price':<10} {'7d':<8} {'14d':<8} {'30d':<8}")
+        print("-" * 80)
+        for r in results:
+            score = f"{r['alpha_score']}/12" if r.get('alpha_score') is not None else '-'
+            price = f"${r['price_at_hunt']:.4f}" if r.get('price_at_hunt') else '-'
+            d7 = f"{r['pct_change_7d']:+.1f}%" if r.get('pct_change_7d') is not None else '-'
+            d14 = f"{r['pct_change_14d']:+.1f}%" if r.get('pct_change_14d') is not None else '-'
+            d30 = f"{r['pct_change_30d']:+.1f}%" if r.get('pct_change_30d') is not None else '-'
+            print(f"{r['hunt_date']:<12} {r['token']:<8} {score:<7} {r['verdict'] or '-':<12} {price:<10} {d7:<8} {d14:<8} {d30:<8}")
+
+    elif args.command == "backtest-hunts":
+        if args.result_id:
+            update_hunt_outcome(
+                result_id=args.result_id,
+                price_7d_later=args.price_7d,
+                price_14d_later=args.price_14d,
+                price_30d_later=args.price_30d
+            )
+            print(f"Updated outcome for {args.result_id}")
+        else:
+            # Show hunts that need outcome data
+            results = get_hunt_history(days=90, limit=50)
+            needs_update = [r for r in results if r.get('price_7d_later') is None]
+            if not needs_update:
+                print("All hunt results have outcome data.")
+                return
+            print(f"\n=== Hunts Needing Outcome Data ({len(needs_update)}) ===\n")
+            print(f"{'ID':<10} {'Date':<12} {'Token':<8} {'Score':<7} {'Price':<10}")
+            print("-" * 50)
+            for r in needs_update:
+                score = f"{r['alpha_score']}/12" if r.get('alpha_score') is not None else '-'
+                price = f"${r['price_at_hunt']:.4f}" if r.get('price_at_hunt') else '-'
+                print(f"{r['result_id']:<10} {r['hunt_date']:<12} {r['token']:<8} {score:<7} {price:<10}")
+
+    # ========== OHLCV REFRESH HANDLERS ==========
+
+    elif args.command == "refresh-setups":
+        print("  Refreshing OHLCV data...\n")
+        result = refresh_active_tokens()
+        print(f"  Constant list : {', '.join(result['constant_list']) if result['constant_list'] else '(empty)'}")
+        print(f"  Active setups : {', '.join(result['setup_tokens']) if result['setup_tokens'] else '(none)'}")
+        print(f"  Total tokens  : {len(result['tokens'])}")
+        print()
+        if result['refreshed']:
+            print(f"  ✓ Refreshed: {', '.join(result['refreshed'])}")
+        if result['errors']:
+            print(f"  ⚠️  Errors:")
+            for e in result['errors']:
+                print(f"    {e}")
+        if not result['tokens']:
+            print("  Nothing to refresh. Add tokens with: refresh-add TOKEN")
+        print()
+
+    elif args.command == "refresh-list":
+        tokens = get_refresh_token_list()
+        if not tokens:
+            print("  Refresh list is empty. Add tokens with: refresh-add TOKEN")
+        else:
+            print(f"\n  Always-on refresh list ({len(tokens)} tokens):")
+            for t in tokens:
+                print(f"    {t}")
+            print()
+
+    elif args.command == "refresh-add":
+        added = add_to_refresh_list(args.token)
+        if added:
+            print(f"  Added {args.token.upper()} to refresh list.")
+        else:
+            print(f"  {args.token.upper()} is already in the refresh list.")
+
+    elif args.command == "refresh-remove":
+        removed = remove_from_refresh_list(args.token)
+        if removed:
+            print(f"  Removed {args.token.upper()} from refresh list.")
+        else:
+            print(f"  {args.token.upper()} not found in refresh list.")
+
+    # ========== DERIVATIVES HISTORY HANDLERS ==========
+
+    elif args.command == "derivatives-history":
+        rows = get_derivatives_history(
+            symbol=args.symbol, days=args.days,
+            source=args.source, limit=args.limit
+        )
+        if not rows:
+            sym_label = args.symbol.upper() if args.symbol else "all tokens"
+            print(f"No derivatives history for {sym_label} (last {args.days} days)")
+            return
+
+        sym_label = args.symbol.upper() if args.symbol else "All Tokens"
+        print(f"\n=== Derivatives History: {sym_label} (last {args.days} days, {len(rows)} snapshots) ===\n")
+        print(f"  {'Date/Time':<18} {'Sym':<5} {'Funding%':<10} {'OI':<9} {'OI∆24h':<8} {'L/S':<6} {'Long%':<7} {'Top Lean':<10} {'Liq24h':<10} {'F&G':<5} {'Premium'}")
+        print(f"  {'─' * 105}")
+        for r in rows:
+            ts = r['timestamp_utc'][:16] if r['timestamp_utc'] else '-'
+            sym = r['symbol'] or '-'
+            fr = f"{r['funding_rate_avg']*100:.4f}%" if r.get('funding_rate_avg') else '-'
+            oi = _format_number(r.get('oi_usd')) if r.get('oi_usd') else '-'
+            oi_c = f"{r['oi_change_24h_pct']:+.1f}%" if r.get('oi_change_24h_pct') else '-'
+            ls = f"{r['ls_global_ratio']:.2f}x" if r.get('ls_global_ratio') else '-'
+            lp = f"{r['ls_global_long_pct']:.1f}%" if r.get('ls_global_long_pct') else '-'
+            lean = (r.get('ls_smart_money_lean') or '-')[:9]
+            liq = _format_number(r.get('liq_24h_usd')) if r.get('liq_24h_usd') else '-'
+            fg = str(r['fear_greed_value']) if r.get('fear_greed_value') is not None else '-'
+            prem = f"{r['coinbase_premium_rate']*100:+.2f}%" if r.get('coinbase_premium_rate') else '-'
+            print(f"  {ts:<18} {sym:<5} {fr:<10} {oi:<9} {oi_c:<8} {ls:<6} {lp:<7} {lean:<10} {liq:<10} {fg:<5} {prem}")
+
+    elif args.command == "derivatives-stats":
+        stats = get_derivatives_stats(symbol=args.symbol, days=args.days)
+        if stats['snapshot_count'] == 0:
+            print(f"No derivatives data for {args.symbol.upper()} (last {args.days} days)")
+            return
+
+        print(f"\n=== Derivatives Stats: {stats['symbol']} (last {stats['days']} days, {stats['snapshot_count']} snapshots) ===\n")
+        avg_f = stats['avg_funding'] or 0
+        min_f = stats['min_funding'] or 0
+        max_f = stats['max_funding'] or 0
+        print(f"  Funding Rate:  avg {avg_f*100:+.4f}%  |  min {min_f*100:+.4f}%  |  max {max_f*100:+.4f}%")
+        print(f"  Open Interest: avg {_format_number(stats['avg_oi'] or 0)}    |  min {_format_number(stats['min_oi'] or 0)}    |  max {_format_number(stats['max_oi'] or 0)}")
+        avg_ls = stats['avg_ls'] or 0
+        min_ls = stats['min_ls'] or 0
+        max_ls = stats['max_ls'] or 0
+        print(f"  L/S Ratio:     avg {avg_ls:.2f}x     |  min {min_ls:.2f}x     |  max {max_ls:.2f}x")
+        avg_liq = stats['avg_liq'] or 0
+        total_liq = stats['total_liq'] or 0
+        print(f"  Liquidations:  avg {_format_number(avg_liq)}/snap |  total {_format_number(total_liq)}")
+        if stats.get('avg_fg'):
+            print(f"  Fear & Greed:  avg {stats['avg_fg']:.0f}        |  min {stats['min_fg'] or 0}          |  max {stats['max_fg'] or 0}")
+        if stats.get('avg_etf_weekly'):
+            print(f"  ETF Weekly:    avg {_format_number(stats['avg_etf_weekly'] or 0)}    |  min {_format_number(stats['min_etf_weekly'] or 0)}     |  max {_format_number(stats['max_etf_weekly'] or 0)}")
+
+        print(f"\n  Extreme Events (last {stats['days']}d):")
+        print(f"    - {stats['funding_high_count'] or 0}x funding > 0.03% (long crowded)")
+        print(f"    - {stats['funding_low_count'] or 0}x funding < -0.03% (short crowded)")
+        print(f"    - {stats['ls_high_count'] or 0}x L/S ratio > 2.5 (extreme longs)")
+        print(f"    - {stats['ls_low_count'] or 0}x L/S ratio < 0.4 (extreme shorts)")
+        print(f"    - {stats['lgf_count'] or 0}x Liquidity Grab Fade detected")
+
+    elif args.command == "derivatives-export":
+        result = export_derivatives_csv(
+            symbol=args.symbol, days=args.days,
+            output_path=args.output
+        )
+        if not result:
+            sym_label = args.symbol.upper() if args.symbol else "any token"
+            print(f"No derivatives data for {sym_label} (last {args.days} days)")
+        elif args.output:
+            print(f"Exported to {args.output}")
+        else:
+            print(result)
+
+    # ========== WYCKOFF SCAN HANDLERS ==========
+
+    elif args.command == "log-wyckoff":
+        data_str = args.data
+        if data_str.startswith('@'):
+            with open(data_str[1:]) as f:
+                data_str = f.read()
+        results = _parse_json_input(data_str)
+        if not isinstance(results, list):
+            results = [results]
+        batch_id = log_wyckoff_scan(args.date, results, args.batch_id)
+        print(f"Logged {len(results)} Wyckoff scan(s) — batch: {batch_id}")
+
+    elif args.command == "wyckoff-history":
+        results = get_wyckoff_history(
+            token=args.token, phase=args.phase, cycle_type=args.cycle,
+            min_confidence=args.min_confidence, days=args.days, limit=args.limit
+        )
+        if not results:
+            print("No Wyckoff scans found matching filters.")
+        else:
+            print(f"\n{'Token':<8} {'Date':<12} {'Cycle':<15} {'Phase':<7} {'Conf':<6} {'Price':<12} {'Events'}")
+            print("-" * 80)
+            for r in results:
+                events = []
+                if r.get('spring_detected'): events.append('Spring')
+                if r.get('upthrust_detected'): events.append('Upthrust')
+                if r.get('sos_detected'): events.append('SOS')
+                if r.get('sow_detected'): events.append('SOW')
+                event_str = ', '.join(events) if events else 'None'
+                price = f"${r.get('price_at_scan', 0):,.2f}" if r.get('price_at_scan') else 'N/A'
+                print(f"{r['token']:<8} {r['scan_date']:<12} {r.get('cycle_type','?'):<15} {r.get('phase','?'):<7} {r.get('confidence','?'):<6} {price:<12} {event_str}")
+
+    elif args.command == "wyckoff-latest":
+        results = get_wyckoff_latest(args.tokens)
+        if not results:
+            print("No Wyckoff scans found.")
+        else:
+            print(f"\n{'Token':<8} {'Date':<12} {'Cycle':<15} {'Phase':<7} {'Conf':<6} {'Price':<12} {'Vol Trend':<12} {'Position'}")
+            print("-" * 90)
+            for r in results:
+                price = f"${r.get('price_at_scan', 0):,.2f}" if r.get('price_at_scan') else 'N/A'
+                print(f"{r['token']:<8} {r['scan_date']:<12} {r.get('cycle_type','?'):<15} {r.get('phase','?'):<7} {r.get('confidence','?'):<6} {price:<12} {r.get('volume_trend','?'):<12} {r.get('position_in_range','?')}")
+
+    elif args.command == "wyckoff-transitions":
+        results = get_wyckoff_phase_transitions(args.token, args.days)
+        if not results:
+            print(f"No Wyckoff scans found for {args.token.upper()}.")
+        else:
+            print(f"\nWyckoff Phase Timeline — {args.token.upper()}")
+            print(f"\n{'Date':<12} {'Cycle':<15} {'Phase':<7} {'Conf':<6} {'Price':<12} {'Vol':<12} {'Events'}")
+            print("-" * 80)
+            for r in results:
+                events = []
+                if r.get('spring_detected'): events.append('Spring')
+                if r.get('upthrust_detected'): events.append('Upthrust')
+                if r.get('sos_detected'): events.append('SOS')
+                if r.get('sow_detected'): events.append('SOW')
+                event_str = ', '.join(events) if events else '-'
+                price = f"${r.get('price_at_scan', 0):,.2f}" if r.get('price_at_scan') else 'N/A'
+                print(f"{r['scan_date']:<12} {r.get('cycle_type','?'):<15} {r.get('phase','?'):<7} {r.get('confidence','?'):<6} {price:<12} {r.get('volume_trend','?'):<12} {event_str}")
+
+    else:
+        parser.print_help()
+
+
+if __name__ == "__main__":
+    main()

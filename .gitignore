@@ -1,0 +1,49 @@
+# Secrets
+.env
+.env.*
+credentials/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Node (for future frontend)
+node_modules/
+.next/
+
+# Data (large files)
+data/*.db
+*.db-journal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code local settings (personal, not shared)
+.claude/settings.local.json
+
+# Personal trading data (gitignored for privacy)
+my-trading/portfolio.md
+my-trading/alerts.md
+my-trading/watchlist.json
+my-trading/journal/
+
+# Config with secrets
+config/wallets.json
+config/token_list.json
+
+# CEX dashboard snapshots (generated data)
+signals/dashboards/*.md
+
+# Results (generated analysis)
+results/trade-cards/
+results/skill-runs/

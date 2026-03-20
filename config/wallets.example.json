@@ -1,0 +1,14 @@
+{
+    "portfolios": [
+        {
+            "name": "Main Portfolio",
+            "platform": "CoinStats",
+            "share_token": "YOUR_SHARE_TOKEN",
+            "url": "https://coinstats.app/p/YOUR_SHARE_TOKEN",
+            "added": "2026-01-01",
+            "notes": "Primary trading portfolio"
+        }
+    ],
+    "wallets": [],
+    "exchanges": []
+}

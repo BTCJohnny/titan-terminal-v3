@@ -1,0 +1,102 @@
+{
+  "fetched_at": "2026-03-20T11:34:58.789185",
+  "symbol": "PEPE",
+  "current_price": 3e-06,
+  "funding": {
+    "symbol": "PEPE",
+    "avg_rate": -0.00997803,
+    "avg_rate_pct": "-0.9978%",
+    "max_rate": 0.01,
+    "max_exchange": "HTX",
+    "min_rate": -0.06757,
+    "min_exchange": "WhiteBIT",
+    "num_exchanges": 14,
+    "annualized_cost_pct": -1456.79,
+    "bias": "short_crowded",
+    "interpretation": "PEPE avg funding: -0.9978% across 14 exchanges. Shorts paying heavily \u2014 crowded short positioning, squeeze UP risk. Annualized cost: -1456.8% for the dominant side"
+  },
+  "open_interest": {
+    "history": {
+      "symbol": "PEPE",
+      "current_oi_usd": 180178305.9934,
+      "oi_24h_ago_usd": 178946464.0,
+      "oi_change_24h_pct": 0.69,
+      "oi_change_period_pct": -21.51,
+      "oi_trend": "flat",
+      "interpretation": "PEPE OI: $180.2M (+0.7% 24h). OI stable \u2014 no significant position changes"
+    },
+    "exchanges": {
+      "symbol": "PEPE",
+      "total_oi_usd": 180178305.9934,
+      "change_1h_pct": 0.18,
+      "change_4h_pct": -7.4,
+      "change_24h_pct": -5.67,
+      "momentum": "stable",
+      "top_exchange_changes": [
+        {
+          "exchange": "HTX",
+          "change_1h_pct": -2.86,
+          "oi_usd": 1147455.636
+        },
+        {
+          "exchange": "dYdX",
+          "change_1h_pct": -2.6,
+          "oi_usd": 130293.12
+        },
+        {
+          "exchange": "WhiteBIT",
+          "change_1h_pct": 1.28,
+          "oi_usd": 5809648.401
+        }
+      ],
+      "interpretation": "PEPE total OI: $180.2M (-5.7% 24h). Biggest mover: HTX (-2.9% 1h)"
+    }
+  },
+  "long_short": {
+    "global": {
+      "symbol": "PEPE",
+      "current_ratio": 1.0,
+      "extreme": false,
+      "interpretation": "Global L/S ratio unavailable"
+    },
+    "top_traders": {
+      "symbol": "PEPE",
+      "smart_money_lean": "neutral",
+      "interpretation": "Top trader L/S data unavailable"
+    }
+  },
+  "liquidation": {
+    "symbol": "PEPE",
+    "total_24h_usd": 0,
+    "long_liq_24h_usd": 0,
+    "short_liq_24h_usd": 0,
+    "long_short_ratio": 1.0,
+    "bias": "balanced",
+    "recent_acceleration": false,
+    "timeframe_breakdown": {},
+    "interpretation": "No liquidation data for PEPE"
+  },
+  "max_pain": {
+    "nearest_expiry": null,
+    "max_pain_price": 0,
+    "distance_pct": 0,
+    "direction": "at",
+    "put_call_oi_ratio": 1.0,
+    "expiries": [],
+    "interpretation": "No options market for PEPE"
+  },
+  "options": {
+    "total_oi_usd": 0,
+    "volume_24h_usd": 0,
+    "oi_change_24h_pct": 0,
+    "interpretation": "Options info unavailable"
+  },
+  "setup": {
+    "detected": false,
+    "direction": null,
+    "confidence": "low",
+    "snap_back_target": null,
+    "thesis": "No liquidity grab setup detected",
+    "components": {}
+  }
+}

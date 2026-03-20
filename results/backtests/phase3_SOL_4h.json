@@ -1,0 +1,262 @@
+{
+  "phase": 3,
+  "symbol": "SOL",
+  "timeframe": "4h",
+  "days": 180,
+  "top_n": 5,
+  "results": [
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH)",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.5,
+      "profit_factor": 2.32,
+      "expectancy_usd": 685.14,
+      "total_pnl_usd": 5481.16,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.68
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [rsi_ob=52.5]",
+      "direction": "SHORT",
+      "total_trades": 32,
+      "win_rate": 0.5,
+      "profit_factor": 1.62,
+      "expectancy_usd": 352.02,
+      "total_pnl_usd": 11264.57,
+      "max_drawdown_pct": 9.61,
+      "avg_r_achieved": 0.34
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [rsi_ob=87.5]",
+      "direction": "?",
+      "total_trades": 0,
+      "win_rate": 0,
+      "profit_factor": 0,
+      "expectancy_usd": 0,
+      "total_pnl_usd": 0,
+      "max_drawdown_pct": 0,
+      "avg_r_achieved": 0
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.12]",
+      "direction": "SHORT",
+      "total_trades": 5,
+      "win_rate": 0.6,
+      "profit_factor": 4.47,
+      "expectancy_usd": 1507.46,
+      "total_pnl_usd": 7537.32,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 1.47
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.88]",
+      "direction": "SHORT",
+      "total_trades": 7,
+      "win_rate": 0.571,
+      "profit_factor": 2.48,
+      "expectancy_usd": 653.57,
+      "total_pnl_usd": 4574.97,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.65
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=1.88]",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.5,
+      "profit_factor": 1.84,
+      "expectancy_usd": 427.63,
+      "total_pnl_usd": 3421.06,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.44
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=3.12]",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.5,
+      "profit_factor": 2.53,
+      "expectancy_usd": 795.28,
+      "total_pnl_usd": 6362.24,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.79
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=3.75]",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.5,
+      "profit_factor": 2.04,
+      "expectancy_usd": 537.34,
+      "total_pnl_usd": 4298.7,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.54
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=6.25]",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.5,
+      "profit_factor": 1.8,
+      "expectancy_usd": 417.87,
+      "total_pnl_usd": 3342.96,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.43
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross",
+      "direction": "SHORT",
+      "total_trades": 22,
+      "win_rate": 0.5,
+      "profit_factor": 1.35,
+      "expectancy_usd": 193.63,
+      "total_pnl_usd": 4259.83,
+      "max_drawdown_pct": 8.44,
+      "avg_r_achieved": 0.2
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.5]",
+      "direction": "SHORT",
+      "total_trades": 22,
+      "win_rate": 0.455,
+      "profit_factor": 1.41,
+      "expectancy_usd": 244.56,
+      "total_pnl_usd": 5380.4,
+      "max_drawdown_pct": 7.76,
+      "avg_r_achieved": 0.26
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=2.5]",
+      "direction": "SHORT",
+      "total_trades": 20,
+      "win_rate": 0.55,
+      "profit_factor": 1.26,
+      "expectancy_usd": 130.09,
+      "total_pnl_usd": 2601.84,
+      "max_drawdown_pct": 6.75,
+      "avg_r_achieved": 0.14
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [target1_atr_mult=2.25]",
+      "direction": "SHORT",
+      "total_trades": 26,
+      "win_rate": 0.615,
+      "profit_factor": 1.5,
+      "expectancy_usd": 207.53,
+      "total_pnl_usd": 5395.88,
+      "max_drawdown_pct": 7.8,
+      "avg_r_achieved": 0.21
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [target1_atr_mult=3.75]",
+      "direction": "SHORT",
+      "total_trades": 20,
+      "win_rate": 0.45,
+      "profit_factor": 1.47,
+      "expectancy_usd": 265.91,
+      "total_pnl_usd": 5318.23,
+      "max_drawdown_pct": 7.25,
+      "avg_r_achieved": 0.27
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+      "direction": "SHORT",
+      "total_trades": 23,
+      "win_rate": 0.522,
+      "profit_factor": 1.44,
+      "expectancy_usd": 239.43,
+      "total_pnl_usd": 5506.99,
+      "max_drawdown_pct": 7.76,
+      "avg_r_achieved": 0.24
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=7.5]",
+      "direction": "SHORT",
+      "total_trades": 20,
+      "win_rate": 0.55,
+      "profit_factor": 1.8,
+      "expectancy_usd": 427.69,
+      "total_pnl_usd": 8553.85,
+      "max_drawdown_pct": 7.76,
+      "avg_r_achieved": 0.42
+    },
+    {
+      "name": "E3: BB Upper Touch + Death Cross",
+      "direction": "SHORT",
+      "total_trades": 18,
+      "win_rate": 0.444,
+      "profit_factor": 1.32,
+      "expectancy_usd": 179.12,
+      "total_pnl_usd": 3224.25,
+      "max_drawdown_pct": 8.44,
+      "avg_r_achieved": 0.19
+    },
+    {
+      "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=1.12]",
+      "direction": "SHORT",
+      "total_trades": 15,
+      "win_rate": 0.333,
+      "profit_factor": 1.08,
+      "expectancy_usd": 49.8,
+      "total_pnl_usd": 747.0,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.08
+    },
+    {
+      "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=1.88]",
+      "direction": "SHORT",
+      "total_trades": 16,
+      "win_rate": 0.5,
+      "profit_factor": 1.18,
+      "expectancy_usd": 92.06,
+      "total_pnl_usd": 1472.89,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.1
+    },
+    {
+      "name": "E3: BB Upper Touch + Death Cross [target1_atr_mult=1.88]",
+      "direction": "SHORT",
+      "total_trades": 18,
+      "win_rate": 0.5,
+      "profit_factor": 1.37,
+      "expectancy_usd": 185.34,
+      "total_pnl_usd": 3336.2,
+      "max_drawdown_pct": 9.18,
+      "avg_r_achieved": 0.2
+    },
+    {
+      "name": "E3: BB Upper Touch + Death Cross [target1_atr_mult=3.12]",
+      "direction": "SHORT",
+      "total_trades": 17,
+      "win_rate": 0.412,
+      "profit_factor": 1.38,
+      "expectancy_usd": 225.38,
+      "total_pnl_usd": 3831.43,
+      "max_drawdown_pct": 9.57,
+      "avg_r_achieved": 0.24
+    },
+    {
+      "name": "E3: BB Upper Touch + Death Cross [target2_atr_mult=3.75]",
+      "direction": "SHORT",
+      "total_trades": 18,
+      "win_rate": 0.444,
+      "profit_factor": 1.48,
+      "expectancy_usd": 278.85,
+      "total_pnl_usd": 5019.31,
+      "max_drawdown_pct": 7.76,
+      "avg_r_achieved": 0.29
+    },
+    {
+      "name": "E3: BB Upper Touch + Death Cross [target2_atr_mult=6.25]",
+      "direction": "SHORT",
+      "total_trades": 17,
+      "win_rate": 0.412,
+      "profit_factor": 0.99,
+      "expectancy_usd": -3.54,
+      "total_pnl_usd": -60.24,
+      "max_drawdown_pct": 8.44,
+      "avg_r_achieved": 0.01
+    }
+  ]
+}

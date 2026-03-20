@@ -1,0 +1,295 @@
+{
+  "phase": 4,
+  "symbol": "SOL",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.12]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 3,
+        "win_rate": 0.667,
+        "profit_factor": 6.08,
+        "expectancy_usd": 1927.41,
+        "total_pnl_usd": 5782.23,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.9
+      },
+      "test": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 2,
+        "win_rate": 0.5,
+        "profit_factor": 3.14,
+        "expectancy_usd": 1140.62,
+        "total_pnl_usd": 2281.25,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.18
+      },
+      "full": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 4.47,
+        "expectancy_usd": 1507.46,
+        "total_pnl_usd": 7537.32,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.47,
+        "strategy": {
+          "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.12]",
+          "description": "RSI overbought in bearish regime \u2014 ETH Phase 1 showed PF 2.30 on RSI OB",
+          "direction": "SHORT",
+          "entry_signals": [
+            "rsi_overbought",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "rsi_ob": 70
+          },
+          "exit": {
+            "stop_atr_mult": 1.12,
+            "target1_atr_mult": 2.5,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=3.12]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=3.12]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.5,
+        "profit_factor": 2.65,
+        "expectancy_usd": 853.88,
+        "total_pnl_usd": 5123.27,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.85
+      },
+      "test": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=3.12]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.4,
+        "profit_factor": 1.78,
+        "expectancy_usd": 458.5,
+        "total_pnl_usd": 2292.49,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.48
+      },
+      "full": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=3.12]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.5,
+        "profit_factor": 2.53,
+        "expectancy_usd": 795.28,
+        "total_pnl_usd": 6362.24,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.79,
+        "strategy": {
+          "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=3.12]",
+          "description": "RSI overbought in bearish regime \u2014 ETH Phase 1 showed PF 2.30 on RSI OB",
+          "direction": "SHORT",
+          "entry_signals": [
+            "rsi_overbought",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "rsi_ob": 70
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.12,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH)",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E12: RSI OB Short + Death Cross (ETH)",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.5,
+        "profit_factor": 2.45,
+        "expectancy_usd": 746.23,
+        "total_pnl_usd": 4477.37,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.75
+      },
+      "test": {
+        "name": "E12: RSI OB Short + Death Cross (ETH)",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.4,
+        "profit_factor": 1.64,
+        "expectancy_usd": 376.64,
+        "total_pnl_usd": 1883.21,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.4
+      },
+      "full": {
+        "name": "E12: RSI OB Short + Death Cross (ETH)",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.5,
+        "profit_factor": 2.32,
+        "expectancy_usd": 685.14,
+        "total_pnl_usd": 5481.16,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.68,
+        "strategy": {
+          "name": "E12: RSI OB Short + Death Cross (ETH)",
+          "description": "RSI overbought in bearish regime \u2014 ETH Phase 1 showed PF 2.30 on RSI OB",
+          "direction": "SHORT",
+          "entry_signals": [
+            "rsi_overbought",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "rsi_ob": 70
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 2.5,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.88]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.88]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 2.94,
+        "expectancy_usd": 799.88,
+        "total_pnl_usd": 3999.4,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.79
+      },
+      "test": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.88]",
+        "direction": "SHORT",
+        "total_trades": 4,
+        "win_rate": 0.5,
+        "profit_factor": 1.97,
+        "expectancy_usd": 481.95,
+        "total_pnl_usd": 1927.81,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.49
+      },
+      "full": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.88]",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 2.48,
+        "expectancy_usd": 653.57,
+        "total_pnl_usd": 4574.97,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.65,
+        "strategy": {
+          "name": "E12: RSI OB Short + Death Cross (ETH) [stop_atr_mult=1.88]",
+          "description": "RSI overbought in bearish regime \u2014 ETH Phase 1 showed PF 2.30 on RSI OB",
+          "direction": "SHORT",
+          "entry_signals": [
+            "rsi_overbought",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "rsi_ob": 70
+          },
+          "exit": {
+            "stop_atr_mult": 1.88,
+            "target1_atr_mult": 2.5,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=3.75]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.5,
+        "profit_factor": 2.04,
+        "expectancy_usd": 531.76,
+        "total_pnl_usd": 3190.55,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.54
+      },
+      "test": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.4,
+        "profit_factor": 1.36,
+        "expectancy_usd": 212.59,
+        "total_pnl_usd": 1062.94,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.23
+      },
+      "full": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.5,
+        "profit_factor": 2.04,
+        "expectancy_usd": 537.34,
+        "total_pnl_usd": 4298.7,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.54,
+        "strategy": {
+          "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=3.75]",
+          "description": "RSI overbought in bearish regime \u2014 ETH Phase 1 showed PF 2.30 on RSI OB",
+          "direction": "SHORT",
+          "entry_signals": [
+            "rsi_overbought",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "rsi_ob": 70
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 2.5,
+            "target2_atr_mult": 3.75,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

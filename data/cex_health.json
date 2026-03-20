@@ -1,0 +1,1052 @@
+{
+    "metadata": {
+        "description": "CEX Health Tracker - Daily exchange flow snapshots",
+        "tracked_assets": [
+            "ETH",
+            "BTC",
+            "USDT",
+            "USDC"
+        ],
+        "data_source": "Nansen",
+        "created": "2026-03-13",
+        "last_updated": "2026-03-20"
+    },
+    "tokens": {
+        "ETH": {
+            "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "chain": "ethereum",
+            "proxy": "WETH"
+        },
+        "BTC": {
+            "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+            "chain": "ethereum",
+            "proxy": "WBTC"
+        },
+        "USDT": {
+            "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "chain": "ethereum",
+            "proxy": null
+        },
+        "USDC": {
+            "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "chain": "ethereum",
+            "proxy": null
+        }
+    },
+    "snapshots": [
+        {
+            "date": "2026-03-13-1239",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 22144319.769188702,
+                    "direction": "inflow",
+                    "vs_average": 2.2,
+                    "signal": "bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": -4487685.105250504,
+                    "direction": "outflow",
+                    "vs_average": 0.8,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 251083447.0813775,
+                    "direction": "inflow",
+                    "vs_average": 2.2,
+                    "signal": "bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 309194073.472679,
+                    "direction": "inflow",
+                    "vs_average": 1.8,
+                    "signal": "slight_bearish"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": -389779.32118542196,
+                    "direction": "outflow",
+                    "vs_average": 0.1,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -20131477.36299052,
+                    "direction": "outflow",
+                    "vs_average": 2.8,
+                    "signal": "bullish"
+                },
+                "USDT": {
+                    "net_flow_usd": -11956442.139496647,
+                    "direction": "outflow",
+                    "vs_average": 0.2,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 908991695.8108071,
+                    "direction": "inflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": -5524396.812462911,
+                    "whales": 325.9053786471486,
+                    "smart_traders": 0
+                },
+                "BTC": {
+                    "top_pnl": 882265.1054416128,
+                    "whales": 299.2183436877942,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 10097237.61824758,
+                    "whales": -105938.05240540435,
+                    "smart_traders": -9208195.487743806
+                },
+                "USDC": {
+                    "top_pnl": 17639312.493016656,
+                    "whales": 1658868.0561593482,
+                    "smart_traders": 3665187.054775606
+                }
+            },
+            "summary": {
+                "overall_signal": "distribution",
+                "confidence": "medium",
+                "notes": "Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-14-0725",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 1136866.2454674516,
+                    "direction": "inflow",
+                    "vs_average": 0.1,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -275592.5527206021,
+                    "direction": "outflow",
+                    "vs_average": 0.1,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 11152975.580162587,
+                    "direction": "inflow",
+                    "vs_average": 0.1,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 558869778.5560428,
+                    "direction": "inflow",
+                    "vs_average": 3.7,
+                    "signal": "bearish"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": -9013193.57723535,
+                    "direction": "outflow",
+                    "vs_average": 0.6,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -22901314.948751822,
+                    "direction": "outflow",
+                    "vs_average": 1.8,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 121678279.3578454,
+                    "direction": "inflow",
+                    "vs_average": 1.6,
+                    "signal": "slight_bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 1040877477.7309567,
+                    "direction": "inflow",
+                    "vs_average": 0.9,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": -3374017.189031505,
+                    "whales": 0,
+                    "smart_traders": 0
+                },
+                "BTC": {
+                    "top_pnl": -1650935.1132214875,
+                    "whales": 1476866.7617679886,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 56755550.8388796,
+                    "whales": 1436985.4044753753,
+                    "smart_traders": -13092121.678026443
+                },
+                "USDC": {
+                    "top_pnl": 11305829.14604706,
+                    "whales": 1327574.6746665786,
+                    "smart_traders": 5929478.16037992
+                }
+            },
+            "summary": {
+                "overall_signal": "distribution",
+                "confidence": "low",
+                "notes": "Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-15-0828",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 7011016.516531734,
+                    "direction": "inflow",
+                    "vs_average": 0.9,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -4410929.837127564,
+                    "direction": "outflow",
+                    "vs_average": 1.4,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 69026758.72234865,
+                    "direction": "inflow",
+                    "vs_average": 0.8,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": -80621213.0658953,
+                    "direction": "outflow",
+                    "vs_average": 0.5,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 4471933.327832767,
+                    "direction": "inflow",
+                    "vs_average": 0.4,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -36818280.95199364,
+                    "direction": "outflow",
+                    "vs_average": 1.2,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 725240621.6427467,
+                    "direction": "inflow",
+                    "vs_average": 1.2,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 1142310087.4401448,
+                    "direction": "inflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": 2805252.052471639,
+                    "whales": 32409.270257959688,
+                    "smart_traders": 0
+                },
+                "BTC": {
+                    "top_pnl": 357774.97645923326,
+                    "whales": 770.6654590464254,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 5091066.237018494,
+                    "whales": 818869.0925745392,
+                    "smart_traders": -5000.607708895622
+                },
+                "USDC": {
+                    "top_pnl": 5817201.011383119,
+                    "whales": 119118.60178228933,
+                    "smart_traders": -35165.21307882146
+                }
+            },
+            "summary": {
+                "overall_signal": "consolidation",
+                "confidence": "medium",
+                "notes": "Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-15-1051",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 7762390.213883596,
+                    "direction": "inflow",
+                    "vs_average": 0.7,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -4020254.4996267795,
+                    "direction": "outflow",
+                    "vs_average": 0.9,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": -68232.71136340126,
+                    "direction": "outflow",
+                    "vs_average": 0.0,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": -77474403.88844447,
+                    "direction": "outflow",
+                    "vs_average": 0.3,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 3997461.2532682572,
+                    "direction": "inflow",
+                    "vs_average": 0.4,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -36961209.695923716,
+                    "direction": "outflow",
+                    "vs_average": 1.2,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 717216036.3502468,
+                    "direction": "inflow",
+                    "vs_average": 1.2,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 1147383720.6574814,
+                    "direction": "inflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": 1801243.2682087622,
+                    "whales": 32535.13180161533,
+                    "smart_traders": 0
+                },
+                "BTC": {
+                    "top_pnl": -34983.03852455849,
+                    "whales": 770.6654590464254,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 6432884.431512559,
+                    "whales": 819419.196877131,
+                    "smart_traders": -25002.499471380863
+                },
+                "USDC": {
+                    "top_pnl": 6361630.21057149,
+                    "whales": 118850.9806059391,
+                    "smart_traders": -43380.78740574719
+                }
+            },
+            "summary": {
+                "overall_signal": "consolidation",
+                "confidence": "medium",
+                "notes": "Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-15-1106",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 6969918.8360525835,
+                    "direction": "inflow",
+                    "vs_average": 0.8,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -3738431.343637931,
+                    "direction": "outflow",
+                    "vs_average": 0.9,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": -18333470.00164602,
+                    "direction": "outflow",
+                    "vs_average": 0.2,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": -91861576.64043565,
+                    "direction": "outflow",
+                    "vs_average": 0.4,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 3895022.157205603,
+                    "direction": "inflow",
+                    "vs_average": 0.4,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -36850665.26273259,
+                    "direction": "outflow",
+                    "vs_average": 1.2,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 709746086.4175587,
+                    "direction": "inflow",
+                    "vs_average": 1.2,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 1147811221.708604,
+                    "direction": "inflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": 1814138.0994717218,
+                    "whales": 32590.22073175673,
+                    "smart_traders": 0
+                },
+                "BTC": {
+                    "top_pnl": -276902.4089385085,
+                    "whales": 770.6654590464254,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 6435436.077369871,
+                    "whales": 819454.7261088052,
+                    "smart_traders": -25002.499471380863
+                },
+                "USDC": {
+                    "top_pnl": 6335786.317203969,
+                    "whales": 118715.55464941738,
+                    "smart_traders": -43380.78740574719
+                }
+            },
+            "summary": {
+                "overall_signal": "consolidation",
+                "confidence": "medium",
+                "notes": "Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-16-0706",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 54230695.326450646,
+                    "direction": "inflow",
+                    "vs_average": 5.0,
+                    "signal": "very_bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": 3327086.4987111925,
+                    "direction": "inflow",
+                    "vs_average": 1.3,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 87942280.6448426,
+                    "direction": "inflow",
+                    "vs_average": 1.1,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": -38769629.42931859,
+                    "direction": "outflow",
+                    "vs_average": 0.2,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 70031574.63324991,
+                    "direction": "inflow",
+                    "vs_average": 1.5,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -22245030.745719858,
+                    "direction": "outflow",
+                    "vs_average": 1.1,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 901600801.7827051,
+                    "direction": "inflow",
+                    "vs_average": 1.3,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 1161434287.6641662,
+                    "direction": "inflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": 1102402.7548085256,
+                    "whales": 4020158.0603566156,
+                    "smart_traders": 0
+                },
+                "BTC": {
+                    "top_pnl": -1576140.636356483,
+                    "whales": 211.0020541462232,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 7973685.109990264,
+                    "whales": -8605931.10473971,
+                    "smart_traders": -20002.124838709144
+                },
+                "USDC": {
+                    "top_pnl": 17402047.48874828,
+                    "whales": 3736894.4074281864,
+                    "smart_traders": -770399.6683623509
+                }
+            },
+            "summary": {
+                "overall_signal": "distribution",
+                "confidence": "low",
+                "notes": "ETH inflows 5.0x average. Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-17-0649",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": -11183562.75881598,
+                    "direction": "outflow",
+                    "vs_average": 0.9,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": 1198487.9946317892,
+                    "direction": "inflow",
+                    "vs_average": 0.4,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 176386606.01074916,
+                    "direction": "inflow",
+                    "vs_average": 2.1,
+                    "signal": "bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 403696590.5229661,
+                    "direction": "inflow",
+                    "vs_average": 2.0,
+                    "signal": "slight_bearish"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 68096045.09737173,
+                    "direction": "inflow",
+                    "vs_average": 2.1,
+                    "signal": "bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": -9771610.889010053,
+                    "direction": "outflow",
+                    "vs_average": 1.4,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 722866057.0492977,
+                    "direction": "inflow",
+                    "vs_average": 1.9,
+                    "signal": "slight_bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 958020274.8430939,
+                    "direction": "inflow",
+                    "vs_average": 0.8,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": 517294.97091769136,
+                    "whales": 4017368.5872736424,
+                    "smart_traders": 0
+                },
+                "BTC": {
+                    "top_pnl": -1745940.5771441045,
+                    "whales": -589717.305926895,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 15498555.391061269,
+                    "whales": -588249.9791470324,
+                    "smart_traders": 203055.2601327548
+                },
+                "USDC": {
+                    "top_pnl": 10207496.00924264,
+                    "whales": -7349234.725128111,
+                    "smart_traders": 1333306.0598677585
+                }
+            },
+            "summary": {
+                "overall_signal": "distribution",
+                "confidence": "low",
+                "notes": "Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-17-0730",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": -11827526.809183758,
+                    "direction": "outflow",
+                    "vs_average": 1.1,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": 1178556.0654578507,
+                    "direction": "inflow",
+                    "vs_average": 0.6,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 198867706.32284713,
+                    "direction": "inflow",
+                    "vs_average": 2.6,
+                    "signal": "bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 365915872.3980718,
+                    "direction": "inflow",
+                    "vs_average": 2.2,
+                    "signal": "bearish"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 67274705.12567502,
+                    "direction": "inflow",
+                    "vs_average": 2.1,
+                    "signal": "bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": -9376199.511154551,
+                    "direction": "outflow",
+                    "vs_average": 1.3,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 733409977.1208302,
+                    "direction": "inflow",
+                    "vs_average": 1.9,
+                    "signal": "slight_bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 957520128.620768,
+                    "direction": "inflow",
+                    "vs_average": 0.8,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": 1494755.6867921057,
+                    "whales": 4017368.5872736424,
+                    "smart_traders": 0
+                },
+                "BTC": {
+                    "top_pnl": -2272129.132588492,
+                    "whales": -590072.3670657708,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 14214133.212686481,
+                    "whales": -381931.3347701014,
+                    "smart_traders": 203055.86933235836
+                },
+                "USDC": {
+                    "top_pnl": 9170532.141917443,
+                    "whales": -7849595.9454145,
+                    "smart_traders": 1324780.345182014
+                }
+            },
+            "summary": {
+                "overall_signal": "distribution",
+                "confidence": "low",
+                "notes": "Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-18-0921",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": -8094206.7920028595,
+                    "direction": "outflow",
+                    "vs_average": 0.7,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -11251849.964572303,
+                    "direction": "outflow",
+                    "vs_average": 4.1,
+                    "signal": "very_bullish"
+                },
+                "USDT": {
+                    "net_flow_usd": 2268799575.2815213,
+                    "direction": "inflow",
+                    "vs_average": 17.3,
+                    "signal": "very_bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": -168799776.81231448,
+                    "direction": "outflow",
+                    "vs_average": 1.3,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 47275998.34250003,
+                    "direction": "inflow",
+                    "vs_average": 1.3,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -16227974.4453296,
+                    "direction": "outflow",
+                    "vs_average": 1.9,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 3366994045.8903356,
+                    "direction": "inflow",
+                    "vs_average": 3.0,
+                    "signal": "bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 375372908.31742233,
+                    "direction": "inflow",
+                    "vs_average": 0.7,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": -1239955.154912222,
+                    "whales": 6010878.102972155,
+                    "smart_traders": 0
+                },
+                "BTC": {
+                    "top_pnl": -1110281.930887819,
+                    "whales": 124.73093648849388,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 7142404.219755722,
+                    "whales": 70493.0334884449,
+                    "smart_traders": 186508.69253716816
+                },
+                "USDC": {
+                    "top_pnl": 1648633.9824951785,
+                    "whales": -5809521.910413466,
+                    "smart_traders": -2721835.966350464
+                }
+            },
+            "summary": {
+                "overall_signal": "consolidation",
+                "confidence": "medium",
+                "notes": "BTC outflows 4.1x average. USDT inflows 17.3x average"
+            }
+        },
+        {
+            "date": "2026-03-19-0624",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 115306255.54010822,
+                    "direction": "inflow",
+                    "vs_average": 7.7,
+                    "signal": "very_bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": -5865865.205587929,
+                    "direction": "outflow",
+                    "vs_average": 1.4,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 238207225.40756848,
+                    "direction": "inflow",
+                    "vs_average": 1.4,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 183884921.69909427,
+                    "direction": "inflow",
+                    "vs_average": 1.2,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 168655561.84257102,
+                    "direction": "inflow",
+                    "vs_average": 3.9,
+                    "signal": "bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": -25067757.092913065,
+                    "direction": "outflow",
+                    "vs_average": 1.2,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 3322234901.8556523,
+                    "direction": "inflow",
+                    "vs_average": 5.1,
+                    "signal": "very_bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 1061691581.669971,
+                    "direction": "inflow",
+                    "vs_average": 1.7,
+                    "signal": "slight_bearish"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": 1967581.2558590074,
+                    "whales": 0,
+                    "smart_traders": 1316019.6992049713
+                },
+                "BTC": {
+                    "top_pnl": 330619.76672166097,
+                    "whales": 154.0103786411862,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 19365440.637360156,
+                    "whales": -166359.22056453658,
+                    "smart_traders": 2137572.2869581683
+                },
+                "USDC": {
+                    "top_pnl": 11203477.761367243,
+                    "whales": 2378102.856605878,
+                    "smart_traders": -2902342.081089455
+                }
+            },
+            "summary": {
+                "overall_signal": "distribution",
+                "confidence": "low",
+                "notes": "ETH inflows 7.7x average. Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-20-0627",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 10057003.936473345,
+                    "direction": "inflow",
+                    "vs_average": 0.7,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": 53103751.89444848,
+                    "direction": "inflow",
+                    "vs_average": 9.3,
+                    "signal": "very_bearish"
+                },
+                "USDT": {
+                    "net_flow_usd": -113297232.07235071,
+                    "direction": "outflow",
+                    "vs_average": 0.6,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 27668612.59205963,
+                    "direction": "inflow",
+                    "vs_average": 0.2,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 156912999.91239426,
+                    "direction": "inflow",
+                    "vs_average": 4.4,
+                    "signal": "very_bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": 30656297.762601662,
+                    "direction": "inflow",
+                    "vs_average": 1.4,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 3234745758.2325907,
+                    "direction": "inflow",
+                    "vs_average": 4.6,
+                    "signal": "very_bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 940048009.2243917,
+                    "direction": "inflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": -12806553.90943489,
+                    "whales": 0,
+                    "smart_traders": 3756983.618358746
+                },
+                "BTC": {
+                    "top_pnl": -944502.166507228,
+                    "whales": -209676.88402182126,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 4669178.520086683,
+                    "whales": 489314.28688539076,
+                    "smart_traders": 204155.75722278
+                },
+                "USDC": {
+                    "top_pnl": 39148994.404388234,
+                    "whales": -4282065.932434631,
+                    "smart_traders": 24697.069698215793
+                }
+            },
+            "summary": {
+                "overall_signal": "distribution",
+                "confidence": "low",
+                "notes": "BTC inflows 9.3x average. Smart money accumulating"
+            }
+        },
+        {
+            "date": "2026-03-20-0631",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 9843331.11888237,
+                    "direction": "inflow",
+                    "vs_average": 0.7,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": 53349348.0742726,
+                    "direction": "inflow",
+                    "vs_average": 9.4,
+                    "signal": "very_bearish"
+                },
+                "USDT": {
+                    "net_flow_usd": -113605762.15809812,
+                    "direction": "outflow",
+                    "vs_average": 0.6,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 27645197.800761048,
+                    "direction": "inflow",
+                    "vs_average": 0.2,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 156701169.60805565,
+                    "direction": "inflow",
+                    "vs_average": 4.4,
+                    "signal": "very_bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": 30901893.942425735,
+                    "direction": "inflow",
+                    "vs_average": 1.4,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 3234437228.1468606,
+                    "direction": "inflow",
+                    "vs_average": 4.6,
+                    "signal": "very_bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 940028551.6865761,
+                    "direction": "inflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "top_pnl": -12638383.786508264,
+                    "whales": 0,
+                    "smart_traders": 3756983.618358746
+                },
+                "BTC": {
+                    "top_pnl": -1004821.82956891,
+                    "whales": -209676.88402182126,
+                    "smart_traders": 0
+                },
+                "USDT": {
+                    "top_pnl": 4633474.205305088,
+                    "whales": 489314.28688539076,
+                    "smart_traders": 204155.75722278
+                },
+                "USDC": {
+                    "top_pnl": 39161059.28911129,
+                    "whales": -4282065.932434631,
+                    "smart_traders": 24697.069698215793
+                }
+            },
+            "summary": {
+                "overall_signal": "distribution",
+                "confidence": "low",
+                "notes": "BTC inflows 9.4x average. Smart money accumulating"
+            }
+        }
+    ],
+    "alerts": {
+        "thresholds": {
+            "large_flow_multiplier": 2.0,
+            "extreme_flow_multiplier": 4.0,
+            "smart_money_threshold": 10000000
+        },
+        "active_alerts": [
+            {
+                "date": "2026-03-20-0631",
+                "asset": "BTC",
+                "type": "extreme_inflow",
+                "value": 53349348.0742726,
+                "vs_average": 9.4,
+                "priority": "CRITICAL",
+                "message": "BTC inflows 9.4x average"
+            }
+        ]
+    }
+}

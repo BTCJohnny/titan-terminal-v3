@@ -1,0 +1,132 @@
+{
+  "fetched_at": "2026-03-19T18:54:33.231785",
+  "symbol": "HYPE",
+  "current_price": 39.83,
+  "funding": {
+    "symbol": "HYPE",
+    "avg_rate": 0.00383675,
+    "avg_rate_pct": "0.3837%",
+    "max_rate": 0.0148,
+    "max_exchange": "KuCoin",
+    "min_rate": -0.00115501,
+    "min_exchange": "Kraken",
+    "num_exchanges": 20,
+    "annualized_cost_pct": 908.38,
+    "bias": "long_crowded",
+    "interpretation": "HYPE avg funding: 0.3837% across 20 exchanges. Longs paying heavily \u2014 crowded long positioning, squeeze DOWN risk. Annualized cost: 908.4% for the dominant side"
+  },
+  "open_interest": {
+    "history": {
+      "symbol": "HYPE",
+      "current_oi_usd": 1705976901.7353,
+      "oi_24h_ago_usd": 1845991366.0,
+      "oi_change_24h_pct": -7.58,
+      "oi_change_period_pct": 18.05,
+      "oi_trend": "falling",
+      "interpretation": "HYPE OI: $1.71B (-7.6% 24h). OI contracting \u2014 positions being closed"
+    },
+    "exchanges": {
+      "symbol": "HYPE",
+      "total_oi_usd": 1705976901.7353,
+      "change_1h_pct": -1.08,
+      "change_4h_pct": 0.28,
+      "change_24h_pct": -8.58,
+      "momentum": "stable",
+      "top_exchange_changes": [
+        {
+          "exchange": "CoinEx",
+          "change_1h_pct": -12.69,
+          "oi_usd": 1115707.43
+        },
+        {
+          "exchange": "BingX",
+          "change_1h_pct": -7.37,
+          "oi_usd": 43351908.41
+        },
+        {
+          "exchange": "Aster",
+          "change_1h_pct": -3.26,
+          "oi_usd": 4341400.5557
+        }
+      ],
+      "interpretation": "HYPE total OI: $1.71B (-8.6% 24h). Biggest mover: CoinEx (-12.7% 1h)"
+    }
+  },
+  "long_short": {
+    "global": {
+      "symbol": "HYPE",
+      "current_long_pct": 57.38,
+      "current_short_pct": 42.62,
+      "current_ratio": 1.35,
+      "trend": "more_longs",
+      "extreme": false,
+      "contrarian_signal": null,
+      "interpretation": "HYPE Global L/S: 1.35x (57.4% long / 42.6% short). Crowd shifting long \u2014 retail piling into longs"
+    },
+    "top_traders": {
+      "symbol": "HYPE",
+      "top_account_long_pct": 52.58,
+      "top_account_ratio": 1.11,
+      "top_position_long_pct": 59.35,
+      "top_position_ratio": 1.46,
+      "account_position_divergence": true,
+      "smart_money_lean": "long",
+      "interpretation": "HYPE Top Traders \u2014 Account: 1.11x (52.6% long), Position: 1.46x (59.4% long). Account/Position divergence: fewer longs by count (acct 53%) but larger positions (59%) \u2014 concentrated conviction longs. Smart money lean: LONG (position-weighted)"
+    }
+  },
+  "liquidation": {
+    "symbol": "HYPE",
+    "total_24h_usd": 1734593.600872,
+    "long_liq_24h_usd": 1287761.7879375,
+    "short_liq_24h_usd": 446831.8129345,
+    "long_short_ratio": 2.88,
+    "bias": "long_pain",
+    "recent_acceleration": false,
+    "timeframe_breakdown": {
+      "24h": {
+        "total": 1734593.600872,
+        "long": 1287761.7879375,
+        "short": 446831.8129345
+      },
+      "12h": {
+        "total": 1239199.1350047,
+        "long": 1112301.0025561,
+        "short": 126898.1324486
+      },
+      "4h": {
+        "total": 48519.8234023,
+        "long": 24119.9955389,
+        "short": 24399.8278634
+      },
+      "1h": {
+        "total": 465.591665,
+        "long": 465.591665,
+        "short": 0.0
+      }
+    },
+    "interpretation": "HYPE 24h liquidations: $1.7M (Long: $1.3M | Short: $447K). Longs getting wrecked 2.9x more than shorts \u2014 bearish pressure, price declining"
+  },
+  "max_pain": {
+    "nearest_expiry": null,
+    "max_pain_price": 0,
+    "distance_pct": 0,
+    "direction": "at",
+    "put_call_oi_ratio": 1.0,
+    "expiries": [],
+    "interpretation": "No options market for HYPE"
+  },
+  "options": {
+    "total_oi_usd": 0,
+    "volume_24h_usd": 0,
+    "oi_change_24h_pct": 0,
+    "interpretation": "Options info unavailable"
+  },
+  "setup": {
+    "detected": false,
+    "direction": null,
+    "confidence": "low",
+    "snap_back_target": null,
+    "thesis": "No liquidity grab setup detected",
+    "components": {}
+  }
+}

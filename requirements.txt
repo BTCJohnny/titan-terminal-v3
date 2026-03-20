@@ -1,0 +1,9 @@
+# Titan Terminal v2 — Python Dependencies
+
+# Primary: Binance Futures data via CCXT
+ccxt>=4.0.0
+
+# Used by binance_fetcher.py for DataFrame CLI output (optional)
+pandas>=2.0.0
+
+# All other data fetching uses stdlib (urllib, json, sqlite3)
