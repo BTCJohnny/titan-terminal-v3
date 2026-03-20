@@ -1,41 +1,29 @@
 ---
 name: portfolio
-description: Show paper trading portfolio — current balance, open positions, allocation, and equity history.
+description: Paper trading — status, tick, positions, performance.
+argument-hint: [status|tick|positions|performance]
 allowed-tools:
   - Read
   - Bash
+  - mcp__coinstats
 ---
 
-# /portfolio
+# /portfolio $ARGUMENTS
 
-Show the current state of the paper trading portfolio.
+Operational command — no pipeline. Run the appropriate paper trading CLI command.
 
-## Execution
+| Argument | Command |
+|----------|---------|
+| (none) or status | `python3 src/trading/paper_engine.py status` |
+| tick | `python3 src/trading/paper_engine.py tick` |
+| positions | `python3 src/trading/paper_engine.py positions` |
+| closed | `python3 src/trading/paper_engine.py positions --closed` |
+| performance | `python3 src/trading/analytics.py summary` |
+| by-strategy | `python3 src/trading/analytics.py by-strategy` |
+| by-direction | `python3 src/trading/analytics.py by-direction` |
 
-### Current Status
-```bash
-python3 src/trading/paper_engine.py status
+For portfolio sync, also run:
 ```
-
-### Open Positions
-```bash
-python3 src/trading/paper_engine.py positions
+mcp__coinstats__get-portfolio-coins: shareToken "NL3S076anq11Ibz", limit 50
 ```
-
-### Closed Positions (recent)
-```bash
-python3 src/trading/paper_engine.py positions --closed
-```
-
-### Equity History (last 7 days)
-```bash
-python3 src/trading/paper_engine.py history --days 7
-```
-
-## Interpretation
-
-After running the commands, synthesize:
-- **Portfolio health**: Is equity growing? What's the drawdown?
-- **Position risk**: Are open positions concentrated in one sector?
-- **Cash reserve**: How much dry powder is available for new setups?
-- **Thesis alignment**: Do open positions match the current regime from `reference/titan-thesis.md`?
+Pass response to: `python3 src/formatters/portfolio_sync.py '<JSON>'`
