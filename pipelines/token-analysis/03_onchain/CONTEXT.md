@@ -1,0 +1,2 @@
+# 03_onchain — CONTEXT.md
+> Placeholder. To be written in Step 4.
