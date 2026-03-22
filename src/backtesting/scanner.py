@@ -21,6 +21,7 @@ import argparse
 import json
 import sys
 import time
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
@@ -335,6 +336,21 @@ def run_phase3(symbol: str, timeframe: str, days: int, top_n: int = 5, phase2_re
     return all_results
 
 
+def _get_base_scenario_name(name: str) -> str:
+    """Extract the base scenario name from a variant name.
+
+    Examples:
+        "E1: MACD Rollover + Death Cross" -> "E1: MACD Rollover + Death Cross"
+        "E1: MACD Rollover + Death Cross [stop_atr_mult=2.5]" -> "E1: MACD Rollover + Death Cross"
+        "G12: MACD Bullish + ADX Strong (SHORT)" -> "G12: MACD Bullish + ADX Strong (SHORT)"
+        "G12: MACD Bullish + ADX Strong (SHORT) [adx_strong=31.25]" -> "G12: MACD Bullish + ADX Strong (SHORT)"
+    """
+    bracket_idx = name.find(" [")
+    if bracket_idx >= 0:
+        return name[:bracket_idx]
+    return name
+
+
 def _find_scenario_by_name(name: str) -> dict | None:
     """Find a scenario by its exact name."""
     for s in get_all_scenarios():
@@ -362,17 +378,37 @@ def run_phase4(symbol: str, timeframe: str, days: int, top_n: int = 5, phase3_re
         with open(p3_path) as f:
             phase3_results = json.load(f).get("results", [])
 
-    # Select top N from Phase 3 by expectancy, min 5 trades
+    # Select best variant per scenario, then take top N scenarios
     candidates = [
         r for r in phase3_results
         if "error" not in r and r.get("total_trades", 0) >= 5
     ]
-    candidates.sort(key=lambda r: r.get("expectancy_usd", 0), reverse=True)
-    top_candidates = candidates[:top_n]
+
+    # Group by base scenario name (strip parameter variant suffixes)
+    by_scenario = defaultdict(list)
+    for r in candidates:
+        base_name = _get_base_scenario_name(r["name"])
+        by_scenario[base_name].append(r)
+
+    # Pick the best variant per scenario (by expectancy)
+    best_per_scenario = []
+    for base_name, variants in by_scenario.items():
+        variants.sort(key=lambda r: r.get("expectancy_usd", 0), reverse=True)
+        best_per_scenario.append(variants[0])
+
+    # Sort deduplicated list and take top N
+    best_per_scenario.sort(key=lambda r: r.get("expectancy_usd", 0), reverse=True)
+    top_candidates = best_per_scenario[:top_n]
 
     if not top_candidates:
         print(f"  No qualifying strategies from Phase 3.")
         return []
+
+    print(f"  Selected {len(top_candidates)} candidates (best per scenario):")
+    for c in top_candidates:
+        base = _get_base_scenario_name(c["name"])
+        print(f"    {base} → {c['name'][:60]} (exp=${c.get('expectancy_usd', 0):+,.0f})")
+    print()
 
     train_days = int(days * 2 / 3)
     test_days = days - train_days
