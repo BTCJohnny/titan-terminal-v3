@@ -1,0 +1,54 @@
+{
+  "name": "E10: OI Div Bullish + RSI Oversold (ETH) [rsi_os=52.5]",
+  "base_name": "E10: OI Div Bullish + RSI Oversold (ETH)",
+  "symbol": "LINK",
+  "timeframe": "1h",
+  "direction": "LONG",
+  "entry_signals": [
+    "oi_price_divergence_bullish",
+    "rsi_oversold"
+  ],
+  "entry_params": {
+    "rsi_os": 52.5
+  },
+  "exit": {
+    "stop_atr_mult": 2.0,
+    "target1_atr_mult": 3.0,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 50
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 20,
+    "win_rate": 0.75,
+    "profit_factor": 4.48,
+    "max_drawdown_pct": 6.53,
+    "avg_r_achieved": 0.87,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E10: OI Div Bullish + RSI Oversold (ETH) [rsi_os=52.5]",
+      "direction": "LONG",
+      "total_trades": 18,
+      "win_rate": 0.722,
+      "profit_factor": 3.88,
+      "expectancy_usd": 864.0,
+      "total_pnl_usd": 15551.99,
+      "max_drawdown_pct": 6.53,
+      "avg_r_achieved": 0.77
+    },
+    "test": {
+      "name": "E10: OI Div Bullish + RSI Oversold (ETH) [rsi_os=52.5]",
+      "direction": "LONG",
+      "total_trades": 10,
+      "win_rate": 0.6,
+      "profit_factor": 1.93,
+      "expectancy_usd": 318.01,
+      "total_pnl_usd": 3180.1,
+      "max_drawdown_pct": 6.53,
+      "avg_r_achieved": 0.32
+    }
+  }
+}

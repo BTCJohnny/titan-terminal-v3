@@ -1,0 +1,54 @@
+{
+  "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=7.5]",
+  "base_name": "E12: RSI OB Short + Death Cross (ETH)",
+  "symbol": "ENS",
+  "timeframe": "1h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "rsi_overbought",
+    "trend_bearish"
+  ],
+  "entry_params": {
+    "rsi_ob": 70
+  },
+  "exit": {
+    "stop_atr_mult": 1.5,
+    "target1_atr_mult": 2.5,
+    "target2_atr_mult": 7.5,
+    "scale_out_pct": 0.5,
+    "max_bars": 40
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 14,
+    "win_rate": 0.5,
+    "profit_factor": 1.93,
+    "max_drawdown_pct": 3.96,
+    "avg_r_achieved": 0.5,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=7.5]",
+      "direction": "SHORT",
+      "total_trades": 11,
+      "win_rate": 0.455,
+      "profit_factor": 1.78,
+      "expectancy_usd": 447.96,
+      "total_pnl_usd": 4927.56,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.46
+    },
+    "test": {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [target2_atr_mult=7.5]",
+      "direction": "SHORT",
+      "total_trades": 9,
+      "win_rate": 0.444,
+      "profit_factor": 1.5,
+      "expectancy_usd": 282.83,
+      "total_pnl_usd": 2545.49,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.3
+    }
+  }
+}

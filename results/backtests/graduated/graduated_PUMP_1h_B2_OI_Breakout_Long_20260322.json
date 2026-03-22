@@ -1,0 +1,61 @@
+{
+  "name": "B2: OI Breakout Long [vol_surge=1.125]",
+  "base_name": "B2: OI Breakout Long",
+  "symbol": "PUMP",
+  "timeframe": "1h",
+  "direction": "LONG",
+  "entry_signals": [
+    "oi_surge",
+    "adx_strong_trend",
+    "volume_surge"
+  ],
+  "entry_params": {
+    "oi_surge_pct": 5.0,
+    "adx_strong": 25,
+    "vol_surge": 1.125
+  },
+  "exit": {
+    "stop_atr_mult": 1.5,
+    "target1_atr_mult": 2.5,
+    "target2_atr_mult": 5.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 40
+  },
+  "filters": {
+    "exclude_signals": [
+      "trend_bearish"
+    ]
+  },
+  "backtest_metrics": {
+    "total_trades": 10,
+    "win_rate": 0.9,
+    "profit_factor": 13.68,
+    "max_drawdown_pct": 2.0,
+    "avg_r_achieved": 1.53,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "B2: OI Breakout Long [vol_surge=1.125]",
+      "direction": "LONG",
+      "total_trades": 8,
+      "win_rate": 0.875,
+      "profit_factor": 10.85,
+      "expectancy_usd": 1573.46,
+      "total_pnl_usd": 12587.7,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 1.44
+    },
+    "test": {
+      "name": "B2: OI Breakout Long [vol_surge=1.125]",
+      "direction": "LONG",
+      "total_trades": 5,
+      "win_rate": 0.8,
+      "profit_factor": 7.52,
+      "expectancy_usd": 1533.8,
+      "total_pnl_usd": 7669.02,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 1.47
+    }
+  }
+}

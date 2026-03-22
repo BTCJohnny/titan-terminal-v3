@@ -1,0 +1,53 @@
+{
+  "name": "A4: Fear & Greed Extreme Fear Buy [fg_fear=15.0]",
+  "base_name": "A4: Fear & Greed Extreme Fear Buy",
+  "symbol": "SKYAI",
+  "timeframe": "4h",
+  "direction": "LONG",
+  "entry_signals": [
+    "fear_greed_extreme_fear"
+  ],
+  "entry_params": {
+    "fg_fear": 15.0
+  },
+  "exit": {
+    "stop_atr_mult": 2.5,
+    "target1_atr_mult": 4.0,
+    "target2_atr_mult": 8.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 90
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 12,
+    "win_rate": 0.833,
+    "profit_factor": 6.19,
+    "max_drawdown_pct": 2.42,
+    "avg_r_achieved": 0.89,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "A4: Fear & Greed Extreme Fear Buy [fg_fear=15.0]",
+      "direction": "LONG",
+      "total_trades": 12,
+      "win_rate": 0.833,
+      "profit_factor": 6.19,
+      "expectancy_usd": 972.56,
+      "total_pnl_usd": 11670.74,
+      "max_drawdown_pct": 2.42,
+      "avg_r_achieved": 0.89
+    },
+    "test": {
+      "name": "A4: Fear & Greed Extreme Fear Buy [fg_fear=15.0]",
+      "direction": "LONG",
+      "total_trades": 8,
+      "win_rate": 0.75,
+      "profit_factor": 3.38,
+      "expectancy_usd": 593.32,
+      "total_pnl_usd": 4746.58,
+      "max_drawdown_pct": 2.42,
+      "avg_r_achieved": 0.58
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+  "base_name": "E9: OI Surge Standalone (ETH)",
+  "symbol": "SKYAI",
+  "timeframe": "4h",
+  "direction": "LONG",
+  "entry_signals": [
+    "oi_surge"
+  ],
+  "entry_params": {
+    "oi_surge_pct": 2.0
+  },
+  "exit": {
+    "stop_atr_mult": 1.0,
+    "target1_atr_mult": 3.0,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 60
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 37,
+    "win_rate": 0.568,
+    "profit_factor": 3.36,
+    "max_drawdown_pct": 3.96,
+    "avg_r_achieved": 1.14,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+      "direction": "LONG",
+      "total_trades": 37,
+      "win_rate": 0.568,
+      "profit_factor": 3.36,
+      "expectancy_usd": 1645.6,
+      "total_pnl_usd": 60887.25,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 1.14
+    },
+    "test": {
+      "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+      "direction": "LONG",
+      "total_trades": 22,
+      "win_rate": 0.5,
+      "profit_factor": 2.86,
+      "expectancy_usd": 1153.18,
+      "total_pnl_usd": 25370.03,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.99
+    }
+  }
+}

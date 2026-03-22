@@ -1,0 +1,55 @@
+{
+  "name": "E7: OI Surge + BB Squeeze (ETH) [target1_atr_mult=3.75]",
+  "base_name": "E7: OI Surge + BB Squeeze (ETH)",
+  "symbol": "PUMP",
+  "timeframe": "1h",
+  "direction": "LONG",
+  "entry_signals": [
+    "oi_surge",
+    "bb_squeeze"
+  ],
+  "entry_params": {
+    "oi_surge_pct": 2.0,
+    "bb_squeeze_pct": 0.25
+  },
+  "exit": {
+    "stop_atr_mult": 1.5,
+    "target1_atr_mult": 3.75,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 40
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 29,
+    "win_rate": 0.483,
+    "profit_factor": 3.01,
+    "max_drawdown_pct": 5.46,
+    "avg_r_achieved": 1.02,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E7: OI Surge + BB Squeeze (ETH) [target1_atr_mult=3.75]",
+      "direction": "LONG",
+      "total_trades": 24,
+      "win_rate": 0.542,
+      "profit_factor": 3.47,
+      "expectancy_usd": 1506.16,
+      "total_pnl_usd": 36147.77,
+      "max_drawdown_pct": 5.46,
+      "avg_r_achieved": 1.23
+    },
+    "test": {
+      "name": "E7: OI Surge + BB Squeeze (ETH) [target1_atr_mult=3.75]",
+      "direction": "LONG",
+      "total_trades": 13,
+      "win_rate": 0.462,
+      "profit_factor": 2.99,
+      "expectancy_usd": 1205.58,
+      "total_pnl_usd": 15672.5,
+      "max_drawdown_pct": 5.46,
+      "avg_r_achieved": 1.19
+    }
+  }
+}

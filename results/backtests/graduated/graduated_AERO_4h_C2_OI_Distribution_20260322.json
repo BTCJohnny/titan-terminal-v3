@@ -1,0 +1,54 @@
+{
+  "name": "C2: OI Distribution [target2_atr_mult=7.5]",
+  "base_name": "C2: OI Distribution",
+  "symbol": "AERO",
+  "timeframe": "4h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "oi_price_divergence_bearish",
+    "rsi_overbought"
+  ],
+  "entry_params": {
+    "rsi_ob": 65
+  },
+  "exit": {
+    "stop_atr_mult": 2.0,
+    "target1_atr_mult": 3.0,
+    "target2_atr_mult": 7.5,
+    "scale_out_pct": 0.5,
+    "max_bars": 60
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 11,
+    "win_rate": 0.727,
+    "profit_factor": 4.45,
+    "max_drawdown_pct": 2.0,
+    "avg_r_achieved": 0.94,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "C2: OI Distribution [target2_atr_mult=7.5]",
+      "direction": "SHORT",
+      "total_trades": 11,
+      "win_rate": 0.727,
+      "profit_factor": 4.45,
+      "expectancy_usd": 1012.56,
+      "total_pnl_usd": 11138.11,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 0.94
+    },
+    "test": {
+      "name": "C2: OI Distribution [target2_atr_mult=7.5]",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.75,
+      "profit_factor": 4.22,
+      "expectancy_usd": 831.07,
+      "total_pnl_usd": 6648.52,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 0.8
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "name": "B3: OI Breakout Short [stop_atr_mult=1.88]",
+  "base_name": "B3: OI Breakout Short",
+  "symbol": "LINK",
+  "timeframe": "4h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "oi_surge",
+    "adx_strong_trend",
+    "trend_bearish",
+    "volume_surge"
+  ],
+  "entry_params": {
+    "oi_surge_pct": 5.0,
+    "adx_strong": 25,
+    "vol_surge": 1.5
+  },
+  "exit": {
+    "stop_atr_mult": 1.88,
+    "target1_atr_mult": 2.5,
+    "target2_atr_mult": 5.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 40
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 10,
+    "win_rate": 0.7,
+    "profit_factor": 3.42,
+    "max_drawdown_pct": 2.68,
+    "avg_r_achieved": 0.74,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "B3: OI Breakout Short [stop_atr_mult=1.88]",
+      "direction": "SHORT",
+      "total_trades": 10,
+      "win_rate": 0.7,
+      "profit_factor": 3.42,
+      "expectancy_usd": 781.64,
+      "total_pnl_usd": 7816.4,
+      "max_drawdown_pct": 2.68,
+      "avg_r_achieved": 0.74
+    },
+    "test": {
+      "name": "B3: OI Breakout Short [stop_atr_mult=1.88]",
+      "direction": "SHORT",
+      "total_trades": 6,
+      "win_rate": 0.667,
+      "profit_factor": 3.63,
+      "expectancy_usd": 914.25,
+      "total_pnl_usd": 5485.53,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 0.89
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=9.0]",
+  "base_name": "E1: MACD Rollover + Death Cross",
+  "symbol": "APT",
+  "timeframe": "1h",
+  "direction": "SHORT",
+  "entry_signals": [],
+  "entry_params": {},
+  "exit": {},
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 50,
+    "win_rate": 0.56,
+    "profit_factor": 2.26,
+    "max_drawdown_pct": 8.11,
+    "avg_r_achieved": 0.54,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E1: MACD Rollover + Death Cross",
+      "direction": "SHORT",
+      "total_trades": 45,
+      "win_rate": 0.511,
+      "profit_factor": 1.7,
+      "expectancy_usd": 399.6,
+      "total_pnl_usd": 17982.14,
+      "max_drawdown_pct": 8.11,
+      "avg_r_achieved": 0.36
+    },
+    "test": {
+      "name": "E1: MACD Rollover + Death Cross",
+      "direction": "SHORT",
+      "total_trades": 30,
+      "win_rate": 0.5,
+      "profit_factor": 1.63,
+      "expectancy_usd": 357.7,
+      "total_pnl_usd": 10730.93,
+      "max_drawdown_pct": 6.59,
+      "avg_r_achieved": 0.35
+    }
+  }
+}

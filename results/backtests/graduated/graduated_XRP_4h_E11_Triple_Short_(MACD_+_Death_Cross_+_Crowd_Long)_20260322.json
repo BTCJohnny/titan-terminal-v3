@@ -1,0 +1,55 @@
+{
+  "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target2_atr_mult=7.5]",
+  "base_name": "E11: Triple Short (MACD + Death Cross + Crowd Long)",
+  "symbol": "XRP",
+  "timeframe": "4h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "macd_bearish_cross",
+    "trend_bearish",
+    "ls_crowd_long"
+  ],
+  "entry_params": {
+    "ls_crowd_long": 1.9
+  },
+  "exit": {
+    "stop_atr_mult": 1.5,
+    "target1_atr_mult": 3.0,
+    "target2_atr_mult": 7.5,
+    "scale_out_pct": 0.5,
+    "max_bars": 50
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 14,
+    "win_rate": 0.643,
+    "profit_factor": 3.62,
+    "max_drawdown_pct": 2.0,
+    "avg_r_achieved": 0.99,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target2_atr_mult=7.5]",
+      "direction": "SHORT",
+      "total_trades": 14,
+      "win_rate": 0.643,
+      "profit_factor": 3.62,
+      "expectancy_usd": 1085.56,
+      "total_pnl_usd": 15197.78,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 0.99
+    },
+    "test": {
+      "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target2_atr_mult=7.5]",
+      "direction": "SHORT",
+      "total_trades": 10,
+      "win_rate": 0.5,
+      "profit_factor": 1.99,
+      "expectancy_usd": 508.18,
+      "total_pnl_usd": 5081.84,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.52
+    }
+  }
+}

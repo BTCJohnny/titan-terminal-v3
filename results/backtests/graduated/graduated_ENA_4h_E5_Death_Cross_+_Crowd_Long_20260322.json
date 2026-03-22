@@ -1,0 +1,54 @@
+{
+  "name": "E5: Death Cross + Crowd Long [target2_atr_mult=7.5]",
+  "base_name": "E5: Death Cross + Crowd Long",
+  "symbol": "ENA",
+  "timeframe": "4h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "trend_bearish",
+    "ls_crowd_long"
+  ],
+  "entry_params": {
+    "ls_crowd_long": 1.9
+  },
+  "exit": {
+    "stop_atr_mult": 2.0,
+    "target1_atr_mult": 3.0,
+    "target2_atr_mult": 7.5,
+    "scale_out_pct": 0.5,
+    "max_bars": 60
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 15,
+    "win_rate": 0.667,
+    "profit_factor": 2.85,
+    "max_drawdown_pct": 5.88,
+    "avg_r_achieved": 0.61,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E5: Death Cross + Crowd Long [target2_atr_mult=7.5]",
+      "direction": "SHORT",
+      "total_trades": 15,
+      "win_rate": 0.667,
+      "profit_factor": 2.85,
+      "expectancy_usd": 651.41,
+      "total_pnl_usd": 9771.21,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.61
+    },
+    "test": {
+      "name": "E5: Death Cross + Crowd Long [target2_atr_mult=7.5]",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.625,
+      "profit_factor": 2.47,
+      "expectancy_usd": 539.57,
+      "total_pnl_usd": 4316.58,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.54
+    }
+  }
+}

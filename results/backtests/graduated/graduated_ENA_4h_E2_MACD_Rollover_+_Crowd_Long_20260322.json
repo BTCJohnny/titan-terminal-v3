@@ -1,0 +1,54 @@
+{
+  "name": "E2: MACD Rollover + Crowd Long [target1_atr_mult=4.5]",
+  "base_name": "E2: MACD Rollover + Crowd Long",
+  "symbol": "ENA",
+  "timeframe": "4h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "macd_bearish_cross",
+    "ls_crowd_long"
+  ],
+  "entry_params": {
+    "ls_crowd_long": 1.9
+  },
+  "exit": {
+    "stop_atr_mult": 2.0,
+    "target1_atr_mult": 4.5,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 60
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 10,
+    "win_rate": 0.7,
+    "profit_factor": 4.35,
+    "max_drawdown_pct": 5.88,
+    "avg_r_achieved": 1.03,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E2: MACD Rollover + Crowd Long [target1_atr_mult=4.5]",
+      "direction": "SHORT",
+      "total_trades": 10,
+      "win_rate": 0.7,
+      "profit_factor": 4.35,
+      "expectancy_usd": 1107.07,
+      "total_pnl_usd": 11070.65,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 1.03
+    },
+    "test": {
+      "name": "E2: MACD Rollover + Crowd Long [target1_atr_mult=4.5]",
+      "direction": "SHORT",
+      "total_trades": 7,
+      "win_rate": 0.571,
+      "profit_factor": 2.49,
+      "expectancy_usd": 626.76,
+      "total_pnl_usd": 4387.33,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.63
+    }
+  }
+}

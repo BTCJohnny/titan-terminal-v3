@@ -1,0 +1,54 @@
+{
+  "name": "E2: MACD Rollover + Crowd Long [target1_atr_mult=4.5]",
+  "base_name": "E2: MACD Rollover + Crowd Long",
+  "symbol": "BTC",
+  "timeframe": "4h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "macd_bearish_cross",
+    "ls_crowd_long"
+  ],
+  "entry_params": {
+    "ls_crowd_long": 1.9
+  },
+  "exit": {
+    "stop_atr_mult": 2.0,
+    "target1_atr_mult": 4.5,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 60
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 14,
+    "win_rate": 0.571,
+    "profit_factor": 2.97,
+    "max_drawdown_pct": 7.64,
+    "avg_r_achieved": 0.78,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E2: MACD Rollover + Crowd Long [target1_atr_mult=4.5]",
+      "direction": "SHORT",
+      "total_trades": 13,
+      "win_rate": 0.615,
+      "profit_factor": 3.02,
+      "expectancy_usd": 901.31,
+      "total_pnl_usd": 11717.08,
+      "max_drawdown_pct": 7.64,
+      "avg_r_achieved": 0.84
+    },
+    "test": {
+      "name": "E2: MACD Rollover + Crowd Long [target1_atr_mult=4.5]",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.5,
+      "profit_factor": 1.98,
+      "expectancy_usd": 492.62,
+      "total_pnl_usd": 3940.96,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.5
+    }
+  }
+}

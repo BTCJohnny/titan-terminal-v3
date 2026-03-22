@@ -1,0 +1,54 @@
+{
+  "name": "C1: OI Accumulation [stop_atr_mult=1.0]",
+  "base_name": "C1: OI Accumulation",
+  "symbol": "FARTCOIN",
+  "timeframe": "1h",
+  "direction": "LONG",
+  "entry_signals": [
+    "oi_price_divergence_bullish",
+    "rsi_oversold"
+  ],
+  "entry_params": {
+    "rsi_os": 35
+  },
+  "exit": {
+    "stop_atr_mult": 1.0,
+    "target1_atr_mult": 3.0,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 60
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 11,
+    "win_rate": 0.818,
+    "profit_factor": 14.61,
+    "max_drawdown_pct": 2.0,
+    "avg_r_achieved": 2.47,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "C1: OI Accumulation [stop_atr_mult=1.0]",
+      "direction": "LONG",
+      "total_trades": 11,
+      "win_rate": 0.818,
+      "profit_factor": 14.61,
+      "expectancy_usd": 3113.31,
+      "total_pnl_usd": 34246.38,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 2.47
+    },
+    "test": {
+      "name": "C1: OI Accumulation [stop_atr_mult=1.0]",
+      "direction": "LONG",
+      "total_trades": 6,
+      "win_rate": 0.833,
+      "profit_factor": 13.46,
+      "expectancy_usd": 2407.98,
+      "total_pnl_usd": 14447.87,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 2.19
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "E4: BB Upper + Crowd Long [target1_atr_mult=3.75]",
+  "base_name": "E4: BB Upper + Crowd Long",
+  "symbol": "DOGE",
+  "timeframe": "4h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "bb_touch_upper",
+    "ls_crowd_long"
+  ],
+  "entry_params": {
+    "ls_crowd_long": 1.9
+  },
+  "exit": {
+    "stop_atr_mult": 1.5,
+    "target1_atr_mult": 3.75,
+    "target2_atr_mult": 5.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 45
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 15,
+    "win_rate": 0.467,
+    "profit_factor": 2.25,
+    "max_drawdown_pct": 6.25,
+    "avg_r_achieved": 0.76,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E4: BB Upper + Crowd Long [target1_atr_mult=3.75]",
+      "direction": "SHORT",
+      "total_trades": 15,
+      "win_rate": 0.467,
+      "profit_factor": 2.25,
+      "expectancy_usd": 802.46,
+      "total_pnl_usd": 12036.87,
+      "max_drawdown_pct": 6.25,
+      "avg_r_achieved": 0.76
+    },
+    "test": {
+      "name": "E4: BB Upper + Crowd Long [target1_atr_mult=3.75]",
+      "direction": "SHORT",
+      "total_trades": 12,
+      "win_rate": 0.417,
+      "profit_factor": 1.89,
+      "expectancy_usd": 581.97,
+      "total_pnl_usd": 6983.63,
+      "max_drawdown_pct": 6.25,
+      "avg_r_achieved": 0.58
+    }
+  }
+}

@@ -2,8 +2,9 @@
 """
 Titan Terminal v2 — Scenario Library
 ======================================
-54 trading scenarios grouped by thesis type.
-Each scenario has a clear hypothesis for WHY it should work.
+21 trading scenarios grouped by thesis type.
+Each scenario has a clear hypothesis backed by full-universe backtesting.
+Dead scenarios culled 2026-03-22 (34 removed after derivatives backtest).
 
 Usage:
     python3 src/backtesting/scenarios.py list                 # List all scenarios
@@ -29,33 +30,6 @@ if str(PROJECT_ROOT) not in sys.path:
 SCENARIOS = [
     # ───── A. CONTRARIAN ─────
     {
-        "name": "A1: Crowded Long Fade",
-        "description": "Short when longs are overleveraged and RSI overbought — cascade risk",
-        "direction": "SHORT",
-        "entry_signals": ["funding_extreme_positive", "ls_crowd_long", "rsi_overbought"],
-        "entry_params": {"funding_extreme_pos": 0.0003, "ls_crowd_long": 1.8, "rsi_ob": 70},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "A2: Crowded Short Squeeze",
-        "description": "Long when shorts are overleveraged and RSI oversold — squeeze fuel",
-        "direction": "LONG",
-        "entry_signals": ["funding_extreme_negative", "ls_crowd_short", "rsi_oversold"],
-        "entry_params": {"funding_extreme_neg": -0.0003, "ls_crowd_short": 0.55, "rsi_os": 30},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "A3: Long Liq Cascade Bounce",
-        "description": "Buy after massive long liquidations — cascade overshoots fair value",
-        "direction": "LONG",
-        "entry_signals": ["liq_cascade_long", "rsi_oversold"],
-        "entry_params": {"liq_cascade_usd": 100_000_000, "rsi_os": 35},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.5, "target2_atr_mult": 5.0, "scale_out_pct": 0.5, "max_bars": 40},
-        "filters": {}
-    },
-    {
         "name": "A4: Fear & Greed Extreme Fear Buy",
         "description": "Contrarian long at extreme fear — market oversold on sentiment",
         "direction": "LONG",
@@ -66,15 +40,6 @@ SCENARIOS = [
     },
 
     # ───── B. MOMENTUM ─────
-    {
-        "name": "B1: ETF Inflow Momentum",
-        "description": "Long when institutional money flowing in via ETFs + trend confirmed",
-        "direction": "LONG",
-        "entry_signals": ["etf_inflow_streak", "coinbase_premium_positive", "trend_bullish"],
-        "entry_params": {"etf_streak": 3, "cb_premium_pos": 0.0005},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 80},
-        "filters": {}
-    },
     {
         "name": "B2: OI Breakout Long",
         "description": "Long when OI surging + ADX confirms trend + volume spike — real momentum",
@@ -113,15 +78,6 @@ SCENARIOS = [
         "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
         "filters": {}
     },
-    {
-        "name": "C3: Smart Money Divergence",
-        "description": "Follow top traders when they lean opposite to the crowd",
-        "direction": "LONG",
-        "entry_signals": ["top_trader_divergence", "ls_crowd_short"],
-        "entry_params": {},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
 
     # ───── D. REGIME-BASED ─────
     {
@@ -133,21 +89,13 @@ SCENARIOS = [
         "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 40},
         "filters": {}
     },
-    {
-        "name": "D2: Trend Mean Reversion Short",
-        "description": "In bearish regime, short RSI overbought bounces + OBV divergence",
-        "direction": "SHORT",
-        "entry_signals": ["trend_bearish", "rsi_overbought", "obv_divergence_bearish"],
-        "entry_params": {"rsi_ob": 65},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.0, "target2_atr_mult": 4.0, "scale_out_pct": 0.5, "max_bars": 30},
-        "filters": {}
-    },
 
     # ───── E. DATA-INFORMED (2-signal combos from Phase 1 winners) ─────
     # Thresholds calibrated from 180-day derivatives distributions:
-    #   ls_crowd_long = 1.9 (BTC p50 — above-median long positioning)
-    #   oi_surge_pct = 2.0 (BTC/ETH p75 — fires ~20-25% of days)
-    #   Funding excluded (max 0.0001 in data, original 0.0003 unreachable)
+    #   ls_crowd_long = 1.9 (cross-asset P75 = 1.95; BTC P50 = 1.88)
+    #   oi_surge_pct = 2.0 (BTC/ETH P75 — fires ~20-25% of days)
+    #   Funding now available (OI-weighted endpoint fixed in Step 1):
+    #     P90 = 0.008, P10 = -0.01 — used in A/G series contrarian scenarios
 
     # === CROSS-ASSET SHORTS (worked on both BTC and ETH in Phase 1) ===
 
@@ -194,15 +142,6 @@ SCENARIOS = [
         "entry_signals": ["trend_bearish", "ls_crowd_long"],
         "entry_params": {"ls_crowd_long": 1.9},
         "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "E6: MACD Rollover + OBV Divergence",
-        "description": "Momentum rolling over + volume confirms distribution — strongest TA short",
-        "direction": "SHORT",
-        "entry_signals": ["macd_bearish_cross", "obv_divergence_bearish"],
-        "entry_params": {},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.5, "target2_atr_mult": 5.0, "scale_out_pct": 0.5, "max_bars": 45},
         "filters": {}
     },
 
@@ -267,54 +206,7 @@ SCENARIOS = [
     },
 
     # ───── F. MEAN REVERSION ─────
-    # Based on the thesis mean reversion setup type: fade extreme overextensions,
-    # target BB middle band, tight stops beyond the extreme.
 
-    {
-        "name": "F1: Oversold Bounce (Uptrend)",
-        "description": "BB lower touch + RSI oversold in a bullish regime — buy the dip in an uptrend",
-        "direction": "LONG",
-        "entry_signals": ["bb_touch_lower", "rsi_oversold", "trend_bullish"],
-        "entry_params": {"rsi_os": 30},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.0, "target2_atr_mult": 4.0, "scale_out_pct": 0.5, "max_bars": 30},
-        "filters": {}
-    },
-    {
-        "name": "F2: Oversold Bounce (Any Regime)",
-        "description": "BB lower touch + RSI oversold — pure mean reversion, no regime filter",
-        "direction": "LONG",
-        "entry_signals": ["bb_touch_lower", "rsi_oversold"],
-        "entry_params": {"rsi_os": 25},
-        "exit": {"stop_atr_mult": 2.0, "target2_atr_mult": 3.5, "scale_out_pct": 0.5, "max_bars": 25},
-        "filters": {}
-    },
-    {
-        "name": "F3: Overbought Fade (Downtrend)",
-        "description": "BB upper touch + RSI overbought in bearish regime — sell the rip in a downtrend",
-        "direction": "SHORT",
-        "entry_signals": ["bb_touch_upper", "rsi_overbought", "trend_bearish"],
-        "entry_params": {"rsi_ob": 70},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.0, "target2_atr_mult": 4.0, "scale_out_pct": 0.5, "max_bars": 30},
-        "filters": {}
-    },
-    {
-        "name": "F4: Accumulation Bounce",
-        "description": "BB lower + OBV bullish divergence — oversold but smart money buying",
-        "direction": "LONG",
-        "entry_signals": ["bb_touch_lower", "obv_divergence_bullish"],
-        "entry_params": {},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.5, "target2_atr_mult": 5.0, "scale_out_pct": 0.5, "max_bars": 40},
-        "filters": {}
-    },
-    {
-        "name": "F5: Distribution Fade",
-        "description": "BB upper + OBV bearish divergence — overbought with hidden selling",
-        "direction": "SHORT",
-        "entry_signals": ["bb_touch_upper", "obv_divergence_bearish"],
-        "entry_params": {},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.5, "target2_atr_mult": 5.0, "scale_out_pct": 0.5, "max_bars": 40},
-        "filters": {}
-    },
     {
         "name": "F6: Fear Oversold Bounce",
         "description": "Extreme fear + BB lower — sentiment and price both at extremes",
@@ -324,83 +216,11 @@ SCENARIOS = [
         "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 45},
         "filters": {}
     },
-    {
-        "name": "F7: RSI Extreme Oversold Snap",
-        "description": "RSI < 20 standalone — extreme oversold, mechanical bounce territory",
-        "direction": "LONG",
-        "entry_signals": ["rsi_oversold"],
-        "entry_params": {"rsi_os": 20},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.0, "target2_atr_mult": 4.0, "scale_out_pct": 0.5, "max_bars": 20},
-        "filters": {}
-    },
-    {
-        "name": "F8: RSI Extreme Overbought Fade",
-        "description": "RSI > 80 standalone — extreme overbought, mechanical pullback",
-        "direction": "SHORT",
-        "entry_signals": ["rsi_overbought"],
-        "entry_params": {"rsi_ob": 80},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.0, "target2_atr_mult": 4.0, "scale_out_pct": 0.5, "max_bars": 20},
-        "filters": {}
-    },
 
     # ───── G. CONFLUENCE (3-4 signal high-conviction combos) ─────
     # The hypothesis: more independent signals aligned = higher win rate,
     # fewer trades but better expectancy per trade.
 
-    {
-        "name": "G1: Triple Buy (MACD + OBV + RSI)",
-        "description": "MACD bullish cross + OBV accumulation + oversold — three independent signals aligned",
-        "direction": "LONG",
-        "entry_signals": ["macd_bullish_cross", "obv_divergence_bullish", "rsi_oversold"],
-        "entry_params": {"rsi_os": 35},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "G2: Momentum Continuation Long",
-        "description": "MACD bullish + golden cross + volume surge — trend continuation with fuel",
-        "direction": "LONG",
-        "entry_signals": ["macd_bullish_cross", "trend_bullish", "volume_surge"],
-        "entry_params": {"vol_surge": 1.5},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 50},
-        "filters": {}
-    },
-    {
-        "name": "G3: Quad Short (MACD + OBV + Trend + Crowd)",
-        "description": "All four short signals — maximum conviction, rare but deadly",
-        "direction": "SHORT",
-        "entry_signals": ["macd_bearish_cross", "obv_divergence_bearish", "trend_bearish", "ls_crowd_long"],
-        "entry_params": {"ls_crowd_long": 1.9},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 3.0, "target2_atr_mult": 7.0, "scale_out_pct": 0.5, "max_bars": 50},
-        "filters": {}
-    },
-    {
-        "name": "G4: Derivatives Distribution Short",
-        "description": "Extreme funding + crowded longs + OBV divergence — derivatives confirm distribution",
-        "direction": "SHORT",
-        "entry_signals": ["funding_extreme_positive", "ls_crowd_long", "obv_divergence_bearish"],
-        "entry_params": {"funding_extreme_pos": 0.0003, "ls_crowd_long": 1.8},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "G5: Derivatives Squeeze Long",
-        "description": "Extreme negative funding + crowded shorts + OBV accumulation — squeeze with smart money",
-        "direction": "LONG",
-        "entry_signals": ["funding_extreme_negative", "ls_crowd_short", "obv_divergence_bullish"],
-        "entry_params": {"funding_extreme_neg": -0.0003, "ls_crowd_short": 0.55},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "G6: Compressed Breakout Bull",
-        "description": "BB squeeze + MACD bullish cross + golden cross — volatility expansion in uptrend",
-        "direction": "LONG",
-        "entry_signals": ["bb_squeeze", "macd_bullish_cross", "trend_bullish"],
-        "entry_params": {"bb_squeeze_pct": 0.20},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 40},
-        "filters": {}
-    },
     {
         "name": "G7: Compressed Breakdown Bear",
         "description": "BB squeeze + MACD bearish cross + death cross — volatility expansion in downtrend",
@@ -420,137 +240,12 @@ SCENARIOS = [
         "filters": {}
     },
     {
-        "name": "G9: Short Squeeze Exhaustion Fade",
-        "description": "Massive short liquidations + RSI overbought — squeeze done, fade the overshoot",
+        "name": "G12: MACD Bullish + ADX Strong (SHORT)",
+        "description": "MACD bearish cross + strong ADX trend — graduated SHORT across 4 symbols",
         "direction": "SHORT",
-        "entry_signals": ["liq_cascade_short", "rsi_overbought"],
-        "entry_params": {"liq_cascade_usd": 100_000_000, "rsi_ob": 75},
-        "exit": {"stop_atr_mult": 1.5, "target1_atr_mult": 2.0, "target2_atr_mult": 4.0, "scale_out_pct": 0.5, "max_bars": 30},
-        "filters": {}
-    },
-    {
-        "name": "G10: Smart Money Accumulation Dip",
-        "description": "Top traders diverge from crowd + OI building on dip + RSI oversold — institutional loading",
-        "direction": "LONG",
-        "entry_signals": ["top_trader_divergence", "oi_price_divergence_bullish", "rsi_oversold"],
-        "entry_params": {"rsi_os": 35},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "G11: MACD Bullish + Golden Cross",
-        "description": "MACD momentum turning up in established uptrend — trend continuation",
-        "direction": "LONG",
-        "entry_signals": ["macd_bullish_cross", "trend_bullish"],
-        "entry_params": {},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "G12: MACD Bullish + ADX Strong",
-        "description": "MACD momentum turning up in strong trend — confirmed trend acceleration",
-        "direction": "LONG",
-        "entry_signals": ["macd_bullish_cross", "adx_strong_trend"],
+        "entry_signals": ["macd_bearish_cross", "adx_strong_trend"],
         "entry_params": {"adx_strong": 25},
         "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 50},
-        "filters": {}
-    },
-
-    # ───── H. SENTIMENT (fear/greed combos) ─────
-    # Fear & Greed extremes + technical or derivatives confirmation.
-
-    {
-        "name": "H1: Greed Top Short (Sentiment + RSI)",
-        "description": "Extreme greed + RSI overbought — sentiment and momentum both exhausted",
-        "direction": "SHORT",
-        "entry_signals": ["fear_greed_extreme_greed", "rsi_overbought"],
-        "entry_params": {"fg_greed": 80},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "H2: Greed Distribution Short",
-        "description": "Extreme greed + OBV bearish divergence — euphoric crowd, smart money exiting",
-        "direction": "SHORT",
-        "entry_signals": ["fear_greed_extreme_greed", "obv_divergence_bearish"],
-        "entry_params": {"fg_greed": 80},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "H3: Double Contrarian Short (Greed + Crowd)",
-        "description": "Extreme greed + crowded longs — two independent contrarian sell signals",
-        "direction": "SHORT",
-        "entry_signals": ["fear_greed_extreme_greed", "ls_crowd_long"],
-        "entry_params": {"fg_greed": 80, "ls_crowd_long": 1.8},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "H4: Fear Accumulation Long",
-        "description": "Extreme fear + OBV bullish divergence — panicking crowd, smart money buying",
-        "direction": "LONG",
-        "entry_signals": ["fear_greed_extreme_fear", "obv_divergence_bullish"],
-        "entry_params": {"fg_fear": 20},
-        "exit": {"stop_atr_mult": 2.5, "target1_atr_mult": 4.0, "target2_atr_mult": 8.0, "scale_out_pct": 0.5, "max_bars": 90},
-        "filters": {}
-    },
-    {
-        "name": "H5: Double Contrarian Long (Fear + Crowd)",
-        "description": "Extreme fear + crowded shorts — two independent contrarian buy signals",
-        "direction": "LONG",
-        "entry_signals": ["fear_greed_extreme_fear", "ls_crowd_short"],
-        "entry_params": {"fg_fear": 20, "ls_crowd_short": 0.55},
-        "exit": {"stop_atr_mult": 2.5, "target1_atr_mult": 4.0, "target2_atr_mult": 8.0, "scale_out_pct": 0.5, "max_bars": 90},
-        "filters": {}
-    },
-    {
-        "name": "H6: Greed Standalone Short",
-        "description": "Extreme greed standalone — contrarian fade at sentiment peak",
-        "direction": "SHORT",
-        "entry_signals": ["fear_greed_extreme_greed"],
-        "entry_params": {"fg_greed": 80},
-        "exit": {"stop_atr_mult": 2.5, "target1_atr_mult": 4.0, "target2_atr_mult": 8.0, "scale_out_pct": 0.5, "max_bars": 90},
-        "filters": {}
-    },
-
-    # ───── I. INSTITUTIONAL (ETF + Coinbase premium combos) ─────
-    # Institutional flow signals combined with technical confirmation.
-
-    {
-        "name": "I1: Full Institutional Bull",
-        "description": "ETF inflows + OI surge + golden cross — institutions, leverage, and regime aligned",
-        "direction": "LONG",
-        "entry_signals": ["etf_inflow_streak", "oi_surge", "trend_bullish"],
-        "entry_params": {"etf_streak": 3, "oi_surge_pct": 3.0},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 80},
-        "filters": {}
-    },
-    {
-        "name": "I2: ETF Dip Buy",
-        "description": "ETF inflows continuing while RSI oversold — institutions buying the dip",
-        "direction": "LONG",
-        "entry_signals": ["etf_inflow_streak", "rsi_oversold"],
-        "entry_params": {"etf_streak": 3, "rsi_os": 35},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
-        "filters": {}
-    },
-    {
-        "name": "I3: Coinbase Momentum Long",
-        "description": "Coinbase premium + MACD bullish + volume surge — US institutional buying + momentum",
-        "direction": "LONG",
-        "entry_signals": ["coinbase_premium_positive", "macd_bullish_cross", "volume_surge"],
-        "entry_params": {"cb_premium_pos": 0.0005, "vol_surge": 1.5},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 50},
-        "filters": {}
-    },
-    {
-        "name": "I4: Coinbase Accumulation",
-        "description": "Coinbase premium + OBV bullish divergence — US institutions accumulating on dip",
-        "direction": "LONG",
-        "entry_signals": ["coinbase_premium_positive", "obv_divergence_bullish"],
-        "entry_params": {"cb_premium_pos": 0.0005},
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "target2_atr_mult": 6.0, "scale_out_pct": 0.5, "max_bars": 60},
         "filters": {}
     },
 ]
@@ -563,13 +258,8 @@ SCENARIOS = [
 def get_all_scenarios() -> list:
     """Return all scenarios including bidirectional duplicates."""
     all_scenarios = []
-    # Scenarios that should get a flipped direction variant
-    bidirectional = {
-        "C3: Smart Money Divergence",
-        "D1: Volatility Squeeze Breakout",
-        "G8: Triple Energy Buildup",   # Could break up or down
-        "G12: MACD Bullish + ADX Strong",  # Strong trend could be either direction
-    }
+    # All variants are either dead or converted to direct entries
+    bidirectional = set()
     for s in SCENARIOS:
         all_scenarios.append(s)
         if s["name"] in bidirectional:
@@ -683,7 +373,7 @@ def cmd_list(args):
     for s in scenarios:
         # Category header
         prefix = s["name"][:1]
-        cat_map = {"A": "CONTRARIAN", "B": "MOMENTUM", "C": "DIVERGENCE", "D": "REGIME-BASED", "E": "DATA-INFORMED", "F": "MEAN REVERSION", "G": "CONFLUENCE", "H": "SENTIMENT", "I": "INSTITUTIONAL"}
+        cat_map = {"A": "CONTRARIAN", "B": "MOMENTUM", "C": "DIVERGENCE", "D": "REGIME-BASED", "E": "DATA-INFORMED", "F": "MEAN REVERSION", "G": "CONFLUENCE"}
         cat = cat_map.get(prefix, "OTHER")
         if cat != current_category:
             current_category = cat

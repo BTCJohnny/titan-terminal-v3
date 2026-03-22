@@ -1,0 +1,55 @@
+{
+  "name": "E8: OI Surge + RSI Oversold (ETH) [target1_atr_mult=4.5]",
+  "base_name": "E8: OI Surge + RSI Oversold (ETH)",
+  "symbol": "0G",
+  "timeframe": "1h",
+  "direction": "LONG",
+  "entry_signals": [
+    "oi_surge",
+    "rsi_oversold"
+  ],
+  "entry_params": {
+    "oi_surge_pct": 2.0,
+    "rsi_os": 35
+  },
+  "exit": {
+    "stop_atr_mult": 2.0,
+    "target1_atr_mult": 4.5,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 50
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 12,
+    "win_rate": 0.75,
+    "profit_factor": 4.33,
+    "max_drawdown_pct": 3.96,
+    "avg_r_achieved": 0.82,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E8: OI Surge + RSI Oversold (ETH) [target1_atr_mult=4.5]",
+      "direction": "LONG",
+      "total_trades": 10,
+      "win_rate": 0.8,
+      "profit_factor": 5.59,
+      "expectancy_usd": 996.96,
+      "total_pnl_usd": 9969.55,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.93
+    },
+    "test": {
+      "name": "E8: OI Surge + RSI Oversold (ETH) [target1_atr_mult=4.5]",
+      "direction": "LONG",
+      "total_trades": 7,
+      "win_rate": 0.714,
+      "profit_factor": 3.38,
+      "expectancy_usd": 671.91,
+      "total_pnl_usd": 4703.36,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.66
+    }
+  }
+}

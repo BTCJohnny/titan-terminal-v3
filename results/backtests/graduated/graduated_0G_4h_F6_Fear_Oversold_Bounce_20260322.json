@@ -1,0 +1,54 @@
+{
+  "name": "F6: Fear Oversold Bounce [stop_atr_mult=1.0]",
+  "base_name": "F6: Fear Oversold Bounce",
+  "symbol": "0G",
+  "timeframe": "4h",
+  "direction": "LONG",
+  "entry_signals": [
+    "fear_greed_extreme_fear",
+    "bb_touch_lower"
+  ],
+  "entry_params": {
+    "fg_fear": 20
+  },
+  "exit": {
+    "stop_atr_mult": 1.0,
+    "target1_atr_mult": 3.0,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 45
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 11,
+    "win_rate": 0.455,
+    "profit_factor": 2.63,
+    "max_drawdown_pct": 3.96,
+    "avg_r_achieved": 0.95,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "F6: Fear Oversold Bounce [stop_atr_mult=1.0]",
+      "direction": "LONG",
+      "total_trades": 11,
+      "win_rate": 0.455,
+      "profit_factor": 2.63,
+      "expectancy_usd": 986.62,
+      "total_pnl_usd": 10852.77,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.95
+    },
+    "test": {
+      "name": "F6: Fear Oversold Bounce [stop_atr_mult=1.0]",
+      "direction": "LONG",
+      "total_trades": 7,
+      "win_rate": 0.429,
+      "profit_factor": 2.51,
+      "expectancy_usd": 919.58,
+      "total_pnl_usd": 6437.08,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.93
+    }
+  }
+}

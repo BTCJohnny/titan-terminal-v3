@@ -1,0 +1,52 @@
+{
+  "name": "E1: MACD Rollover + Death Cross [target1_atr_mult=4.5]",
+  "base_name": "E1: MACD Rollover + Death Cross",
+  "symbol": "BTC",
+  "timeframe": "4h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "macd_bearish_cross",
+    "trend_bearish"
+  ],
+  "entry_params": {},
+  "exit": {
+    "stop_atr_mult": 2.0,
+    "target1_atr_mult": 4.5,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 60
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 16,
+    "win_rate": 0.562,
+    "profit_factor": 2.63,
+    "max_drawdown_pct": 5.88,
+    "avg_r_achieved": 0.71,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E1: MACD Rollover + Death Cross [target1_atr_mult=4.5]",
+      "direction": "SHORT",
+      "total_trades": 14,
+      "win_rate": 0.643,
+      "profit_factor": 3.58,
+      "expectancy_usd": 1056.6,
+      "total_pnl_usd": 14792.42,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.96
+    },
+    "test": {
+      "name": "E1: MACD Rollover + Death Cross [target1_atr_mult=4.5]",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.5,
+      "profit_factor": 2.15,
+      "expectancy_usd": 544.7,
+      "total_pnl_usd": 4357.61,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.55
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "E9: OI Surge Standalone (ETH) [target1_atr_mult=4.5]",
+  "base_name": "E9: OI Surge Standalone (ETH)",
+  "symbol": "SOL",
+  "timeframe": "1h",
+  "direction": "LONG",
+  "entry_signals": [
+    "oi_surge"
+  ],
+  "entry_params": {
+    "oi_surge_pct": 2.0
+  },
+  "exit": {
+    "stop_atr_mult": 2.0,
+    "target1_atr_mult": 4.5,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 60
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 32,
+    "win_rate": 0.625,
+    "profit_factor": 3.46,
+    "max_drawdown_pct": 7.91,
+    "avg_r_achieved": 0.89,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E9: OI Surge Standalone (ETH) [target1_atr_mult=4.5]",
+      "direction": "LONG",
+      "total_trades": 32,
+      "win_rate": 0.594,
+      "profit_factor": 3.06,
+      "expectancy_usd": 958.43,
+      "total_pnl_usd": 30669.62,
+      "max_drawdown_pct": 7.91,
+      "avg_r_achieved": 0.78
+    },
+    "test": {
+      "name": "E9: OI Surge Standalone (ETH) [target1_atr_mult=4.5]",
+      "direction": "LONG",
+      "total_trades": 20,
+      "win_rate": 0.6,
+      "profit_factor": 3.48,
+      "expectancy_usd": 992.71,
+      "total_pnl_usd": 19854.15,
+      "max_drawdown_pct": 7.91,
+      "avg_r_achieved": 0.87
+    }
+  }
+}

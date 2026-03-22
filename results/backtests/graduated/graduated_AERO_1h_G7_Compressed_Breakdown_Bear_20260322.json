@@ -1,0 +1,55 @@
+{
+  "name": "G7: Compressed Breakdown Bear [target1_atr_mult=4.5]",
+  "base_name": "G7: Compressed Breakdown Bear",
+  "symbol": "AERO",
+  "timeframe": "1h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "bb_squeeze",
+    "macd_bearish_cross",
+    "trend_bearish"
+  ],
+  "entry_params": {
+    "bb_squeeze_pct": 0.2
+  },
+  "exit": {
+    "stop_atr_mult": 1.5,
+    "target1_atr_mult": 4.5,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 40
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 11,
+    "win_rate": 0.636,
+    "profit_factor": 3.83,
+    "max_drawdown_pct": 3.96,
+    "avg_r_achieved": 1.16,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "G7: Compressed Breakdown Bear [target1_atr_mult=4.5]",
+      "direction": "SHORT",
+      "total_trades": 9,
+      "win_rate": 0.556,
+      "profit_factor": 2.44,
+      "expectancy_usd": 693.08,
+      "total_pnl_usd": 6237.7,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.69
+    },
+    "test": {
+      "name": "G7: Compressed Breakdown Bear [target1_atr_mult=4.5]",
+      "direction": "SHORT",
+      "total_trades": 6,
+      "win_rate": 0.667,
+      "profit_factor": 3.21,
+      "expectancy_usd": 787.62,
+      "total_pnl_usd": 4725.74,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 0.78
+    }
+  }
+}

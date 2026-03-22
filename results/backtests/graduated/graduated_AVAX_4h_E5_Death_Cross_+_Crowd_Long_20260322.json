@@ -1,0 +1,54 @@
+{
+  "name": "E5: Death Cross + Crowd Long [stop_atr_mult=1.5]",
+  "base_name": "E5: Death Cross + Crowd Long",
+  "symbol": "AVAX",
+  "timeframe": "4h",
+  "direction": "SHORT",
+  "entry_signals": [
+    "trend_bearish",
+    "ls_crowd_long"
+  ],
+  "entry_params": {
+    "ls_crowd_long": 1.9
+  },
+  "exit": {
+    "stop_atr_mult": 1.5,
+    "target1_atr_mult": 3.0,
+    "target2_atr_mult": 6.0,
+    "scale_out_pct": 0.5,
+    "max_bars": 60
+  },
+  "filters": {},
+  "backtest_metrics": {
+    "total_trades": 25,
+    "win_rate": 0.6,
+    "profit_factor": 2.88,
+    "max_drawdown_pct": 5.92,
+    "avg_r_achieved": 0.8,
+    "walk_forward": "PASS"
+  },
+  "walk_forward": {
+    "train": {
+      "name": "E5: Death Cross + Crowd Long [stop_atr_mult=1.5]",
+      "direction": "SHORT",
+      "total_trades": 25,
+      "win_rate": 0.6,
+      "profit_factor": 2.88,
+      "expectancy_usd": 939.56,
+      "total_pnl_usd": 23489.06,
+      "max_drawdown_pct": 5.92,
+      "avg_r_achieved": 0.8
+    },
+    "test": {
+      "name": "E5: Death Cross + Crowd Long [stop_atr_mult=1.5]",
+      "direction": "SHORT",
+      "total_trades": 17,
+      "win_rate": 0.529,
+      "profit_factor": 2.0,
+      "expectancy_usd": 485.7,
+      "total_pnl_usd": 8256.82,
+      "max_drawdown_pct": 7.8,
+      "avg_r_achieved": 0.48
+    }
+  }
+}
