@@ -48,6 +48,111 @@ MAX_DIRECTIONAL = 3
 
 
 # ============================================================================
+# REGIME TAGGING
+# ============================================================================
+# Tags derived from entry analysis:
+# - bear_only: SHORT direction + trend_bearish in entry_signals (requires downtrend)
+# - bull_only: LONG direction + trend_bullish in entry_signals or exclude_signals blocks trend_bearish
+# - all_weather: no trend dependency — fires on OI, sentiment, positioning, or volatility
+
+REGIME_TAGS = {
+    # Bear-only: these require a bearish trend to fire
+    "E1: MACD Rollover + Death Cross":                       "bear_only",    # trend_bearish in signals
+    "E3: BB Upper Touch + Death Cross":                      "bear_only",    # trend_bearish in signals
+    "E5: Death Cross + Crowd Long":                          "bear_only",    # trend_bearish in signals
+    "E11: Triple Short (MACD + Death Cross + Crowd Long)":   "bear_only",    # trend_bearish in signals
+    "E12: RSI OB Short + Death Cross (ETH)":                 "bear_only",    # trend_bearish in signals
+    "G7: Compressed Breakdown Bear":                         "bear_only",    # trend_bearish in signals
+    "B3: OI Breakout Short":                                 "bear_only",    # trend_bearish in signals
+
+    # Bull-only: these require bullish conditions or exclude bearish
+    "B2: OI Breakout Long":                                  "bull_only",    # exclude_signals: trend_bearish
+
+    # All-weather: fire on derivatives/sentiment/positioning regardless of trend
+    "A4: Fear & Greed Extreme Fear Buy":                     "all_weather",  # sentiment only
+    "C1: OI Accumulation":                                   "all_weather",  # OI divergence + RSI
+    "C2: OI Distribution":                                   "all_weather",  # OI divergence + RSI
+    "D1: Volatility Squeeze Breakout":                       "all_weather",  # BB squeeze + ADX weak + OI
+    "E2: MACD Rollover + Crowd Long":                        "all_weather",  # MACD + crowd (no trend filter)
+    "E4: BB Upper + Crowd Long":                             "all_weather",  # BB + crowd (no trend filter)
+    "E7: OI Surge + BB Squeeze (ETH)":                       "all_weather",  # OI + volatility
+    "E8: OI Surge + RSI Oversold (ETH)":                     "all_weather",  # OI + momentum extreme
+    "E9: OI Surge Standalone (ETH)":                         "all_weather",  # pure OI
+    "E10: OI Div Bullish + RSI Oversold (ETH)":              "all_weather",  # OI divergence + RSI
+    "F6: Fear Oversold Bounce":                              "all_weather",  # sentiment + BB
+    "G8: Triple Energy Buildup":                             "all_weather",  # OI + volume + BB squeeze
+    "G12: MACD Bullish + ADX Strong (SHORT)":                "all_weather",  # MACD + ADX (no trend filter)
+}
+
+
+def detect_btc_regime(btc_data: dict | None, bar_ts: int) -> str:
+    """
+    Detect BTC regime at a given timestamp using SMA50/SMA200 cross.
+
+    Returns: "risk_on" | "risk_off" | "chop"
+
+    Uses BTC 4h data (most stable regime signal). Falls back to "chop" if
+    BTC data is not loaded or timestamp not found.
+    """
+    if btc_data is None:
+        return "chop"
+
+    ts_to_idx = btc_data.get("ts_to_idx", {})
+
+    # Find the nearest BTC bar at or before this timestamp
+    bar_idx = ts_to_idx.get(bar_ts)
+
+    if bar_idx is None:
+        # Find the closest bar before this timestamp
+        btc_timestamps = sorted(ts_to_idx.keys())
+        candidates = [t for t in btc_timestamps if t <= bar_ts]
+        if not candidates:
+            return "chop"
+        bar_idx = ts_to_idx[candidates[-1]]
+
+    ind = btc_data["ind"]
+
+    if bar_idx >= len(ind["sma_50"]) or bar_idx >= len(ind["sma_200"]):
+        return "chop"
+
+    sma50 = ind["sma_50"][bar_idx]
+    sma200 = ind["sma_200"][bar_idx]
+
+    if sma50 is None or sma200 is None or sma200 == 0:
+        return "chop"
+
+    # Percentage gap between SMA50 and SMA200
+    gap_pct = (sma50 - sma200) / sma200 * 100.0
+
+    if gap_pct > 2.0:
+        return "risk_on"
+    elif gap_pct < -2.0:
+        return "risk_off"
+    else:
+        return "chop"
+
+
+def check_regime_fit(strategy_base_name: str, regime: str) -> tuple[bool, str]:
+    """
+    Check if a strategy is allowed in the current regime.
+
+    Returns (True, "ok") or (False, "regime_mismatch").
+    """
+    tag = REGIME_TAGS.get(strategy_base_name, "all_weather")
+
+    if tag == "bear_only" and regime == "risk_on":
+        return False, "regime_mismatch"
+
+    if tag == "bull_only" and regime == "risk_off":
+        return False, "regime_mismatch"
+
+    # all_weather passes in any regime
+    # bear_only passes in risk_off and chop
+    # bull_only passes in risk_on and chop
+    return True, "ok"
+
+
+# ============================================================================
 # STRATEGY LOADING
 # ============================================================================
 
@@ -413,7 +518,7 @@ def manage_position(
 # MAIN SIMULATION
 # ============================================================================
 
-def run_simulation(capital: float, days: int, verbose: bool = False) -> dict:
+def run_simulation(capital: float, days: int, verbose: bool = False, regime_filter: bool = False) -> dict:
     """
     Run the full portfolio backtest simulation over all graduated strategies.
     Returns a results dict with metrics, trade log, equity curve, and rejections.
@@ -449,6 +554,14 @@ def run_simulation(capital: float, days: int, verbose: bool = False) -> dict:
             data_by_pair[(sym, tf)] = result
 
     loaded_pairs = list(data_by_pair.keys())
+
+    # Resolve BTC 4h data for regime detection
+    btc_regime_data = data_by_pair.get(("BTC", "4h"))
+    if regime_filter and btc_regime_data is None:
+        # Fall back to BTC 1h if 4h not loaded
+        btc_regime_data = data_by_pair.get(("BTC", "1h"))
+        if btc_regime_data is None:
+            print("  [WARN] Regime filter enabled but no BTC data loaded — regime will default to 'chop'")
 
     if skipped_pairs:
         print(f"\n  Skipped {len(skipped_pairs)} pair(s) — insufficient OHLCV data:")
@@ -617,6 +730,23 @@ def run_simulation(capital: float, days: int, verbose: bool = False) -> dict:
 
             # Conflict resolution: highest PF strategy wins
             best = max(candidates, key=lambda s: s["backtest_metrics"]["profit_factor"])
+
+            # Regime filter check (if enabled)
+            if regime_filter:
+                regime = detect_btc_regime(btc_regime_data, ts)
+                base_name = best.get("base_name", best["name"])
+                regime_ok, regime_reason = check_regime_fit(base_name, regime)
+                if not regime_ok:
+                    portfolio["rejected_signals"].append({
+                        "ts": ts,
+                        "symbol": sym,
+                        "timeframe": tf,
+                        "strategy": best["name"],
+                        "reason": "regime_mismatch",
+                        "detail": f"{REGIME_TAGS.get(base_name, '?')} blocked in {regime}",
+                    })
+                    continue
+
             exit_cfg = best.get("exit", {})
 
             pending_entries[(sym, tf)] = {
@@ -719,6 +849,7 @@ def run_simulation(capital: float, days: int, verbose: bool = False) -> dict:
         total_strats=total_strats,
         skipped_pairs=skipped_pairs,
         days=days,
+        regime_filter=regime_filter,
     )
 
 
@@ -736,6 +867,7 @@ def _compute_metrics(
     total_strats: int,
     skipped_pairs: list,
     days: int,
+    regime_filter: bool = False,
 ) -> dict:
     """Compute performance metrics from closed trades and equity curve."""
     trades = portfolio["closed_trades"]
@@ -901,6 +1033,7 @@ def _compute_metrics(
         "daily_equity": daily_equity,
         "trade_log": portfolio["closed_trades"],
         "rejection_log": portfolio["rejected_signals"][:500],  # cap for file size
+        "regime_filter": regime_filter,
     }
 
 
@@ -916,9 +1049,10 @@ def format_report(m: dict) -> str:
     ret = m["total_return_pct"]
     sign = "+" if ret >= 0 else ""
 
+    regime_tag = " + REGIME FILTER" if m.get("regime_filter") else ""
     lines = [
         sep,
-        f"  PORTFOLIO BACKTEST — ${cap:,.0f} starting capital — {m['days']} days",
+        f"  PORTFOLIO BACKTEST — ${cap:,.0f} starting capital — {m['days']} days{regime_tag}",
         sep,
         "",
         "  PERFORMANCE",
@@ -1017,6 +1151,8 @@ def main():
     run_cmd.add_argument("--days", type=int, default=180, help="Backtest period in days (default: 180)")
     run_cmd.add_argument("--json", action="store_true", help="Output JSON results file")
     run_cmd.add_argument("--verbose", action="store_true", help="Print every entry and exit")
+    run_cmd.add_argument("--regime", action="store_true",
+                         help="Enable BTC regime filter (blocks bear-only in risk-on, bull-only in risk-off)")
 
     args = parser.parse_args()
 
@@ -1025,6 +1161,7 @@ def main():
             capital=args.capital,
             days=args.days,
             verbose=args.verbose,
+            regime_filter=args.regime,
         )
 
         report = format_report(metrics)
