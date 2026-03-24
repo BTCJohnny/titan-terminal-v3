@@ -1,0 +1,301 @@
+{
+  "phase": 4,
+  "symbol": "LINK",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "D1: Volatility Squeeze Breakout [adx_weak=15.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "D1: Volatility Squeeze Breakout [adx_weak=15.0]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.8,
+        "profit_factor": 8.28,
+        "expectancy_usd": 1456.14,
+        "total_pnl_usd": 7280.68,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.4
+      },
+      "test": {
+        "name": "D1: Volatility Squeeze Breakout [adx_weak=15.0]",
+        "direction": "LONG",
+        "total_trades": 4,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2112.42,
+        "total_pnl_usd": 8449.67,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.0
+      },
+      "full": {
+        "name": "D1: Volatility Squeeze Breakout [adx_weak=15.0]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.8,
+        "profit_factor": 8.28,
+        "expectancy_usd": 1456.14,
+        "total_pnl_usd": 7280.68,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.4,
+        "strategy": {
+          "name": "D1: Volatility Squeeze Breakout [adx_weak=15.0]",
+          "description": "BB squeeze + no trend + OI building = coiled spring. Direction TBD.",
+          "direction": "LONG",
+          "entry_signals": [
+            "bb_squeeze",
+            "adx_weak_trend",
+            "oi_surge"
+          ],
+          "entry_params": {
+            "bb_squeeze_pct": 0.2,
+            "adx_weak": 15.0,
+            "oi_surge_pct": 3.0
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.125]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.125]",
+        "direction": "LONG",
+        "total_trades": 10,
+        "win_rate": 0.8,
+        "profit_factor": 7.87,
+        "expectancy_usd": 1122.58,
+        "total_pnl_usd": 11225.8,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.04
+      },
+      "test": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.125]",
+        "direction": "LONG",
+        "total_trades": 7,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1718.18,
+        "total_pnl_usd": 12027.25,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.57
+      },
+      "full": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.125]",
+        "direction": "LONG",
+        "total_trades": 10,
+        "win_rate": 0.8,
+        "profit_factor": 7.87,
+        "expectancy_usd": 1122.58,
+        "total_pnl_usd": 11225.8,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.04,
+        "strategy": {
+          "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.125]",
+          "description": "New money entering compressed volatility \u2014 breakout fuel accumulating",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "bb_squeeze"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0,
+            "bb_squeeze_pct": 0.125
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=0.75]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=0.75]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.4,
+        "profit_factor": 2.64,
+        "expectancy_usd": 995.39,
+        "total_pnl_usd": 4976.95,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.02
+      },
+      "test": {
+        "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=0.75]",
+        "direction": "SHORT",
+        "total_trades": 2,
+        "win_rate": 0.5,
+        "profit_factor": 3.04,
+        "expectancy_usd": 1019.91,
+        "total_pnl_usd": 2039.82,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.05
+      },
+      "full": {
+        "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=0.75]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.4,
+        "profit_factor": 2.64,
+        "expectancy_usd": 995.39,
+        "total_pnl_usd": 4976.95,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.02,
+        "strategy": {
+          "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=0.75]",
+          "description": "Price hits upper BB in a bearish regime \u2014 overbought in downtrend",
+          "direction": "SHORT",
+          "entry_signals": [
+            "bb_touch_upper",
+            "trend_bearish"
+          ],
+          "entry_params": {},
+          "exit": {
+            "stop_atr_mult": 0.75,
+            "target1_atr_mult": 2.5,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 45
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "B3: OI Breakout Short [stop_atr_mult=1.88]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "B3: OI Breakout Short [stop_atr_mult=1.88]",
+        "direction": "SHORT",
+        "total_trades": 10,
+        "win_rate": 0.7,
+        "profit_factor": 3.42,
+        "expectancy_usd": 781.64,
+        "total_pnl_usd": 7816.4,
+        "max_drawdown_pct": 2.68,
+        "avg_r_achieved": 0.74
+      },
+      "test": {
+        "name": "B3: OI Breakout Short [stop_atr_mult=1.88]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 3.63,
+        "expectancy_usd": 914.25,
+        "total_pnl_usd": 5485.53,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.89
+      },
+      "full": {
+        "name": "B3: OI Breakout Short [stop_atr_mult=1.88]",
+        "direction": "SHORT",
+        "total_trades": 10,
+        "win_rate": 0.7,
+        "profit_factor": 3.42,
+        "expectancy_usd": 781.64,
+        "total_pnl_usd": 7816.4,
+        "max_drawdown_pct": 2.68,
+        "avg_r_achieved": 0.74,
+        "strategy": {
+          "name": "B3: OI Breakout Short [stop_atr_mult=1.88]",
+          "description": "Short when OI surging + strong bearish trend + volume \u2014 breakdown momentum",
+          "direction": "SHORT",
+          "entry_signals": [
+            "oi_surge",
+            "adx_strong_trend",
+            "trend_bearish",
+            "volume_surge"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 5.0,
+            "adx_strong": 25,
+            "vol_surge": 1.5
+          },
+          "exit": {
+            "stop_atr_mult": 1.88,
+            "target1_atr_mult": 2.5,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E5: Death Cross + Crowd Long",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E5: Death Cross + Crowd Long",
+        "direction": "SHORT",
+        "total_trades": 22,
+        "win_rate": 0.727,
+        "profit_factor": 3.2,
+        "expectancy_usd": 708.51,
+        "total_pnl_usd": 15587.23,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.64
+      },
+      "test": {
+        "name": "E5: Death Cross + Crowd Long",
+        "direction": "SHORT",
+        "total_trades": 14,
+        "win_rate": 0.643,
+        "profit_factor": 2.1,
+        "expectancy_usd": 408.82,
+        "total_pnl_usd": 5723.45,
+        "max_drawdown_pct": 4.47,
+        "avg_r_achieved": 0.4
+      },
+      "full": {
+        "name": "E5: Death Cross + Crowd Long",
+        "direction": "SHORT",
+        "total_trades": 22,
+        "win_rate": 0.727,
+        "profit_factor": 3.2,
+        "expectancy_usd": 708.51,
+        "total_pnl_usd": 15587.23,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.64,
+        "strategy": {
+          "name": "E5: Death Cross + Crowd Long",
+          "description": "Bearish regime + crowd positioned wrong \u2014 regime filter + crowd fade",
+          "direction": "SHORT",
+          "entry_signals": [
+            "trend_bearish",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 1.9
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

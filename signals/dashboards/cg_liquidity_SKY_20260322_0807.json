@@ -1,0 +1,132 @@
+{
+  "fetched_at": "2026-03-22T08:07:43.449247",
+  "symbol": "SKY",
+  "current_price": 0.073,
+  "funding": {
+    "symbol": "SKY",
+    "avg_rate": 0.00176444,
+    "avg_rate_pct": "0.1764%",
+    "max_rate": 0.009,
+    "max_exchange": "KuCoin",
+    "min_rate": -0.021773,
+    "min_exchange": "Aster",
+    "num_exchanges": 16,
+    "annualized_cost_pct": 441.61,
+    "bias": "long_crowded",
+    "interpretation": "SKY avg funding: 0.1764% across 16 exchanges. Longs paying heavily \u2014 crowded long positioning, squeeze DOWN risk. Annualized cost: 441.6% for the dominant side"
+  },
+  "open_interest": {
+    "history": {
+      "symbol": "SKY",
+      "current_oi_usd": 36123222.1628,
+      "oi_24h_ago_usd": 37351100.0,
+      "oi_change_24h_pct": -3.29,
+      "oi_change_period_pct": 4.49,
+      "oi_trend": "flat",
+      "interpretation": "SKY OI: $36.1M (-3.3% 24h). OI stable \u2014 no significant position changes"
+    },
+    "exchanges": {
+      "symbol": "SKY",
+      "total_oi_usd": 36123222.1628,
+      "change_1h_pct": 0.43,
+      "change_4h_pct": -0.48,
+      "change_24h_pct": -3.04,
+      "momentum": "stable",
+      "top_exchange_changes": [
+        {
+          "exchange": "Bitunix",
+          "change_1h_pct": 3.44,
+          "oi_usd": 364262.4776
+        },
+        {
+          "exchange": "Bybit",
+          "change_1h_pct": 0.58,
+          "oi_usd": 6620473.48
+        },
+        {
+          "exchange": "KuCoin",
+          "change_1h_pct": 0.56,
+          "oi_usd": 432629.2014
+        }
+      ],
+      "interpretation": "SKY total OI: $36.1M (-3.0% 24h). Biggest mover: Bitunix (+3.4% 1h)"
+    }
+  },
+  "long_short": {
+    "global": {
+      "symbol": "SKY",
+      "current_long_pct": 52.33,
+      "current_short_pct": 47.67,
+      "current_ratio": 1.1,
+      "trend": "stable",
+      "extreme": false,
+      "contrarian_signal": null,
+      "interpretation": "SKY Global L/S: 1.10x (52.3% long / 47.7% short)"
+    },
+    "top_traders": {
+      "symbol": "SKY",
+      "top_account_long_pct": 55.66,
+      "top_account_ratio": 1.26,
+      "top_position_long_pct": 65.61,
+      "top_position_ratio": 1.91,
+      "account_position_divergence": true,
+      "smart_money_lean": "long",
+      "interpretation": "SKY Top Traders \u2014 Account: 1.26x (55.7% long), Position: 1.91x (65.6% long). Account/Position divergence: fewer longs by count (acct 56%) but larger positions (66%) \u2014 concentrated conviction longs. Smart money lean: LONG (position-weighted)"
+    }
+  },
+  "liquidation": {
+    "symbol": "SKY",
+    "total_24h_usd": 12813.7151236,
+    "long_liq_24h_usd": 7766.3784823,
+    "short_liq_24h_usd": 5047.3366413,
+    "long_short_ratio": 1.54,
+    "bias": "balanced",
+    "recent_acceleration": false,
+    "timeframe_breakdown": {
+      "24h": {
+        "total": 12813.7151236,
+        "long": 7766.3784823,
+        "short": 5047.3366413
+      },
+      "12h": {
+        "total": 10261.0419453,
+        "long": 5371.9666423,
+        "short": 4889.075303
+      },
+      "4h": {
+        "total": 4466.764205,
+        "long": 1878.8624536,
+        "short": 2587.9017514
+      },
+      "1h": {
+        "total": 3322.4017514,
+        "long": 734.5,
+        "short": 2587.9017514
+      }
+    },
+    "interpretation": "SKY 24h liquidations: $13K (Long: $8K | Short: $5K). Balanced liquidation (L/S ratio: 1.5x)"
+  },
+  "max_pain": {
+    "nearest_expiry": null,
+    "max_pain_price": 0,
+    "distance_pct": 0,
+    "direction": "at",
+    "put_call_oi_ratio": 1.0,
+    "expiries": [],
+    "interpretation": "No options market for SKY"
+  },
+  "options": {
+    "total_oi_usd": 0,
+    "volume_24h_usd": 0,
+    "oi_change_24h_pct": 0,
+    "interpretation": "Options info unavailable"
+  },
+  "setup": {
+    "detected": false,
+    "direction": null,
+    "confidence": "low",
+    "snap_back_target": null,
+    "thesis": "No liquidity grab setup detected",
+    "components": {}
+  }
+}

@@ -1,0 +1,299 @@
+{
+  "phase": 4,
+  "symbol": "ZRO",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "D1: Volatility Squeeze Breakout [target1_atr_mult=2.25]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "D1: Volatility Squeeze Breakout [target1_atr_mult=2.25]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.833,
+        "profit_factor": 8.03,
+        "expectancy_usd": 1171.58,
+        "total_pnl_usd": 7029.45,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.12
+      },
+      "test": {
+        "name": "D1: Volatility Squeeze Breakout [target1_atr_mult=2.25]",
+        "direction": "LONG",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2162.01,
+        "total_pnl_usd": 6486.02,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.08
+      },
+      "full": {
+        "name": "D1: Volatility Squeeze Breakout [target1_atr_mult=2.25]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.833,
+        "profit_factor": 8.03,
+        "expectancy_usd": 1171.58,
+        "total_pnl_usd": 7029.45,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.12,
+        "strategy": {
+          "name": "D1: Volatility Squeeze Breakout [target1_atr_mult=2.25]",
+          "description": "BB squeeze + no trend + OI building = coiled spring. Direction TBD.",
+          "direction": "LONG",
+          "entry_signals": [
+            "bb_squeeze",
+            "adx_weak_trend",
+            "oi_surge"
+          ],
+          "entry_params": {
+            "bb_squeeze_pct": 0.2,
+            "adx_weak": 20,
+            "oi_surge_pct": 3.0
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 2.25,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+        "direction": "LONG",
+        "total_trades": 17,
+        "win_rate": 0.412,
+        "profit_factor": 2.85,
+        "expectancy_usd": 1098.3,
+        "total_pnl_usd": 18671.16,
+        "max_drawdown_pct": 9.61,
+        "avg_r_achieved": 1.01
+      },
+      "test": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+        "direction": "LONG",
+        "total_trades": 11,
+        "win_rate": 0.545,
+        "profit_factor": 5.09,
+        "expectancy_usd": 2095.31,
+        "total_pnl_usd": 23048.39,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 1.83
+      },
+      "full": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+        "direction": "LONG",
+        "total_trades": 17,
+        "win_rate": 0.412,
+        "profit_factor": 2.85,
+        "expectancy_usd": 1098.3,
+        "total_pnl_usd": 18671.16,
+        "max_drawdown_pct": 9.61,
+        "avg_r_achieved": 1.01,
+        "strategy": {
+          "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+          "description": "New money entering compressed volatility \u2014 breakout fuel accumulating",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "bb_squeeze"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0,
+            "bb_squeeze_pct": 0.25
+          },
+          "exit": {
+            "stop_atr_mult": 0.75,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "H5: Double Contrarian Long (Fear + Crowd) [fg_fear=10.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "H5: Double Contrarian Long (Fear + Crowd) [fg_fear=10.0]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 5.7,
+        "expectancy_usd": 1056.18,
+        "total_pnl_usd": 5280.9,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.03
+      },
+      "test": {
+        "name": "H5: Double Contrarian Long (Fear + Crowd) [fg_fear=10.0]",
+        "direction": "LONG",
+        "total_trades": 4,
+        "win_rate": 0.5,
+        "profit_factor": 4.45,
+        "expectancy_usd": 942.84,
+        "total_pnl_usd": 3771.35,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.94
+      },
+      "full": {
+        "name": "H5: Double Contrarian Long (Fear + Crowd) [fg_fear=10.0]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 5.7,
+        "expectancy_usd": 1056.18,
+        "total_pnl_usd": 5280.9,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.03,
+        "strategy": {
+          "name": "H5: Double Contrarian Long (Fear + Crowd) [fg_fear=10.0]",
+          "description": "Extreme fear + crowded shorts \u2014 two independent contrarian buy signals",
+          "direction": "LONG",
+          "entry_signals": [
+            "fear_greed_extreme_fear",
+            "ls_crowd_short"
+          ],
+          "entry_params": {
+            "fg_fear": 10.0,
+            "ls_crowd_short": 0.85
+          },
+          "exit": {
+            "stop_atr_mult": 2.5,
+            "target1_atr_mult": 4.0,
+            "target2_atr_mult": 8.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 90
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "F6: Fear Oversold Bounce [fg_fear=30.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "F6: Fear Oversold Bounce [fg_fear=30.0]",
+        "direction": "LONG",
+        "total_trades": 14,
+        "win_rate": 0.571,
+        "profit_factor": 2.93,
+        "expectancy_usd": 801.45,
+        "total_pnl_usd": 11220.33,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.75
+      },
+      "test": {
+        "name": "F6: Fear Oversold Bounce [fg_fear=30.0]",
+        "direction": "LONG",
+        "total_trades": 7,
+        "win_rate": 0.714,
+        "profit_factor": 5.28,
+        "expectancy_usd": 1271.87,
+        "total_pnl_usd": 8903.06,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.2
+      },
+      "full": {
+        "name": "F6: Fear Oversold Bounce [fg_fear=30.0]",
+        "direction": "LONG",
+        "total_trades": 14,
+        "win_rate": 0.571,
+        "profit_factor": 2.93,
+        "expectancy_usd": 801.45,
+        "total_pnl_usd": 11220.33,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.75,
+        "strategy": {
+          "name": "F6: Fear Oversold Bounce [fg_fear=30.0]",
+          "description": "Extreme fear + BB lower \u2014 sentiment and price both at extremes",
+          "direction": "LONG",
+          "entry_signals": [
+            "fear_greed_extreme_fear",
+            "bb_touch_lower"
+          ],
+          "entry_params": {
+            "fg_fear": 30.0
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 45
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "A4: Fear & Greed Extreme Fear Buy [target2_atr_mult=12.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "A4: Fear & Greed Extreme Fear Buy [target2_atr_mult=12.0]",
+        "direction": "LONG",
+        "total_trades": 11,
+        "win_rate": 0.636,
+        "profit_factor": 2.64,
+        "expectancy_usd": 603.71,
+        "total_pnl_usd": 6640.84,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.59
+      },
+      "test": {
+        "name": "A4: Fear & Greed Extreme Fear Buy [target2_atr_mult=12.0]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.833,
+        "profit_factor": 8.1,
+        "expectancy_usd": 1279.97,
+        "total_pnl_usd": 7679.8,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.22
+      },
+      "full": {
+        "name": "A4: Fear & Greed Extreme Fear Buy [target2_atr_mult=12.0]",
+        "direction": "LONG",
+        "total_trades": 11,
+        "win_rate": 0.636,
+        "profit_factor": 2.64,
+        "expectancy_usd": 603.71,
+        "total_pnl_usd": 6640.84,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.59,
+        "strategy": {
+          "name": "A4: Fear & Greed Extreme Fear Buy [target2_atr_mult=12.0]",
+          "description": "Contrarian long at extreme fear \u2014 market oversold on sentiment",
+          "direction": "LONG",
+          "entry_signals": [
+            "fear_greed_extreme_fear"
+          ],
+          "entry_params": {
+            "fg_fear": 20
+          },
+          "exit": {
+            "stop_atr_mult": 2.5,
+            "target1_atr_mult": 4.0,
+            "target2_atr_mult": 12.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 90
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

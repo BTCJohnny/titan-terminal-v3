@@ -29,46 +29,46 @@
     {
       "name": "A3: Long Liq Cascade Bounce",
       "direction": "LONG",
-      "total_trades": 2,
-      "win_rate": 0.5,
-      "profit_factor": 0.82,
-      "expectancy_usd": -91.67,
-      "total_pnl_usd": -183.33,
-      "max_drawdown_pct": 2.0,
-      "avg_r_achieved": -0.09
+      "total_trades": 33,
+      "win_rate": 0.273,
+      "profit_factor": 0.64,
+      "expectancy_usd": -245.5,
+      "total_pnl_usd": -8101.65,
+      "max_drawdown_pct": 20.86,
+      "avg_r_achieved": -0.25
     },
     {
       "name": "A4: Fear & Greed Extreme Fear Buy",
       "direction": "LONG",
-      "total_trades": 19,
-      "win_rate": 0.421,
-      "profit_factor": 0.84,
-      "expectancy_usd": -88.55,
-      "total_pnl_usd": -1682.44,
+      "total_trades": 20,
+      "win_rate": 0.4,
+      "profit_factor": 0.81,
+      "expectancy_usd": -100.47,
+      "total_pnl_usd": -2009.3,
       "max_drawdown_pct": 11.63,
-      "avg_r_achieved": -0.08
+      "avg_r_achieved": -0.09
     },
     {
       "name": "B1: ETF Inflow Momentum",
       "direction": "LONG",
-      "total_trades": 6,
-      "win_rate": 0.167,
-      "profit_factor": 0.43,
-      "expectancy_usd": -461.69,
-      "total_pnl_usd": -2770.13,
-      "max_drawdown_pct": 7.76,
-      "avg_r_achieved": -0.46
+      "total_trades": 5,
+      "win_rate": 0.2,
+      "profit_factor": 0.54,
+      "expectancy_usd": -361.25,
+      "total_pnl_usd": -1806.27,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": -0.35
     },
     {
       "name": "B2: OI Breakout Long",
       "direction": "LONG",
-      "total_trades": 1,
+      "total_trades": 2,
       "win_rate": 1.0,
       "profit_factor": "inf",
-      "expectancy_usd": 2500.0,
-      "total_pnl_usd": 2500.0,
+      "expectancy_usd": 1687.5,
+      "total_pnl_usd": 3375.0,
       "max_drawdown_pct": 0,
-      "avg_r_achieved": 2.5
+      "avg_r_achieved": 1.67
     },
     {
       "name": "B3: OI Breakout Short",
@@ -130,11 +130,11 @@
       "direction": "LONG",
       "total_trades": 5,
       "win_rate": 0.8,
-      "profit_factor": 5.8,
-      "expectancy_usd": 979.8,
-      "total_pnl_usd": 4899.0,
+      "profit_factor": 6.02,
+      "expectancy_usd": 1023.83,
+      "total_pnl_usd": 5119.14,
       "max_drawdown_pct": 2.0,
-      "avg_r_achieved": 0.96
+      "avg_r_achieved": 1.0
     },
     {
       "name": "D1: Volatility Squeeze Breakout (SHORT)",
@@ -172,13 +172,13 @@
     {
       "name": "E2: MACD Rollover + Crowd Long",
       "direction": "SHORT",
-      "total_trades": 15,
-      "win_rate": 0.533,
-      "profit_factor": 1.66,
-      "expectancy_usd": 318.1,
-      "total_pnl_usd": 4771.44,
-      "max_drawdown_pct": 5.88,
-      "avg_r_achieved": 0.32
+      "total_trades": 17,
+      "win_rate": 0.647,
+      "profit_factor": 2.52,
+      "expectancy_usd": 575.38,
+      "total_pnl_usd": 9781.39,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.54
     },
     {
       "name": "E3: BB Upper Touch + Death Cross",
@@ -186,32 +186,32 @@
       "total_trades": 17,
       "win_rate": 0.471,
       "profit_factor": 1.41,
-      "expectancy_usd": 217.53,
-      "total_pnl_usd": 3698.0,
+      "expectancy_usd": 217.61,
+      "total_pnl_usd": 3699.44,
       "max_drawdown_pct": 7.76,
       "avg_r_achieved": 0.23
     },
     {
       "name": "E4: BB Upper + Crowd Long",
       "direction": "SHORT",
-      "total_trades": 12,
-      "win_rate": 0.417,
-      "profit_factor": 0.98,
-      "expectancy_usd": -9.79,
-      "total_pnl_usd": -117.44,
-      "max_drawdown_pct": 9.94,
-      "avg_r_achieved": 0.01
+      "total_trades": 6,
+      "win_rate": 0.5,
+      "profit_factor": 1.66,
+      "expectancy_usd": 328.0,
+      "total_pnl_usd": 1968.02,
+      "max_drawdown_pct": 4.31,
+      "avg_r_achieved": 0.34
     },
     {
       "name": "E5: Death Cross + Crowd Long",
       "direction": "SHORT",
-      "total_trades": 28,
-      "win_rate": 0.536,
-      "profit_factor": 1.57,
-      "expectancy_usd": 257.46,
-      "total_pnl_usd": 7208.76,
-      "max_drawdown_pct": 8.98,
-      "avg_r_achieved": 0.26
+      "total_trades": 26,
+      "win_rate": 0.577,
+      "profit_factor": 2.07,
+      "expectancy_usd": 459.04,
+      "total_pnl_usd": 11935.07,
+      "max_drawdown_pct": 5.23,
+      "avg_r_achieved": 0.43
     },
     {
       "name": "E6: MACD Rollover + OBV Divergence",
@@ -249,13 +249,13 @@
     {
       "name": "E9: OI Surge Standalone (ETH)",
       "direction": "LONG",
-      "total_trades": 25,
-      "win_rate": 0.6,
-      "profit_factor": 1.97,
-      "expectancy_usd": 417.47,
-      "total_pnl_usd": 10436.74,
+      "total_trades": 24,
+      "win_rate": 0.625,
+      "profit_factor": 2.19,
+      "expectancy_usd": 486.26,
+      "total_pnl_usd": 11670.17,
       "max_drawdown_pct": 6.38,
-      "avg_r_achieved": 0.4
+      "avg_r_achieved": 0.46
     },
     {
       "name": "E10: OI Div Bullish + RSI Oversold (ETH)",
@@ -271,13 +271,13 @@
     {
       "name": "E11: Triple Short (MACD + Death Cross + Crowd Long)",
       "direction": "SHORT",
-      "total_trades": 15,
-      "win_rate": 0.467,
-      "profit_factor": 1.49,
-      "expectancy_usd": 287.26,
-      "total_pnl_usd": 4308.83,
+      "total_trades": 17,
+      "win_rate": 0.471,
+      "profit_factor": 1.62,
+      "expectancy_usd": 377.41,
+      "total_pnl_usd": 6416.01,
       "max_drawdown_pct": 5.92,
-      "avg_r_achieved": 0.3
+      "avg_r_achieved": 0.38
     },
     {
       "name": "E12: RSI OB Short + Death Cross (ETH)",
@@ -289,6 +289,358 @@
       "total_pnl_usd": 7208.27,
       "max_drawdown_pct": 3.96,
       "avg_r_achieved": 0.87
+    },
+    {
+      "name": "F1: Oversold Bounce (Uptrend)",
+      "direction": "LONG",
+      "total_trades": 5,
+      "win_rate": 0.2,
+      "profit_factor": 0.26,
+      "expectancy_usd": -580.24,
+      "total_pnl_usd": -2901.22,
+      "max_drawdown_pct": 5.8,
+      "avg_r_achieved": -0.59
+    },
+    {
+      "name": "F2: Oversold Bounce (Any Regime)",
+      "direction": "LONG",
+      "total_trades": 12,
+      "win_rate": 0.417,
+      "profit_factor": 1.1,
+      "expectancy_usd": 55.88,
+      "total_pnl_usd": 670.57,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.07
+    },
+    {
+      "name": "F3: Overbought Fade (Downtrend)",
+      "direction": "SHORT",
+      "total_trades": 7,
+      "win_rate": 0.571,
+      "profit_factor": 2.65,
+      "expectancy_usd": 721.87,
+      "total_pnl_usd": 5053.08,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.71
+    },
+    {
+      "name": "F4: Accumulation Bounce",
+      "direction": "LONG",
+      "total_trades": 1,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "expectancy_usd": -1000.0,
+      "total_pnl_usd": -1000.0,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": -1.0
+    },
+    {
+      "name": "F5: Distribution Fade",
+      "direction": "?",
+      "total_trades": 0,
+      "win_rate": 0,
+      "profit_factor": 0,
+      "expectancy_usd": 0,
+      "total_pnl_usd": 0,
+      "max_drawdown_pct": 0,
+      "avg_r_achieved": 0
+    },
+    {
+      "name": "F6: Fear Oversold Bounce",
+      "direction": "LONG",
+      "total_trades": 11,
+      "win_rate": 0.455,
+      "profit_factor": 0.9,
+      "expectancy_usd": -54.45,
+      "total_pnl_usd": -598.93,
+      "max_drawdown_pct": 6.06,
+      "avg_r_achieved": -0.04
+    },
+    {
+      "name": "F7: RSI Extreme Oversold Snap",
+      "direction": "LONG",
+      "total_trades": 9,
+      "win_rate": 0.444,
+      "profit_factor": 1.17,
+      "expectancy_usd": 98.95,
+      "total_pnl_usd": 890.54,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.11
+    },
+    {
+      "name": "F8: RSI Extreme Overbought Fade",
+      "direction": "SHORT",
+      "total_trades": 3,
+      "win_rate": 0.667,
+      "profit_factor": 2.61,
+      "expectancy_usd": 537.11,
+      "total_pnl_usd": 1611.34,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 0.55
+    },
+    {
+      "name": "G1: Triple Buy (MACD + OBV + RSI)",
+      "direction": "?",
+      "total_trades": 0,
+      "win_rate": 0,
+      "profit_factor": 0,
+      "expectancy_usd": 0,
+      "total_pnl_usd": 0,
+      "max_drawdown_pct": 0,
+      "avg_r_achieved": 0
+    },
+    {
+      "name": "G2: Momentum Continuation Long",
+      "direction": "LONG",
+      "total_trades": 3,
+      "win_rate": 0.333,
+      "profit_factor": 1.09,
+      "expectancy_usd": 60.3,
+      "total_pnl_usd": 180.9,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.08
+    },
+    {
+      "name": "G3: Quad Short (MACD + OBV + Trend + Crowd)",
+      "direction": "?",
+      "total_trades": 0,
+      "win_rate": 0,
+      "profit_factor": 0,
+      "expectancy_usd": 0,
+      "total_pnl_usd": 0,
+      "max_drawdown_pct": 0,
+      "avg_r_achieved": 0
+    },
+    {
+      "name": "G4: Derivatives Distribution Short",
+      "direction": "?",
+      "total_trades": 0,
+      "win_rate": 0,
+      "profit_factor": 0,
+      "expectancy_usd": 0,
+      "total_pnl_usd": 0,
+      "max_drawdown_pct": 0,
+      "avg_r_achieved": 0
+    },
+    {
+      "name": "G5: Derivatives Squeeze Long",
+      "direction": "?",
+      "total_trades": 0,
+      "win_rate": 0,
+      "profit_factor": 0,
+      "expectancy_usd": 0,
+      "total_pnl_usd": 0,
+      "max_drawdown_pct": 0,
+      "avg_r_achieved": 0
+    },
+    {
+      "name": "G6: Compressed Breakout Bull",
+      "direction": "LONG",
+      "total_trades": 1,
+      "win_rate": 1.0,
+      "profit_factor": "inf",
+      "expectancy_usd": 1000.0,
+      "total_pnl_usd": 1000.0,
+      "max_drawdown_pct": 0,
+      "avg_r_achieved": 1.0
+    },
+    {
+      "name": "G7: Compressed Breakdown Bear",
+      "direction": "SHORT",
+      "total_trades": 7,
+      "win_rate": 0.571,
+      "profit_factor": 2.29,
+      "expectancy_usd": 565.61,
+      "total_pnl_usd": 3959.3,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.57
+    },
+    {
+      "name": "G8: Triple Energy Buildup",
+      "direction": "LONG",
+      "total_trades": 7,
+      "win_rate": 0.571,
+      "profit_factor": 1.82,
+      "expectancy_usd": 358.43,
+      "total_pnl_usd": 2509.0,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.37
+    },
+    {
+      "name": "G8: Triple Energy Buildup (SHORT)",
+      "direction": "SHORT",
+      "total_trades": 8,
+      "win_rate": 0.125,
+      "profit_factor": 0.14,
+      "expectancy_usd": -712.49,
+      "total_pnl_usd": -5699.92,
+      "max_drawdown_pct": 11.4,
+      "avg_r_achieved": -0.75
+    },
+    {
+      "name": "G9: Short Squeeze Exhaustion Fade",
+      "direction": "SHORT",
+      "total_trades": 7,
+      "win_rate": 0.429,
+      "profit_factor": 1.14,
+      "expectancy_usd": 78.11,
+      "total_pnl_usd": 546.77,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.1
+    },
+    {
+      "name": "G10: Smart Money Accumulation Dip",
+      "direction": "?",
+      "total_trades": 0,
+      "win_rate": 0,
+      "profit_factor": 0,
+      "expectancy_usd": 0,
+      "total_pnl_usd": 0,
+      "max_drawdown_pct": 0,
+      "avg_r_achieved": 0
+    },
+    {
+      "name": "G11: MACD Bullish + Golden Cross",
+      "direction": "LONG",
+      "total_trades": 7,
+      "win_rate": 0.429,
+      "profit_factor": 1.31,
+      "expectancy_usd": 176.62,
+      "total_pnl_usd": 1236.37,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": 0.2
+    },
+    {
+      "name": "G12: MACD Bullish + ADX Strong",
+      "direction": "LONG",
+      "total_trades": 20,
+      "win_rate": 0.4,
+      "profit_factor": 0.77,
+      "expectancy_usd": -121.73,
+      "total_pnl_usd": -2434.62,
+      "max_drawdown_pct": 12.42,
+      "avg_r_achieved": -0.11
+    },
+    {
+      "name": "G12: MACD Bullish + ADX Strong (SHORT)",
+      "direction": "SHORT",
+      "total_trades": 15,
+      "win_rate": 0.667,
+      "profit_factor": 3.24,
+      "expectancy_usd": 836.63,
+      "total_pnl_usd": 12549.42,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": 0.77
+    },
+    {
+      "name": "H1: Greed Top Short (Sentiment + RSI)",
+      "direction": "SHORT",
+      "total_trades": 1,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "expectancy_usd": -1000.0,
+      "total_pnl_usd": -1000.0,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": -1.0
+    },
+    {
+      "name": "H2: Greed Distribution Short",
+      "direction": "SHORT",
+      "total_trades": 2,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "expectancy_usd": -990.0,
+      "total_pnl_usd": -1980.0,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": -1.0
+    },
+    {
+      "name": "H3: Double Contrarian Short (Greed + Crowd)",
+      "direction": "SHORT",
+      "total_trades": 2,
+      "win_rate": 0.5,
+      "profit_factor": 2.15,
+      "expectancy_usd": 602.5,
+      "total_pnl_usd": 1205.0,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 0.62
+    },
+    {
+      "name": "H4: Fear Accumulation Long",
+      "direction": "LONG",
+      "total_trades": 2,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "expectancy_usd": -990.0,
+      "total_pnl_usd": -1980.0,
+      "max_drawdown_pct": 3.96,
+      "avg_r_achieved": -1.0
+    },
+    {
+      "name": "H5: Double Contrarian Long (Fear + Crowd)",
+      "direction": "?",
+      "total_trades": 0,
+      "win_rate": 0,
+      "profit_factor": 0,
+      "expectancy_usd": 0,
+      "total_pnl_usd": 0,
+      "max_drawdown_pct": 0,
+      "avg_r_achieved": 0
+    },
+    {
+      "name": "H6: Greed Standalone Short",
+      "direction": "SHORT",
+      "total_trades": 3,
+      "win_rate": 0.667,
+      "profit_factor": 3.17,
+      "expectancy_usd": 724.54,
+      "total_pnl_usd": 2173.63,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 0.73
+    },
+    {
+      "name": "I1: Full Institutional Bull",
+      "direction": "LONG",
+      "total_trades": 2,
+      "win_rate": 0.5,
+      "profit_factor": 0.73,
+      "expectancy_usd": -132.5,
+      "total_pnl_usd": -265.0,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": -0.12
+    },
+    {
+      "name": "I2: ETF Dip Buy",
+      "direction": "LONG",
+      "total_trades": 2,
+      "win_rate": 0.5,
+      "profit_factor": 2.21,
+      "expectancy_usd": 602.5,
+      "total_pnl_usd": 1205.0,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": 0.62
+    },
+    {
+      "name": "I3: Coinbase Momentum Long",
+      "direction": "LONG",
+      "total_trades": 4,
+      "win_rate": 0.25,
+      "profit_factor": 0.24,
+      "expectancy_usd": -558.63,
+      "total_pnl_usd": -2234.51,
+      "max_drawdown_pct": 5.88,
+      "avg_r_achieved": -0.56
+    },
+    {
+      "name": "I4: Coinbase Accumulation",
+      "direction": "LONG",
+      "total_trades": 3,
+      "win_rate": 0.333,
+      "profit_factor": 0.62,
+      "expectancy_usd": -253.13,
+      "total_pnl_usd": -759.39,
+      "max_drawdown_pct": 2.0,
+      "avg_r_achieved": -0.24
     }
   ]
 }

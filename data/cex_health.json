@@ -9,7 +9,7 @@
         ],
         "data_source": "Nansen",
         "created": "2026-03-13",
-        "last_updated": "2026-03-20"
+        "last_updated": "2026-03-23"
     },
     "tokens": {
         "ETH": {
@@ -1029,6 +1029,931 @@
                 "confidence": "low",
                 "notes": "BTC inflows 9.4x average. Smart money accumulating"
             }
+        },
+        {
+            "date": "2026-03-20-1718",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 51037056.03547408,
+                    "direction": "inflow",
+                    "vs_average": 2.4,
+                    "signal": "bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": 52698880.18475095,
+                    "direction": "inflow",
+                    "vs_average": 7.9,
+                    "signal": "very_bearish"
+                },
+                "USDT": {
+                    "net_flow_usd": -410236122.55445546,
+                    "direction": "outflow",
+                    "vs_average": 4.8,
+                    "signal": "very_bearish"
+                },
+                "USDC": {
+                    "net_flow_usd": 125604969.57370485,
+                    "direction": "inflow",
+                    "vs_average": 1.3,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 168900398.0633737,
+                    "direction": "inflow",
+                    "vs_average": 4.6,
+                    "signal": "very_bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": 29026990.16381902,
+                    "direction": "inflow",
+                    "vs_average": 1.3,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 2831060279.8283367,
+                    "direction": "inflow",
+                    "vs_average": 4.3,
+                    "signal": "very_bullish"
+                },
+                "USDC": {
+                    "net_flow_usd": 940714008.2449914,
+                    "direction": "inflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "segments": {
+                        "smart_trader": {
+                            "display_name": "Smart Traders",
+                            "net_flow_usd": 40883.20531508277,
+                            "avg_flow_usd": 847798.5328367561,
+                            "vs_average": 0.0,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Minor accumulation"
+                        },
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": 0,
+                            "avg_flow_usd": 76040.18782300182,
+                            "vs_average": 0.0,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": -1422330.3777658609,
+                            "avg_flow_usd": 973268.273909702,
+                            "vs_average": 1.5,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Minor profit taking"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 216.0246732498428,
+                            "avg_flow_usd": 6132.885700645002,
+                            "vs_average": 0.0,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Minor accumulation"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": -1422330.3777658609,
+                        "whales": 0,
+                        "smart_traders": 40883.20531508277
+                    }
+                },
+                "BTC": {
+                    "segments": {
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": 662.194037964042,
+                            "avg_flow_usd": 25316.427965494695,
+                            "vs_average": 0.0,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Minor accumulation"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 6324930.648593946,
+                            "avg_flow_usd": 1221458.492936255,
+                            "vs_average": 5.2,
+                            "direction": "inflow",
+                            "signal": "very_bullish",
+                            "label": "Accumulating"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": -214.17658706160907,
+                            "avg_flow_usd": 5285.680231972415,
+                            "vs_average": 0.0,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 6324930.648593946,
+                        "whales": 662.194037964042,
+                        "smart_traders": 0
+                    }
+                },
+                "USDT": {
+                    "segments": {
+                        "smart_trader": {
+                            "display_name": "Smart Traders",
+                            "net_flow_usd": 1777698.2762293743,
+                            "avg_flow_usd": 526230.2328811858,
+                            "vs_average": 3.4,
+                            "direction": "inflow",
+                            "signal": "slight_bearish",
+                            "label": "Heavy stable accumulation"
+                        },
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": -21060.046121629246,
+                            "avg_flow_usd": 567176.4038841111,
+                            "vs_average": 0.0,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 11091111.9461895,
+                            "avg_flow_usd": 10167284.830541171,
+                            "vs_average": 1.1,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 7683521.8002433,
+                            "avg_flow_usd": 2882542.536828218,
+                            "vs_average": 2.7,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Accumulating stables"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 11091111.9461895,
+                        "whales": -21060.046121629246,
+                        "smart_traders": 1777698.2762293743
+                    }
+                },
+                "USDC": {
+                    "segments": {
+                        "smart_trader": {
+                            "display_name": "Smart Traders",
+                            "net_flow_usd": -3933272.734453974,
+                            "avg_flow_usd": 1204984.2332341825,
+                            "vs_average": 3.3,
+                            "direction": "outflow",
+                            "signal": "bullish",
+                            "label": "Deploying capital"
+                        },
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": -3628504.824600879,
+                            "avg_flow_usd": 2415038.4891438615,
+                            "vs_average": 1.5,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Minor deployment"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 17833200.97877354,
+                            "avg_flow_usd": 10448862.444629414,
+                            "vs_average": 1.7,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Accumulating stables"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": -8215826.271149693,
+                            "avg_flow_usd": 875563.1976597679,
+                            "vs_average": 9.4,
+                            "direction": "outflow",
+                            "signal": "very_bullish",
+                            "label": "Aggressive deployment"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 17833200.97877354,
+                        "whales": -3628504.824600879,
+                        "smart_traders": -3933272.734453974
+                    }
+                }
+            },
+            "summary": {
+                "overall_signal": "distribution",
+                "confidence": "medium-high",
+                "narrative": "BTC exchange inflows at 7.9x average (+$52.7M) \u2014 selling pressure. Smart money: Public Figures USDC at 9.4x (aggressive deployment), Top PnL BTC at 5.2x (accumulating), Smart Traders USDT at 3.4x (heavy stable accumulation). ETH inflow at 2.4x \u2014 mild headwind. USDT outflow at 4.8x \u2014 mild headwind.",
+                "exchange_bullish": 0,
+                "exchange_bearish": 3,
+                "sm_bullish": 3,
+                "sm_bearish": 1
+            }
+        },
+        {
+            "date": "2026-03-22-0649",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": 3960978.328419005,
+                    "direction": "inflow",
+                    "vs_average": 0.3,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": -774333.521578998,
+                    "direction": "outflow",
+                    "vs_average": 0.2,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": -286546275.9199853,
+                    "direction": "outflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": -73393664.62888512,
+                    "direction": "outflow",
+                    "vs_average": 0.7,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 172228566.33685815,
+                    "direction": "inflow",
+                    "vs_average": 9.4,
+                    "signal": "very_bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": 31416257.555907607,
+                    "direction": "inflow",
+                    "vs_average": 1.0,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 2301540158.028214,
+                    "direction": "inflow",
+                    "vs_average": 1.8,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 267612743.816697,
+                    "direction": "inflow",
+                    "vs_average": 0.5,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "segments": {
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": 21354.43529744827,
+                            "avg_flow_usd": 53381.12681612828,
+                            "vs_average": 0.4,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Minor accumulation"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 10651000.49735649,
+                            "avg_flow_usd": 3544343.4279949763,
+                            "vs_average": 3.0,
+                            "direction": "inflow",
+                            "signal": "very_bullish",
+                            "label": "Accumulating"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 168.1640407273951,
+                            "avg_flow_usd": 10432.679851319277,
+                            "vs_average": 0.0,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Minor accumulation"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 10651000.49735649,
+                        "whales": 21354.43529744827,
+                        "smart_traders": 0
+                    }
+                },
+                "BTC": {
+                    "segments": {
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": -747.2717454529267,
+                            "avg_flow_usd": 2792.315255915882,
+                            "vs_average": 0.3,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": -280074.2320687757,
+                            "avg_flow_usd": 978036.4752765399,
+                            "vs_average": 0.3,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 0,
+                            "avg_flow_usd": 809.297913163339,
+                            "vs_average": 0.0,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": -280074.2320687757,
+                        "whales": -747.2717454529267,
+                        "smart_traders": 0
+                    }
+                },
+                "USDT": {
+                    "segments": {
+                        "smart_trader": {
+                            "display_name": "Smart Traders",
+                            "net_flow_usd": 300093.154227824,
+                            "avg_flow_usd": 377251.4867136821,
+                            "vs_average": 0.8,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        },
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": -2081617.5360730025,
+                            "avg_flow_usd": 869218.005089371,
+                            "vs_average": 2.4,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Minor deployment"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 8586552.467004728,
+                            "avg_flow_usd": 9221118.730486423,
+                            "vs_average": 0.9,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": -2216.1861987378024,
+                            "avg_flow_usd": 336340.70223531127,
+                            "vs_average": 0.0,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 8586552.467004728,
+                        "whales": -2081617.5360730025,
+                        "smart_traders": 300093.154227824
+                    }
+                },
+                "USDC": {
+                    "segments": {
+                        "smart_trader": {
+                            "display_name": "Smart Traders",
+                            "net_flow_usd": -8771.377090105167,
+                            "avg_flow_usd": 366210.867315333,
+                            "vs_average": 0.0,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        },
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": -151648.64441737684,
+                            "avg_flow_usd": 1808682.4577989406,
+                            "vs_average": 0.1,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 6014134.68943126,
+                            "avg_flow_usd": 13788080.762460172,
+                            "vs_average": 0.4,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": -1039888.151696821,
+                            "avg_flow_usd": 2879022.3344355663,
+                            "vs_average": 0.4,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 6014134.68943126,
+                        "whales": -151648.64441737684,
+                        "smart_traders": -8771.377090105167
+                    }
+                }
+            },
+            "summary": {
+                "overall_signal": "accumulation",
+                "confidence": "low",
+                "narrative": "Smart money: Top PnL ETH at 3.0x (accumulating), Whales USDT at 2.4x (minor deployment).",
+                "exchange_bullish": 0,
+                "exchange_bearish": 0,
+                "sm_bullish": 1,
+                "sm_bearish": 0
+            }
+        },
+        {
+            "date": "2026-03-23-0745",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": -53590970.144394964,
+                    "direction": "outflow",
+                    "vs_average": 3.6,
+                    "signal": "bullish"
+                },
+                "BTC": {
+                    "net_flow_usd": 7351602.239870787,
+                    "direction": "inflow",
+                    "vs_average": 1.9,
+                    "signal": "slight_bearish"
+                },
+                "USDT": {
+                    "net_flow_usd": -57965381.785767026,
+                    "direction": "outflow",
+                    "vs_average": 0.3,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": -82351320.17048152,
+                    "direction": "outflow",
+                    "vs_average": 0.8,
+                    "signal": "neutral"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 99311058.31999479,
+                    "direction": "inflow",
+                    "vs_average": 1.8,
+                    "signal": "slight_bearish"
+                },
+                "BTC": {
+                    "net_flow_usd": 48404075.07724877,
+                    "direction": "inflow",
+                    "vs_average": 1.3,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 2166188970.502214,
+                    "direction": "inflow",
+                    "vs_average": 1.6,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 255977840.27016732,
+                    "direction": "inflow",
+                    "vs_average": 0.5,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "segments": {
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": 143397.4120389104,
+                            "avg_flow_usd": 65963.595782653,
+                            "vs_average": 2.2,
+                            "direction": "inflow",
+                            "signal": "bullish",
+                            "label": "Accumulating"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 1565848.027349501,
+                            "avg_flow_usd": 2228697.198792751,
+                            "vs_average": 0.7,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Minor accumulation"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 413.269293385261,
+                            "avg_flow_usd": 5266.226917735342,
+                            "vs_average": 0.1,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Minor accumulation"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 1565848.027349501,
+                        "whales": 143397.4120389104,
+                        "smart_traders": 0
+                    }
+                },
+                "BTC": {
+                    "segments": {
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": 1914595.79097301,
+                            "avg_flow_usd": 10263.907991525724,
+                            "vs_average": 186.5,
+                            "direction": "inflow",
+                            "signal": "very_bullish",
+                            "label": "Accumulating"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": -6547491.225189466,
+                            "avg_flow_usd": 1658626.0468701147,
+                            "vs_average": 3.9,
+                            "direction": "outflow",
+                            "signal": "bearish",
+                            "label": "Heavy selling"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 0,
+                            "avg_flow_usd": 809.297913163339,
+                            "vs_average": 0.0,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": -6547491.225189466,
+                        "whales": 1914595.79097301,
+                        "smart_traders": 0
+                    }
+                },
+                "USDT": {
+                    "segments": {
+                        "smart_trader": {
+                            "display_name": "Smart Traders",
+                            "net_flow_usd": 151042.40298347932,
+                            "avg_flow_usd": 475397.7202331614,
+                            "vs_average": 0.3,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        },
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": 27485959.86685035,
+                            "avg_flow_usd": 2167840.425216216,
+                            "vs_average": 12.7,
+                            "direction": "inflow",
+                            "signal": "slight_bearish",
+                            "label": "Heavy stable accumulation"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 9948788.692589954,
+                            "avg_flow_usd": 7612914.358420862,
+                            "vs_average": 1.3,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": -2938061.6419202196,
+                            "avg_flow_usd": 388823.3778413727,
+                            "vs_average": 7.6,
+                            "direction": "outflow",
+                            "signal": "bullish",
+                            "label": "Deploying capital"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 9948788.692589954,
+                        "whales": 27485959.86685035,
+                        "smart_traders": 151042.40298347932
+                    }
+                },
+                "USDC": {
+                    "segments": {
+                        "smart_trader": {
+                            "display_name": "Smart Traders",
+                            "net_flow_usd": -100211.52273779918,
+                            "avg_flow_usd": 242160.68943515647,
+                            "vs_average": 0.4,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        },
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": -51983180.35824823,
+                            "avg_flow_usd": 5921194.055694383,
+                            "vs_average": 8.8,
+                            "direction": "outflow",
+                            "signal": "very_bullish",
+                            "label": "Aggressive deployment"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 17533988.132593583,
+                            "avg_flow_usd": 8339233.340117025,
+                            "vs_average": 2.1,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Accumulating stables"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": -480127.8926430058,
+                            "avg_flow_usd": 2934816.6737935096,
+                            "vs_average": 0.2,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 17533988.132593583,
+                        "whales": -51983180.35824823,
+                        "smart_traders": -100211.52273779918
+                    }
+                }
+            },
+            "summary": {
+                "overall_signal": "divergence",
+                "confidence": "medium",
+                "narrative": "ETH exchange outflows at 3.6x average (+$53.6M) \u2014 accumulation. Smart money: Whales BTC at 186.5x (accumulating), Whales USDT at 12.7x (heavy stable accumulation), Whales USDC at 8.8x (aggressive deployment). BTC inflow at 1.9x \u2014 mild headwind.",
+                "exchange_bullish": 1,
+                "exchange_bearish": 1,
+                "sm_bullish": 4,
+                "sm_bearish": 2
+            }
+        },
+        {
+            "date": "2026-03-23-1301",
+            "market_context": {},
+            "exchange_flows_24h": {
+                "ETH": {
+                    "net_flow_usd": -69081319.87523656,
+                    "direction": "outflow",
+                    "vs_average": 5.3,
+                    "signal": "very_bullish"
+                },
+                "BTC": {
+                    "net_flow_usd": 1316467.513692928,
+                    "direction": "inflow",
+                    "vs_average": 0.2,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": -23283688.954287075,
+                    "direction": "outflow",
+                    "vs_average": 0.1,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": -192411044.68414283,
+                    "direction": "outflow",
+                    "vs_average": 3.3,
+                    "signal": "bearish"
+                }
+            },
+            "exchange_flows_7d": {
+                "ETH": {
+                    "net_flow_usd": 68063270.07874778,
+                    "direction": "inflow",
+                    "vs_average": 1.5,
+                    "signal": "neutral"
+                },
+                "BTC": {
+                    "net_flow_usd": 51567717.99570561,
+                    "direction": "inflow",
+                    "vs_average": 1.3,
+                    "signal": "neutral"
+                },
+                "USDT": {
+                    "net_flow_usd": 2210995243.564702,
+                    "direction": "inflow",
+                    "vs_average": 1.6,
+                    "signal": "neutral"
+                },
+                "USDC": {
+                    "net_flow_usd": 146613114.87395537,
+                    "direction": "inflow",
+                    "vs_average": 0.4,
+                    "signal": "neutral"
+                }
+            },
+            "smart_money_flows_24h": {
+                "ETH": {
+                    "segments": {
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": 143397.4120389104,
+                            "avg_flow_usd": 79161.71144207663,
+                            "vs_average": 1.8,
+                            "direction": "inflow",
+                            "signal": "bullish",
+                            "label": "Accumulating"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 38668979.45515774,
+                            "avg_flow_usd": 3470728.95023672,
+                            "vs_average": 11.1,
+                            "direction": "inflow",
+                            "signal": "very_bullish",
+                            "label": "Accumulating"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 413.269293385261,
+                            "avg_flow_usd": 4970.452886196374,
+                            "vs_average": 0.1,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Minor accumulation"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 38668979.45515774,
+                        "whales": 143397.4120389104,
+                        "smart_traders": 0
+                    }
+                },
+                "BTC": {
+                    "segments": {
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": 5174.484368461163,
+                            "avg_flow_usd": 31499.02425787261,
+                            "vs_average": 0.2,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Minor accumulation"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": -1175225.4795456976,
+                            "avg_flow_usd": 1889039.451930934,
+                            "vs_average": 0.6,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Minor profit taking"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 0,
+                            "avg_flow_usd": 214.17658689570885,
+                            "vs_average": 0.0,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": -1175225.4795456976,
+                        "whales": 5174.484368461163,
+                        "smart_traders": 0
+                    }
+                },
+                "USDT": {
+                    "segments": {
+                        "smart_trader": {
+                            "display_name": "Smart Traders",
+                            "net_flow_usd": 111059.26903778472,
+                            "avg_flow_usd": 401676.0391081286,
+                            "vs_average": 0.3,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        },
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": 6613395.889956291,
+                            "avg_flow_usd": 1817676.4206848992,
+                            "vs_average": 3.6,
+                            "direction": "inflow",
+                            "signal": "slight_bearish",
+                            "label": "Heavy stable accumulation"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 956499.2234316645,
+                            "avg_flow_usd": 7129215.423425232,
+                            "vs_average": 0.1,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 317368.82765570894,
+                            "avg_flow_usd": 2164045.9711837443,
+                            "vs_average": 0.1,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 956499.2234316645,
+                        "whales": 6613395.889956291,
+                        "smart_traders": 111059.26903778472
+                    }
+                },
+                "USDC": {
+                    "segments": {
+                        "smart_trader": {
+                            "display_name": "Smart Traders",
+                            "net_flow_usd": -56156.53109704346,
+                            "avg_flow_usd": 240311.56469316967,
+                            "vs_average": 0.2,
+                            "direction": "outflow",
+                            "signal": "neutral",
+                            "label": "Negligible"
+                        },
+                        "whale": {
+                            "display_name": "Whales",
+                            "net_flow_usd": -27200841.565262802,
+                            "avg_flow_usd": 7066412.924672802,
+                            "vs_average": 3.8,
+                            "direction": "outflow",
+                            "signal": "bullish",
+                            "label": "Deploying capital"
+                        },
+                        "top_pnl": {
+                            "display_name": "Top PnL",
+                            "net_flow_usd": 9979593.410881866,
+                            "avg_flow_usd": 8006831.728133331,
+                            "vs_average": 1.2,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        },
+                        "public_figure": {
+                            "display_name": "Public Figures",
+                            "net_flow_usd": 777590.7399629118,
+                            "avg_flow_usd": 2769105.076045505,
+                            "vs_average": 0.3,
+                            "direction": "inflow",
+                            "signal": "neutral",
+                            "label": "Modest accumulation"
+                        }
+                    },
+                    "totals": {
+                        "top_pnl": 9979593.410881866,
+                        "whales": -27200841.565262802,
+                        "smart_traders": -56156.53109704346
+                    }
+                }
+            },
+            "summary": {
+                "overall_signal": "accumulation",
+                "confidence": "medium",
+                "narrative": "ETH exchange outflows at 5.3x average (+$69.1M) \u2014 accumulation. Smart money: Top PnL ETH at 11.1x (accumulating), Whales USDC at 3.8x (deploying capital), Whales USDT at 3.6x (heavy stable accumulation). USDC outflow at 3.3x \u2014 mild headwind.",
+                "exchange_bullish": 1,
+                "exchange_bearish": 1,
+                "sm_bullish": 3,
+                "sm_bearish": 1
+            }
         }
     ],
     "alerts": {
@@ -1039,13 +1964,34 @@
         },
         "active_alerts": [
             {
-                "date": "2026-03-20-0631",
-                "asset": "BTC",
-                "type": "extreme_inflow",
-                "value": 53349348.0742726,
-                "vs_average": 9.4,
-                "priority": "CRITICAL",
-                "message": "BTC inflows 9.4x average"
+                "date": "2026-03-23-1301",
+                "asset": "ETH",
+                "type": "extreme_outflow",
+                "value": -69081319.87523656,
+                "vs_average": 5.3,
+                "priority": "HIGH BULLISH",
+                "emoji": "\ud83d\udfe2",
+                "message": "ETH outflows 5.3x average \u2014 +$69.1M withdrawn from exchanges (accumulation)"
+            },
+            {
+                "date": "2026-03-23-1301",
+                "asset": "ETH",
+                "type": "smart_money_top_pnl",
+                "value": 38668979.45515774,
+                "vs_average": 11.1,
+                "priority": "HIGH BULLISH",
+                "emoji": "\ud83d\udfe2",
+                "message": "Top PnL ETH inflow at 11.1x average \u2014 accumulating"
+            },
+            {
+                "date": "2026-03-23-1301",
+                "asset": "USDC",
+                "type": "large_outflow",
+                "value": -192411044.68414283,
+                "vs_average": 3.3,
+                "priority": "HIGH",
+                "emoji": "\ud83d\udfe0",
+                "message": "USDC outflows 3.3x average"
             }
         ]
     }

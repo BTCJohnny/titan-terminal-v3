@@ -1,0 +1,195 @@
+{
+  "phase": 4,
+  "symbol": "APT",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=0.75]",
+      "walk_forward_pass": false,
+      "train": {
+        "name": "E3: BB Upper Touch + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 11,
+        "win_rate": 0.273,
+        "profit_factor": 0.77,
+        "expectancy_usd": -161.29,
+        "total_pnl_usd": -1774.21,
+        "max_drawdown_pct": 6.99,
+        "avg_r_achieved": -0.14
+      },
+      "test": {
+        "name": "E3: BB Upper Touch + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.286,
+        "profit_factor": 0.75,
+        "expectancy_usd": -171.56,
+        "total_pnl_usd": -1200.9,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": -0.15
+      },
+      "full": {
+        "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=0.75]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.375,
+        "profit_factor": 2.5,
+        "expectancy_usd": 972.89,
+        "total_pnl_usd": 7783.11,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.98
+      }
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E1: MACD Rollover + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 13,
+        "win_rate": 0.615,
+        "profit_factor": 2.3,
+        "expectancy_usd": 544.95,
+        "total_pnl_usd": 7084.32,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.53
+      },
+      "test": {
+        "name": "E1: MACD Rollover + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.625,
+        "profit_factor": 2.19,
+        "expectancy_usd": 453.11,
+        "total_pnl_usd": 3624.85,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.45
+      },
+      "full": {
+        "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 13,
+        "win_rate": 0.615,
+        "profit_factor": 3.04,
+        "expectancy_usd": 891.9,
+        "total_pnl_usd": 11594.76,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.83
+      }
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E1: MACD Rollover + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 13,
+        "win_rate": 0.615,
+        "profit_factor": 2.3,
+        "expectancy_usd": 544.95,
+        "total_pnl_usd": 7084.32,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.53
+      },
+      "test": {
+        "name": "E1: MACD Rollover + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.625,
+        "profit_factor": 2.19,
+        "expectancy_usd": 453.11,
+        "total_pnl_usd": 3624.85,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.45
+      },
+      "full": {
+        "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.0]",
+        "direction": "SHORT",
+        "total_trades": 17,
+        "win_rate": 0.412,
+        "profit_factor": 2.09,
+        "expectancy_usd": 720.77,
+        "total_pnl_usd": 12253.14,
+        "max_drawdown_pct": 14.92,
+        "avg_r_achieved": 0.7
+      }
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=3.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E1: MACD Rollover + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 13,
+        "win_rate": 0.615,
+        "profit_factor": 2.3,
+        "expectancy_usd": 544.95,
+        "total_pnl_usd": 7084.32,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.53
+      },
+      "test": {
+        "name": "E1: MACD Rollover + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.625,
+        "profit_factor": 2.19,
+        "expectancy_usd": 453.11,
+        "total_pnl_usd": 3624.85,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.45
+      },
+      "full": {
+        "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 16,
+        "win_rate": 0.688,
+        "profit_factor": 2.93,
+        "expectancy_usd": 690.17,
+        "total_pnl_usd": 11042.72,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.64
+      }
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E1: MACD Rollover + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 13,
+        "win_rate": 0.615,
+        "profit_factor": 2.3,
+        "expectancy_usd": 544.95,
+        "total_pnl_usd": 7084.32,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.53
+      },
+      "test": {
+        "name": "E1: MACD Rollover + Death Cross",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.625,
+        "profit_factor": 2.19,
+        "expectancy_usd": 453.11,
+        "total_pnl_usd": 3624.85,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.45
+      },
+      "full": {
+        "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 14,
+        "win_rate": 0.643,
+        "profit_factor": 2.65,
+        "expectancy_usd": 658.82,
+        "total_pnl_usd": 9223.43,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.62
+      }
+    }
+  ]
+}

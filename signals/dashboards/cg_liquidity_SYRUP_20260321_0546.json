@@ -1,0 +1,132 @@
+{
+  "fetched_at": "2026-03-21T05:46:17.368967",
+  "symbol": "SYRUP",
+  "current_price": 0.238,
+  "funding": {
+    "symbol": "SYRUP",
+    "avg_rate": 0.00149545,
+    "avg_rate_pct": "0.1495%",
+    "max_rate": 0.03152216,
+    "max_exchange": "Kraken",
+    "min_rate": -0.052,
+    "min_exchange": "KuCoin",
+    "num_exchanges": 16,
+    "annualized_cost_pct": 349.34,
+    "bias": "long_crowded",
+    "interpretation": "SYRUP avg funding: 0.1495% across 16 exchanges. Longs paying heavily \u2014 crowded long positioning, squeeze DOWN risk. Annualized cost: 349.3% for the dominant side"
+  },
+  "open_interest": {
+    "history": {
+      "symbol": "SYRUP",
+      "current_oi_usd": 16616125.1549,
+      "oi_24h_ago_usd": 15069199.0,
+      "oi_change_24h_pct": 10.27,
+      "oi_change_period_pct": 4.35,
+      "oi_trend": "rising",
+      "interpretation": "SYRUP OI: $16.6M (+10.3% 24h). OI expanding \u2014 new positions entering the market"
+    },
+    "exchanges": {
+      "symbol": "SYRUP",
+      "total_oi_usd": 16616125.1549,
+      "change_1h_pct": -0.35,
+      "change_4h_pct": 0.42,
+      "change_24h_pct": 12.3,
+      "momentum": "stable",
+      "top_exchange_changes": [
+        {
+          "exchange": "LBank",
+          "change_1h_pct": 65.94,
+          "oi_usd": 15275.27212
+        },
+        {
+          "exchange": "Bitget",
+          "change_1h_pct": -6.82,
+          "oi_usd": 551128.5398
+        },
+        {
+          "exchange": "Bitunix",
+          "change_1h_pct": 0.77,
+          "oi_usd": 98035.01169
+        }
+      ],
+      "interpretation": "SYRUP total OI: $16.6M (+12.3% 24h). Biggest mover: LBank (+65.9% 1h)"
+    }
+  },
+  "long_short": {
+    "global": {
+      "symbol": "SYRUP",
+      "current_long_pct": 36.75,
+      "current_short_pct": 63.25,
+      "current_ratio": 0.58,
+      "trend": "more_shorts",
+      "extreme": false,
+      "contrarian_signal": null,
+      "interpretation": "SYRUP Global L/S: 0.58x (36.8% long / 63.2% short). Crowd shifting short \u2014 retail piling into shorts"
+    },
+    "top_traders": {
+      "symbol": "SYRUP",
+      "top_account_long_pct": 41.01,
+      "top_account_ratio": 0.7,
+      "top_position_long_pct": 55.71,
+      "top_position_ratio": 1.26,
+      "account_position_divergence": true,
+      "smart_money_lean": "long",
+      "interpretation": "SYRUP Top Traders \u2014 Account: 0.70x (41.0% long), Position: 1.26x (55.7% long). Account/Position divergence: fewer longs by count (acct 41%) but larger positions (56%) \u2014 concentrated conviction longs. Smart money lean: LONG (position-weighted)"
+    }
+  },
+  "liquidation": {
+    "symbol": "SYRUP",
+    "total_24h_usd": 266.5728604,
+    "long_liq_24h_usd": 266.5728604,
+    "short_liq_24h_usd": 0.0,
+    "long_short_ratio": 99.0,
+    "bias": "long_pain",
+    "recent_acceleration": false,
+    "timeframe_breakdown": {
+      "24h": {
+        "total": 266.5728604,
+        "long": 266.5728604,
+        "short": 0.0
+      },
+      "12h": {
+        "total": 12.7251,
+        "long": 12.7251,
+        "short": 0.0
+      },
+      "4h": {
+        "total": 12.7251,
+        "long": 12.7251,
+        "short": 0.0
+      },
+      "1h": {
+        "total": 12.7251,
+        "long": 12.7251,
+        "short": 0.0
+      }
+    },
+    "interpretation": "SYRUP 24h liquidations: $267 (Long: $267 | Short: $0). Longs getting wrecked 99.0x more than shorts \u2014 bearish pressure, price declining"
+  },
+  "max_pain": {
+    "nearest_expiry": null,
+    "max_pain_price": 0,
+    "distance_pct": 0,
+    "direction": "at",
+    "put_call_oi_ratio": 1.0,
+    "expiries": [],
+    "interpretation": "No options market for SYRUP"
+  },
+  "options": {
+    "total_oi_usd": 0,
+    "volume_24h_usd": 0,
+    "oi_change_24h_pct": 0,
+    "interpretation": "Options info unavailable"
+  },
+  "setup": {
+    "detected": false,
+    "direction": null,
+    "confidence": "low",
+    "snap_back_target": null,
+    "thesis": "No liquidity grab setup detected",
+    "components": {}
+  }
+}

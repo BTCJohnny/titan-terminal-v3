@@ -109,9 +109,21 @@ CMC_TIMEFRAME_MAP = {
 # How many candles to fetch per timeframe (Coinbase returns up to 300)
 CANDLES_PER_REQUEST = 300
 
-# Default candle count for initial fetch (180 days at 4h = 1080 bars)
+# Default candle count for initial fetch per timeframe (~180 days of data)
 # Hyperliquid supports up to 5000 if needed
 DEFAULT_CANDLE_COUNT = 1080
+
+# Per-timeframe minimum candle counts (ensures sufficient history for analysis)
+TIMEFRAME_CANDLE_MINIMUMS = {
+    "1h": 4320,   # 180 days × 24h
+    "4h": 1080,   # 180 days × 6
+    "1d": 365,    # 365 days
+    "1w": 200,    # ~4 years
+}
+
+def get_default_candle_count(timeframe: str) -> int:
+    """Return the target candle count for a given timeframe."""
+    return TIMEFRAME_CANDLE_MINIMUMS.get(timeframe, DEFAULT_CANDLE_COUNT)
 
 
 # ============================================================================
@@ -289,7 +301,7 @@ def calculate_candles_needed(symbol: str, timeframe: str) -> tuple[int, str]:
 
     if latest_ts is None:
         # No cache - do initial full fetch
-        return DEFAULT_CANDLE_COUNT, "initial"
+        return get_default_candle_count(timeframe), "initial"
 
     # Calculate gap from last cached candle to now
     tf_ms = {
@@ -458,10 +470,10 @@ def fetch_from_hyperliquid(symbol: str, timeframe: str, candle_count: int = None
     Args:
         symbol: Token symbol (e.g., BTC, ETH)
         timeframe: Candle timeframe (e.g., 4h, 1d)
-        candle_count: Number of candles to fetch (default: DEFAULT_CANDLE_COUNT)
+        candle_count: Number of candles to fetch (default: per-timeframe minimum)
     """
     if candle_count is None:
-        candle_count = DEFAULT_CANDLE_COUNT
+        candle_count = get_default_candle_count(timeframe)
     hl_tf = HL_TIMEFRAME_MAP.get(timeframe)
     if not hl_tf:
         return []
@@ -1397,9 +1409,15 @@ def cmd_download(args):
     candles_needed, fetch_mode = calculate_candles_needed(symbol, timeframe)
     cached_count = get_cached_candle_count(symbol, timeframe)
 
-    # --full flag forces full 4500-bar fetch regardless of cache
+    # --full flag forces full backfill to timeframe minimum regardless of cache
+    target_count = get_default_candle_count(timeframe)
     if args.full:
-        candles_needed = DEFAULT_CANDLE_COUNT
+        candles_needed = target_count
+        fetch_mode = "full_backfill"
+
+    # Auto-backfill if cache is below the timeframe minimum
+    elif fetch_mode == "incremental" and cached_count < target_count:
+        candles_needed = target_count
         fetch_mode = "full_backfill"
 
     if fetch_mode == "initial":
@@ -1415,7 +1433,7 @@ def cmd_download(args):
     if not args.force and fetch_mode == "incremental" and not should_refresh(symbol, timeframe):
         last = get_last_update(symbol, timeframe)
         print(f"Data is fresh (last update: {last.strftime('%Y-%m-%d %H:%M UTC')})")
-        print(f"Use --force to re-download anyway, or --full to backfill to {DEFAULT_CANDLE_COUNT} bars.")
+        print(f"Use --force to re-download anyway, or --full to backfill to {target_count} bars.")
         return
 
     candles, source = fetch_candles_from_api(symbol, timeframe, candles_needed)

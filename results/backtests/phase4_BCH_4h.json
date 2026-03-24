@@ -1,0 +1,299 @@
+{
+  "phase": 4,
+  "symbol": "BCH",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "D1: Volatility Squeeze Breakout [oi_surge_pct=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "D1: Volatility Squeeze Breakout [oi_surge_pct=4.5]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.833,
+        "profit_factor": 9.86,
+        "expectancy_usd": 1506.58,
+        "total_pnl_usd": 9039.5,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.42
+      },
+      "test": {
+        "name": "D1: Volatility Squeeze Breakout [oi_surge_pct=4.5]",
+        "direction": "LONG",
+        "total_trades": 2,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2313.69,
+        "total_pnl_usd": 4627.38,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.26
+      },
+      "full": {
+        "name": "D1: Volatility Squeeze Breakout [oi_surge_pct=4.5]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.833,
+        "profit_factor": 9.86,
+        "expectancy_usd": 1506.58,
+        "total_pnl_usd": 9039.5,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.42,
+        "strategy": {
+          "name": "D1: Volatility Squeeze Breakout [oi_surge_pct=4.5]",
+          "description": "BB squeeze + no trend + OI building = coiled spring. Direction TBD.",
+          "direction": "LONG",
+          "entry_signals": [
+            "bb_squeeze",
+            "adx_weak_trend",
+            "oi_surge"
+          ],
+          "entry_params": {
+            "bb_squeeze_pct": 0.2,
+            "adx_weak": 20,
+            "oi_surge_pct": 4.5
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E7: OI Surge + BB Squeeze (ETH) [target1_atr_mult=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [target1_atr_mult=4.5]",
+        "direction": "LONG",
+        "total_trades": 12,
+        "win_rate": 0.417,
+        "profit_factor": 2.34,
+        "expectancy_usd": 767.72,
+        "total_pnl_usd": 9212.65,
+        "max_drawdown_pct": 9.61,
+        "avg_r_achieved": 0.75
+      },
+      "test": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [target1_atr_mult=4.5]",
+        "direction": "LONG",
+        "total_trades": 4,
+        "win_rate": 0.75,
+        "profit_factor": 8.84,
+        "expectancy_usd": 2095.89,
+        "total_pnl_usd": 8383.56,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 2.0
+      },
+      "full": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [target1_atr_mult=4.5]",
+        "direction": "LONG",
+        "total_trades": 12,
+        "win_rate": 0.417,
+        "profit_factor": 2.34,
+        "expectancy_usd": 767.72,
+        "total_pnl_usd": 9212.65,
+        "max_drawdown_pct": 9.61,
+        "avg_r_achieved": 0.75,
+        "strategy": {
+          "name": "E7: OI Surge + BB Squeeze (ETH) [target1_atr_mult=4.5]",
+          "description": "New money entering compressed volatility \u2014 breakout fuel accumulating",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "bb_squeeze"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0,
+            "bb_squeeze_pct": 0.25
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 4.5,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "C2: OI Distribution [target1_atr_mult=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "C2: OI Distribution [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.75,
+        "profit_factor": 3.72,
+        "expectancy_usd": 728.23,
+        "total_pnl_usd": 5825.86,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.7
+      },
+      "test": {
+        "name": "C2: OI Distribution [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 4,
+        "win_rate": 0.5,
+        "profit_factor": 2.32,
+        "expectancy_usd": 668.98,
+        "total_pnl_usd": 2675.93,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.68
+      },
+      "full": {
+        "name": "C2: OI Distribution [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.75,
+        "profit_factor": 3.72,
+        "expectancy_usd": 728.23,
+        "total_pnl_usd": 5825.86,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.7,
+        "strategy": {
+          "name": "C2: OI Distribution [target1_atr_mult=4.5]",
+          "description": "Short when leverage building on rising price \u2014 fragile rally",
+          "direction": "SHORT",
+          "entry_signals": [
+            "oi_price_divergence_bearish",
+            "rsi_overbought"
+          ],
+          "entry_params": {
+            "rsi_ob": 65
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 4.5,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "G2: Momentum Continuation Long [stop_atr_mult=1.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "G2: Momentum Continuation Long [stop_atr_mult=1.5]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 2.93,
+        "expectancy_usd": 675.81,
+        "total_pnl_usd": 4054.87,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.67
+      },
+      "test": {
+        "name": "G2: Momentum Continuation Long [stop_atr_mult=1.5]",
+        "direction": "LONG",
+        "total_trades": 2,
+        "win_rate": 0.5,
+        "profit_factor": 2.12,
+        "expectancy_usd": 582.62,
+        "total_pnl_usd": 1165.23,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.6
+      },
+      "full": {
+        "name": "G2: Momentum Continuation Long [stop_atr_mult=1.5]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 2.93,
+        "expectancy_usd": 675.81,
+        "total_pnl_usd": 4054.87,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.67,
+        "strategy": {
+          "name": "G2: Momentum Continuation Long [stop_atr_mult=1.5]",
+          "description": "MACD bullish + golden cross + volume surge \u2014 trend continuation with fuel",
+          "direction": "LONG",
+          "entry_signals": [
+            "macd_bullish_cross",
+            "trend_bullish",
+            "volume_surge"
+          ],
+          "entry_params": {
+            "vol_surge": 1.5
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "F2: Oversold Bounce (Any Regime) [target2_atr_mult=2.62]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "F2: Oversold Bounce (Any Regime) [target2_atr_mult=2.62]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 2.04,
+        "expectancy_usd": 436.58,
+        "total_pnl_usd": 2182.9,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.44
+      },
+      "test": {
+        "name": "F2: Oversold Bounce (Any Regime) [target2_atr_mult=2.62]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 2.04,
+        "expectancy_usd": 436.58,
+        "total_pnl_usd": 2182.9,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.44
+      },
+      "full": {
+        "name": "F2: Oversold Bounce (Any Regime) [target2_atr_mult=2.62]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 2.04,
+        "expectancy_usd": 436.58,
+        "total_pnl_usd": 2182.9,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.44,
+        "strategy": {
+          "name": "F2: Oversold Bounce (Any Regime) [target2_atr_mult=2.62]",
+          "description": "BB lower touch + RSI oversold \u2014 pure mean reversion, no regime filter",
+          "direction": "LONG",
+          "entry_signals": [
+            "bb_touch_lower",
+            "rsi_oversold"
+          ],
+          "entry_params": {
+            "rsi_os": 25
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target2_atr_mult": 2.62,
+            "scale_out_pct": 0.5,
+            "max_bars": 25
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,293 @@
+{
+  "phase": 4,
+  "symbol": "BNB",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "C2: OI Distribution [target2_atr_mult=3.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "C2: OI Distribution [target2_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1304.21,
+        "total_pnl_usd": 6521.03,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.24
+      },
+      "test": {
+        "name": "C2: OI Distribution [target2_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1280.22,
+        "total_pnl_usd": 3840.67,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.25
+      },
+      "full": {
+        "name": "C2: OI Distribution [target2_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1304.21,
+        "total_pnl_usd": 6521.03,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.24,
+        "strategy": {
+          "name": "C2: OI Distribution [target2_atr_mult=3.0]",
+          "description": "Short when leverage building on rising price \u2014 fragile rally",
+          "direction": "SHORT",
+          "entry_signals": [
+            "oi_price_divergence_bearish",
+            "rsi_overbought"
+          ],
+          "entry_params": {
+            "rsi_ob": 65
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 3.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.375]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.375]",
+        "direction": "SHORT",
+        "total_trades": 15,
+        "win_rate": 0.867,
+        "profit_factor": 8.68,
+        "expectancy_usd": 1128.84,
+        "total_pnl_usd": 16932.67,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.99
+      },
+      "test": {
+        "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.375]",
+        "direction": "SHORT",
+        "total_trades": 10,
+        "win_rate": 0.7,
+        "profit_factor": 3.34,
+        "expectancy_usd": 687.59,
+        "total_pnl_usd": 6875.92,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.66
+      },
+      "full": {
+        "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.375]",
+        "direction": "SHORT",
+        "total_trades": 15,
+        "win_rate": 0.867,
+        "profit_factor": 8.68,
+        "expectancy_usd": 1128.84,
+        "total_pnl_usd": 16932.67,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.99,
+        "strategy": {
+          "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.375]",
+          "description": "Bearish regime + crowd positioned wrong \u2014 regime filter + crowd fade",
+          "direction": "SHORT",
+          "entry_signals": [
+            "trend_bearish",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 2.375
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E2: MACD Rollover + Crowd Long [ls_crowd_long=2.85]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E2: MACD Rollover + Crowd Long [ls_crowd_long=2.85]",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.714,
+        "profit_factor": 4.33,
+        "expectancy_usd": 1011.0,
+        "total_pnl_usd": 7077.02,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.97
+      },
+      "test": {
+        "name": "E2: MACD Rollover + Crowd Long [ls_crowd_long=2.85]",
+        "direction": "SHORT",
+        "total_trades": 2,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2300.62,
+        "total_pnl_usd": 4601.25,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.25
+      },
+      "full": {
+        "name": "E2: MACD Rollover + Crowd Long [ls_crowd_long=2.85]",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.714,
+        "profit_factor": 4.33,
+        "expectancy_usd": 1011.0,
+        "total_pnl_usd": 7077.02,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.97,
+        "strategy": {
+          "name": "E2: MACD Rollover + Crowd Long [ls_crowd_long=2.85]",
+          "description": "MACD bearish cross when crowd is long \u2014 timing + positioning alignment",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 2.85
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=1.12]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 3.58,
+        "expectancy_usd": 900.71,
+        "total_pnl_usd": 5404.27,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.89
+      },
+      "test": {
+        "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 4,
+        "win_rate": 0.75,
+        "profit_factor": 3.86,
+        "expectancy_usd": 746.69,
+        "total_pnl_usd": 2986.76,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.74
+      },
+      "full": {
+        "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 3.58,
+        "expectancy_usd": 900.71,
+        "total_pnl_usd": 5404.27,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.89,
+        "strategy": {
+          "name": "E3: BB Upper Touch + Death Cross [stop_atr_mult=1.12]",
+          "description": "Price hits upper BB in a bearish regime \u2014 overbought in downtrend",
+          "direction": "SHORT",
+          "entry_signals": [
+            "bb_touch_upper",
+            "trend_bearish"
+          ],
+          "entry_params": {},
+          "exit": {
+            "stop_atr_mult": 1.12,
+            "target1_atr_mult": 2.5,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 45
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E4: BB Upper + Crowd Long [stop_atr_mult=1.12]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E4: BB Upper + Crowd Long [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 3.58,
+        "expectancy_usd": 900.71,
+        "total_pnl_usd": 5404.27,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.89
+      },
+      "test": {
+        "name": "E4: BB Upper + Crowd Long [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 4,
+        "win_rate": 0.75,
+        "profit_factor": 3.86,
+        "expectancy_usd": 746.69,
+        "total_pnl_usd": 2986.76,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.74
+      },
+      "full": {
+        "name": "E4: BB Upper + Crowd Long [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 3.58,
+        "expectancy_usd": 900.71,
+        "total_pnl_usd": 5404.27,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.89,
+        "strategy": {
+          "name": "E4: BB Upper + Crowd Long [stop_atr_mult=1.12]",
+          "description": "Price at BB upper when crowd is positioned long \u2014 distribution fade",
+          "direction": "SHORT",
+          "entry_signals": [
+            "bb_touch_upper",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 1.9
+          },
+          "exit": {
+            "stop_atr_mult": 1.12,
+            "target1_atr_mult": 2.5,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 45
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

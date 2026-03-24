@@ -119,15 +119,15 @@ def volume_surge(data, params=None) -> bool:
 # ============================================================================
 
 def funding_extreme_positive(data, params=None) -> bool:
-    """Funding rate extremely positive (longs paying heavily). Default: 0.0003 (0.03%)"""
-    threshold = (params or {}).get("funding_extreme_pos", 0.0003)
+    """Funding rate extremely positive (longs paying heavily). Default: 0.008 (P90 of 180d data)"""
+    threshold = (params or {}).get("funding_extreme_pos", 0.008)
     fr = data.get("funding_rate_avg")
     return fr is not None and fr >= threshold
 
 
 def funding_extreme_negative(data, params=None) -> bool:
-    """Funding rate extremely negative (shorts paying). Default: -0.0003"""
-    threshold = (params or {}).get("funding_extreme_neg", -0.0003)
+    """Funding rate extremely negative (shorts paying). Default: -0.01 (P10 of 180d data)"""
+    threshold = (params or {}).get("funding_extreme_neg", -0.01)
     fr = data.get("funding_rate_avg")
     return fr is not None and fr <= threshold
 
@@ -161,8 +161,8 @@ def ls_crowd_long(data, params=None) -> bool:
 
 
 def ls_crowd_short(data, params=None) -> bool:
-    """Global L/S ratio shows crowd is heavily short. Default: 0.55 (35% long)"""
-    threshold = (params or {}).get("ls_crowd_short", 0.55)
+    """Global L/S ratio shows crowd is heavily short. Default: 0.85 (P10 of 180d data)"""
+    threshold = (params or {}).get("ls_crowd_short", 0.85)
     r = data.get("ls_global_ratio")
     return r is not None and r <= threshold
 
@@ -183,15 +183,15 @@ def top_trader_divergence(data, params=None) -> bool:
 
 
 def liq_cascade_long(data, params=None) -> bool:
-    """Massive long liquidations (>$X in 24h). Default: 100M"""
-    threshold = (params or {}).get("liq_cascade_usd", 100_000_000)
+    """Massive long liquidations (>$X in 24h). Default: 10M (P95 of 180d data)"""
+    threshold = (params or {}).get("liq_cascade_usd", 10_000_000)
     liq = data.get("liq_long_24h_usd")
     return liq is not None and liq >= threshold
 
 
 def liq_cascade_short(data, params=None) -> bool:
-    """Massive short liquidations. Default: 100M"""
-    threshold = (params or {}).get("liq_cascade_usd", 100_000_000)
+    """Massive short liquidations (>$X in 24h). Default: 5M (P95 of 180d data)"""
+    threshold = (params or {}).get("liq_cascade_usd", 5_000_000)
     liq = data.get("liq_short_24h_usd")
     return liq is not None and liq >= threshold
 
@@ -204,8 +204,8 @@ def fear_greed_extreme_fear(data, params=None) -> bool:
 
 
 def fear_greed_extreme_greed(data, params=None) -> bool:
-    """Fear & Greed in extreme greed. Default: >= 80"""
-    threshold = (params or {}).get("fg_greed", 80)
+    """Fear & Greed in extreme greed. Default: >= 65 (above P95 of 180d data; max was 75)"""
+    threshold = (params or {}).get("fg_greed", 65)
     fg = data.get("fear_greed_value")
     return fg is not None and fg >= threshold
 
@@ -218,8 +218,8 @@ def etf_inflow_streak(data, params=None) -> bool:
 
 
 def coinbase_premium_positive(data, params=None) -> bool:
-    """Coinbase premium positive (US institutional demand). Default: > 0.0005"""
-    threshold = (params or {}).get("cb_premium_pos", 0.0005)
+    """Coinbase premium positive (US institutional demand). Default: > 0.02 (P75 of 180d data)"""
+    threshold = (params or {}).get("cb_premium_pos", 0.02)
     rate = data.get("coinbase_premium_rate")
     return rate is not None and rate >= threshold
 

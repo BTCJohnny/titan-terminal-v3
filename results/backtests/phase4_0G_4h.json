@@ -1,0 +1,296 @@
+{
+  "phase": 4,
+  "symbol": "0G",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "F6: Fear Oversold Bounce [stop_atr_mult=1.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "F6: Fear Oversold Bounce [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 11,
+        "win_rate": 0.455,
+        "profit_factor": 2.63,
+        "expectancy_usd": 986.62,
+        "total_pnl_usd": 10852.77,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.95
+      },
+      "test": {
+        "name": "F6: Fear Oversold Bounce [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 7,
+        "win_rate": 0.429,
+        "profit_factor": 2.51,
+        "expectancy_usd": 919.58,
+        "total_pnl_usd": 6437.08,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.93
+      },
+      "full": {
+        "name": "F6: Fear Oversold Bounce [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 11,
+        "win_rate": 0.455,
+        "profit_factor": 2.63,
+        "expectancy_usd": 986.62,
+        "total_pnl_usd": 10852.77,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.95,
+        "strategy": {
+          "name": "F6: Fear Oversold Bounce [stop_atr_mult=1.0]",
+          "description": "Extreme fear + BB lower \u2014 sentiment and price both at extremes",
+          "direction": "LONG",
+          "entry_signals": [
+            "fear_greed_extreme_fear",
+            "bb_touch_lower"
+          ],
+          "entry_params": {
+            "fg_fear": 20
+          },
+          "exit": {
+            "stop_atr_mult": 1.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 45
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 15,
+        "win_rate": 0.6,
+        "profit_factor": 2.05,
+        "expectancy_usd": 458.47,
+        "total_pnl_usd": 6877.08,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.45
+      },
+      "test": {
+        "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 9,
+        "win_rate": 0.556,
+        "profit_factor": 1.78,
+        "expectancy_usd": 362.28,
+        "total_pnl_usd": 3260.55,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.37
+      },
+      "full": {
+        "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 15,
+        "win_rate": 0.6,
+        "profit_factor": 2.05,
+        "expectancy_usd": 458.47,
+        "total_pnl_usd": 6877.08,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.45,
+        "strategy": {
+          "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+          "description": "MACD bearish cross in a confirmed downtrend \u2014 momentum aligns with regime",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "trend_bearish"
+          ],
+          "entry_params": {},
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 4.5,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=3.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 10,
+        "win_rate": 0.7,
+        "profit_factor": 3.01,
+        "expectancy_usd": 444.71,
+        "total_pnl_usd": 4447.06,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.43
+      },
+      "test": {
+        "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 2.02,
+        "expectancy_usd": 308.05,
+        "total_pnl_usd": 2156.35,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.31
+      },
+      "full": {
+        "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 10,
+        "win_rate": 0.7,
+        "profit_factor": 3.01,
+        "expectancy_usd": 444.71,
+        "total_pnl_usd": 4447.06,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.43,
+        "strategy": {
+          "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=3.0]",
+          "description": "MACD momentum turning up in strong trend \u2014 confirmed trend acceleration",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "adx_strong_trend"
+          ],
+          "entry_params": {
+            "adx_strong": 25
+          },
+          "exit": {
+            "stop_atr_mult": 3.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "D1: Volatility Squeeze Breakout (SHORT) [target1_atr_mult=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "D1: Volatility Squeeze Breakout (SHORT) [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.333,
+        "profit_factor": 1.48,
+        "expectancy_usd": 310.78,
+        "total_pnl_usd": 1864.7,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.34
+      },
+      "test": {
+        "name": "D1: Volatility Squeeze Breakout (SHORT) [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 4,
+        "win_rate": 0.5,
+        "profit_factor": 3.02,
+        "expectancy_usd": 1000.81,
+        "total_pnl_usd": 4003.22,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.01
+      },
+      "full": {
+        "name": "D1: Volatility Squeeze Breakout (SHORT) [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.333,
+        "profit_factor": 1.48,
+        "expectancy_usd": 310.78,
+        "total_pnl_usd": 1864.7,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.34,
+        "strategy": {
+          "name": "D1: Volatility Squeeze Breakout (SHORT) [target1_atr_mult=4.5]",
+          "description": "BB squeeze + no trend + OI building = coiled spring. Direction TBD.",
+          "direction": "SHORT",
+          "entry_signals": [
+            "bb_squeeze",
+            "adx_weak_trend",
+            "oi_surge"
+          ],
+          "entry_params": {
+            "bb_squeeze_pct": 0.2,
+            "adx_weak": 20,
+            "oi_surge_pct": 3.0
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 4.5,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "C2: OI Distribution [stop_atr_mult=1.0]",
+      "walk_forward_pass": false,
+      "train": {
+        "name": "C2: OI Distribution [stop_atr_mult=1.0]",
+        "direction": "SHORT",
+        "total_trades": 14,
+        "win_rate": 0.286,
+        "profit_factor": 1.18,
+        "expectancy_usd": 130.99,
+        "total_pnl_usd": 1833.81,
+        "max_drawdown_pct": 10.03,
+        "avg_r_achieved": 0.16
+      },
+      "test": {
+        "name": "C2: OI Distribution [stop_atr_mult=1.0]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.125,
+        "profit_factor": 0.42,
+        "expectancy_usd": -477.15,
+        "total_pnl_usd": -3817.23,
+        "max_drawdown_pct": 13.19,
+        "avg_r_achieved": -0.47
+      },
+      "full": {
+        "name": "C2: OI Distribution [stop_atr_mult=1.0]",
+        "direction": "SHORT",
+        "total_trades": 14,
+        "win_rate": 0.286,
+        "profit_factor": 1.18,
+        "expectancy_usd": 130.99,
+        "total_pnl_usd": 1833.81,
+        "max_drawdown_pct": 10.03,
+        "avg_r_achieved": 0.16,
+        "strategy": {
+          "name": "C2: OI Distribution [stop_atr_mult=1.0]",
+          "description": "Short when leverage building on rising price \u2014 fragile rally",
+          "direction": "SHORT",
+          "entry_signals": [
+            "oi_price_divergence_bearish",
+            "rsi_overbought"
+          ],
+          "entry_params": {
+            "rsi_ob": 65
+          },
+          "exit": {
+            "stop_atr_mult": 1.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

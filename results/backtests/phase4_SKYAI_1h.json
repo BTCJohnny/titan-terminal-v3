@@ -1,0 +1,298 @@
+{
+  "phase": 4,
+  "symbol": "SKYAI",
+  "timeframe": "1h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+        "direction": "LONG",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 5.48,
+        "expectancy_usd": 2780.96,
+        "total_pnl_usd": 19466.69,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 2.5
+      },
+      "test": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+        "direction": "LONG",
+        "total_trades": 4,
+        "win_rate": 0.25,
+        "profit_factor": 1.82,
+        "expectancy_usd": 676.69,
+        "total_pnl_usd": 2706.75,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.75
+      },
+      "full": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+        "direction": "LONG",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 5.48,
+        "expectancy_usd": 2780.96,
+        "total_pnl_usd": 19466.69,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 2.5,
+        "strategy": {
+          "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=0.75]",
+          "description": "New money entering compressed volatility \u2014 breakout fuel accumulating",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "bb_squeeze"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0,
+            "bb_squeeze_pct": 0.25
+          },
+          "exit": {
+            "stop_atr_mult": 0.75,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target2_atr_mult=9.0]",
+      "walk_forward_pass": false,
+      "train": {
+        "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target2_atr_mult=9.0]",
+        "direction": "SHORT",
+        "total_trades": 2,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 3095.12,
+        "total_pnl_usd": 6190.24,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 3.01
+      },
+      "test": {
+        "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target2_atr_mult=9.0]",
+        "direction": "?",
+        "total_trades": 0,
+        "win_rate": 0,
+        "profit_factor": 0,
+        "expectancy_usd": 0,
+        "total_pnl_usd": 0,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 0
+      },
+      "full": {
+        "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target2_atr_mult=9.0]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2627.43,
+        "total_pnl_usd": 13137.15,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.41,
+        "strategy": {
+          "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target2_atr_mult=9.0]",
+          "description": "All three BTC short signals aligned \u2014 highest conviction",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "trend_bearish",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 1.9
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 9.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E8: OI Surge + RSI Oversold (ETH) [oi_surge_pct=2.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E8: OI Surge + RSI Oversold (ETH) [oi_surge_pct=2.5]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2305.41,
+        "total_pnl_usd": 11527.03,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.12
+      },
+      "test": {
+        "name": "E8: OI Surge + RSI Oversold (ETH) [oi_surge_pct=2.5]",
+        "direction": "LONG",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2114.05,
+        "total_pnl_usd": 6342.14,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.03
+      },
+      "full": {
+        "name": "E8: OI Surge + RSI Oversold (ETH) [oi_surge_pct=2.5]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2382.62,
+        "total_pnl_usd": 14295.75,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.14,
+        "strategy": {
+          "name": "E8: OI Surge + RSI Oversold (ETH) [oi_surge_pct=2.5]",
+          "description": "New money entering while price oversold \u2014 bounce with fuel",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "rsi_oversold"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.5,
+            "rsi_os": 35
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E10: OI Div Bullish + RSI Oversold (ETH) [target1_atr_mult=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E10: OI Div Bullish + RSI Oversold (ETH) [target1_atr_mult=4.5]",
+        "direction": "LONG",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2523.06,
+        "total_pnl_usd": 7569.18,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.41
+      },
+      "test": {
+        "name": "E10: OI Div Bullish + RSI Oversold (ETH) [target1_atr_mult=4.5]",
+        "direction": "LONG",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2523.06,
+        "total_pnl_usd": 7569.18,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.41
+      },
+      "full": {
+        "name": "E10: OI Div Bullish + RSI Oversold (ETH) [target1_atr_mult=4.5]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.8,
+        "profit_factor": 23.52,
+        "expectancy_usd": 2010.14,
+        "total_pnl_usd": 10050.71,
+        "max_drawdown_pct": 0.89,
+        "avg_r_achieved": 1.88,
+        "strategy": {
+          "name": "E10: OI Div Bullish + RSI Oversold (ETH) [target1_atr_mult=4.5]",
+          "description": "OI building while price drops + oversold \u2014 accumulation bounce",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_price_divergence_bullish",
+            "rsi_oversold"
+          ],
+          "entry_params": {
+            "rsi_os": 35
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 4.5,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "C1: OI Accumulation [target1_atr_mult=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "C1: OI Accumulation [target1_atr_mult=4.5]",
+        "direction": "LONG",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2570.95,
+        "total_pnl_usd": 7712.84,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.45
+      },
+      "test": {
+        "name": "C1: OI Accumulation [target1_atr_mult=4.5]",
+        "direction": "LONG",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 2570.95,
+        "total_pnl_usd": 7712.84,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 2.45
+      },
+      "full": {
+        "name": "C1: OI Accumulation [target1_atr_mult=4.5]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.8,
+        "profit_factor": 10.53,
+        "expectancy_usd": 1905.58,
+        "total_pnl_usd": 9527.9,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.8,
+        "strategy": {
+          "name": "C1: OI Accumulation [target1_atr_mult=4.5]",
+          "description": "Long when OI building while price dips \u2014 someone loading quietly",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_price_divergence_bullish",
+            "rsi_oversold"
+          ],
+          "entry_params": {
+            "rsi_os": 35
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 4.5,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

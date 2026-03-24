@@ -1,0 +1,296 @@
+{
+  "phase": 4,
+  "symbol": "JUP",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "G12: MACD Bullish + ADX Strong (SHORT) [target2_atr_mult=3.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "G12: MACD Bullish + ADX Strong (SHORT) [target2_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1472.19,
+        "total_pnl_usd": 8833.17,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.38
+      },
+      "test": {
+        "name": "G12: MACD Bullish + ADX Strong (SHORT) [target2_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1423.92,
+        "total_pnl_usd": 7119.58,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.35
+      },
+      "full": {
+        "name": "G12: MACD Bullish + ADX Strong (SHORT) [target2_atr_mult=3.0]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1472.19,
+        "total_pnl_usd": 8833.17,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.38,
+        "strategy": {
+          "name": "G12: MACD Bullish + ADX Strong (SHORT) [target2_atr_mult=3.0]",
+          "description": "MACD momentum turning up in strong trend \u2014 confirmed trend acceleration",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "adx_strong_trend"
+          ],
+          "entry_params": {
+            "adx_strong": 25
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 3.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E7: OI Surge + BB Squeeze (ETH) [oi_surge_pct=3.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [oi_surge_pct=3.0]",
+        "direction": "LONG",
+        "total_trades": 9,
+        "win_rate": 0.667,
+        "profit_factor": 3.98,
+        "expectancy_usd": 1053.26,
+        "total_pnl_usd": 9479.35,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.0
+      },
+      "test": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [oi_surge_pct=3.0]",
+        "direction": "LONG",
+        "total_trades": 7,
+        "win_rate": 0.714,
+        "profit_factor": 5.38,
+        "expectancy_usd": 1357.59,
+        "total_pnl_usd": 9503.16,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.29
+      },
+      "full": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [oi_surge_pct=3.0]",
+        "direction": "LONG",
+        "total_trades": 9,
+        "win_rate": 0.667,
+        "profit_factor": 3.98,
+        "expectancy_usd": 1053.26,
+        "total_pnl_usd": 9479.35,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.0,
+        "strategy": {
+          "name": "E7: OI Surge + BB Squeeze (ETH) [oi_surge_pct=3.0]",
+          "description": "New money entering compressed volatility \u2014 breakout fuel accumulating",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "bb_squeeze"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 3.0,
+            "bb_squeeze_pct": 0.25
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "D1: Volatility Squeeze Breakout [adx_weak=25.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "D1: Volatility Squeeze Breakout [adx_weak=25.0]",
+        "direction": "LONG",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 3.3,
+        "expectancy_usd": 1024.24,
+        "total_pnl_usd": 7169.71,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.0
+      },
+      "test": {
+        "name": "D1: Volatility Squeeze Breakout [adx_weak=25.0]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 4.85,
+        "expectancy_usd": 1389.4,
+        "total_pnl_usd": 8336.43,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.33
+      },
+      "full": {
+        "name": "D1: Volatility Squeeze Breakout [adx_weak=25.0]",
+        "direction": "LONG",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 3.3,
+        "expectancy_usd": 1024.24,
+        "total_pnl_usd": 7169.71,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.0,
+        "strategy": {
+          "name": "D1: Volatility Squeeze Breakout [adx_weak=25.0]",
+          "description": "BB squeeze + no trend + OI building = coiled spring. Direction TBD.",
+          "direction": "LONG",
+          "entry_signals": [
+            "bb_squeeze",
+            "adx_weak_trend",
+            "oi_surge"
+          ],
+          "entry_params": {
+            "bb_squeeze_pct": 0.2,
+            "adx_weak": 25.0,
+            "oi_surge_pct": 3.0
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 13,
+        "win_rate": 0.692,
+        "profit_factor": 2.86,
+        "expectancy_usd": 680.07,
+        "total_pnl_usd": 8840.86,
+        "max_drawdown_pct": 2.52,
+        "avg_r_achieved": 0.64
+      },
+      "test": {
+        "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 1.34,
+        "expectancy_usd": 150.65,
+        "total_pnl_usd": 1054.56,
+        "max_drawdown_pct": 2.52,
+        "avg_r_achieved": 0.16
+      },
+      "full": {
+        "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 13,
+        "win_rate": 0.692,
+        "profit_factor": 2.86,
+        "expectancy_usd": 680.07,
+        "total_pnl_usd": 8840.86,
+        "max_drawdown_pct": 2.52,
+        "avg_r_achieved": 0.64,
+        "strategy": {
+          "name": "E1: MACD Rollover + Death Cross [target2_atr_mult=4.5]",
+          "description": "MACD bearish cross in a confirmed downtrend \u2014 momentum aligns with regime",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "trend_bearish"
+          ],
+          "entry_params": {},
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 4.5,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 31,
+        "win_rate": 0.387,
+        "profit_factor": 1.77,
+        "expectancy_usd": 552.0,
+        "total_pnl_usd": 17112.04,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.52
+      },
+      "test": {
+        "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 24,
+        "win_rate": 0.333,
+        "profit_factor": 1.62,
+        "expectancy_usd": 451.91,
+        "total_pnl_usd": 10845.9,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.46
+      },
+      "full": {
+        "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 31,
+        "win_rate": 0.387,
+        "profit_factor": 1.77,
+        "expectancy_usd": 552.0,
+        "total_pnl_usd": 17112.04,
+        "max_drawdown_pct": 7.76,
+        "avg_r_achieved": 0.52,
+        "strategy": {
+          "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+          "description": "Pure OI surge signal \u2014 ETH Phase 1 showed PF 4.92 standalone",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0
+          },
+          "exit": {
+            "stop_atr_mult": 1.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

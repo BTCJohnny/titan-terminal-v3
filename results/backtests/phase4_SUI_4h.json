@@ -1,0 +1,297 @@
+{
+  "phase": 4,
+  "symbol": "SUI",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.1875]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.1875]",
+        "direction": "LONG",
+        "total_trades": 8,
+        "win_rate": 0.875,
+        "profit_factor": 12.04,
+        "expectancy_usd": 1425.57,
+        "total_pnl_usd": 11404.53,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.31
+      },
+      "test": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.1875]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1775.58,
+        "total_pnl_usd": 10653.46,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.64
+      },
+      "full": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.1875]",
+        "direction": "LONG",
+        "total_trades": 8,
+        "win_rate": 0.875,
+        "profit_factor": 12.04,
+        "expectancy_usd": 1425.57,
+        "total_pnl_usd": 11404.53,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.31,
+        "strategy": {
+          "name": "E7: OI Surge + BB Squeeze (ETH) [bb_squeeze_pct=0.1875]",
+          "description": "New money entering compressed volatility \u2014 breakout fuel accumulating",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "bb_squeeze"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0,
+            "bb_squeeze_pct": 0.1875
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E5: Death Cross + Crowd Long [target1_atr_mult=3.75]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E5: Death Cross + Crowd Long [target1_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 12,
+        "win_rate": 0.667,
+        "profit_factor": 3.53,
+        "expectancy_usd": 974.4,
+        "total_pnl_usd": 11692.79,
+        "max_drawdown_pct": 2.16,
+        "avg_r_achieved": 0.91
+      },
+      "test": {
+        "name": "E5: Death Cross + Crowd Long [target1_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 2.8,
+        "expectancy_usd": 761.27,
+        "total_pnl_usd": 3806.37,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.76
+      },
+      "full": {
+        "name": "E5: Death Cross + Crowd Long [target1_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 12,
+        "win_rate": 0.667,
+        "profit_factor": 3.53,
+        "expectancy_usd": 974.4,
+        "total_pnl_usd": 11692.79,
+        "max_drawdown_pct": 2.16,
+        "avg_r_achieved": 0.91,
+        "strategy": {
+          "name": "E5: Death Cross + Crowd Long [target1_atr_mult=3.75]",
+          "description": "Bearish regime + crowd positioned wrong \u2014 regime filter + crowd fade",
+          "direction": "SHORT",
+          "entry_signals": [
+            "trend_bearish",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 1.9
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.75,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=1.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 12,
+        "win_rate": 0.667,
+        "profit_factor": 3.28,
+        "expectancy_usd": 835.1,
+        "total_pnl_usd": 10021.21,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.79
+      },
+      "test": {
+        "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.625,
+        "profit_factor": 2.96,
+        "expectancy_usd": 760.77,
+        "total_pnl_usd": 6086.19,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.74
+      },
+      "full": {
+        "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 12,
+        "win_rate": 0.667,
+        "profit_factor": 3.28,
+        "expectancy_usd": 835.1,
+        "total_pnl_usd": 10021.21,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.79,
+        "strategy": {
+          "name": "G12: MACD Bullish + ADX Strong (SHORT) [stop_atr_mult=1.5]",
+          "description": "MACD momentum turning up in strong trend \u2014 confirmed trend acceleration",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "adx_strong_trend"
+          ],
+          "entry_params": {
+            "adx_strong": 25
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E4: BB Upper + Crowd Long [target2_atr_mult=3.75]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E4: BB Upper + Crowd Long [target2_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 9,
+        "win_rate": 0.556,
+        "profit_factor": 2.51,
+        "expectancy_usd": 729.02,
+        "total_pnl_usd": 6561.14,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.71
+      },
+      "test": {
+        "name": "E4: BB Upper + Crowd Long [target2_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.5,
+        "profit_factor": 2.01,
+        "expectancy_usd": 531.76,
+        "total_pnl_usd": 3190.55,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.54
+      },
+      "full": {
+        "name": "E4: BB Upper + Crowd Long [target2_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 9,
+        "win_rate": 0.556,
+        "profit_factor": 2.51,
+        "expectancy_usd": 729.02,
+        "total_pnl_usd": 6561.14,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.71,
+        "strategy": {
+          "name": "E4: BB Upper + Crowd Long [target2_atr_mult=3.75]",
+          "description": "Price at BB upper when crowd is positioned long \u2014 distribution fade",
+          "direction": "SHORT",
+          "entry_signals": [
+            "bb_touch_upper",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 1.9
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 2.5,
+            "target2_atr_mult": 3.75,
+            "scale_out_pct": 0.5,
+            "max_bars": 45
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "G7: Compressed Breakdown Bear [stop_atr_mult=1.12]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "G7: Compressed Breakdown Bear [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.5,
+        "profit_factor": 2.16,
+        "expectancy_usd": 641.18,
+        "total_pnl_usd": 5129.44,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.65
+      },
+      "test": {
+        "name": "G7: Compressed Breakdown Bear [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 2,
+        "win_rate": 0.5,
+        "profit_factor": 1.3,
+        "expectancy_usd": 156.25,
+        "total_pnl_usd": 312.5,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.17
+      },
+      "full": {
+        "name": "G7: Compressed Breakdown Bear [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.5,
+        "profit_factor": 2.16,
+        "expectancy_usd": 641.18,
+        "total_pnl_usd": 5129.44,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.65,
+        "strategy": {
+          "name": "G7: Compressed Breakdown Bear [stop_atr_mult=1.12]",
+          "description": "BB squeeze + MACD bearish cross + death cross \u2014 volatility expansion in downtrend",
+          "direction": "SHORT",
+          "entry_signals": [
+            "bb_squeeze",
+            "macd_bearish_cross",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "bb_squeeze_pct": 0.2
+          },
+          "exit": {
+            "stop_atr_mult": 1.12,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "phase": 4,
+  "symbol": "SKY",
+  "timeframe": "4h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=1.12]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=1.12]",
+        "direction": "LONG",
+        "total_trades": 10,
+        "win_rate": 0.6,
+        "profit_factor": 4.22,
+        "expectancy_usd": 1383.46,
+        "total_pnl_usd": 13834.57,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.28
+      },
+      "test": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=1.12]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 5.73,
+        "expectancy_usd": 1652.98,
+        "total_pnl_usd": 9917.91,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.57
+      },
+      "full": {
+        "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=1.12]",
+        "direction": "LONG",
+        "total_trades": 10,
+        "win_rate": 0.6,
+        "profit_factor": 4.22,
+        "expectancy_usd": 1383.46,
+        "total_pnl_usd": 13834.57,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.28,
+        "strategy": {
+          "name": "E7: OI Surge + BB Squeeze (ETH) [stop_atr_mult=1.12]",
+          "description": "New money entering compressed volatility \u2014 breakout fuel accumulating",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "bb_squeeze"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0,
+            "bb_squeeze_pct": 0.25
+          },
+          "exit": {
+            "stop_atr_mult": 1.12,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "F3: Overbought Fade (Downtrend) [stop_atr_mult=1.12]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "F3: Overbought Fade (Downtrend) [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.8,
+        "profit_factor": 7.03,
+        "expectancy_usd": 1270.1,
+        "total_pnl_usd": 6350.49,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.23
+      },
+      "test": {
+        "name": "F3: Overbought Fade (Downtrend) [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1525.58,
+        "total_pnl_usd": 4576.75,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.49
+      },
+      "full": {
+        "name": "F3: Overbought Fade (Downtrend) [stop_atr_mult=1.12]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.8,
+        "profit_factor": 7.03,
+        "expectancy_usd": 1270.1,
+        "total_pnl_usd": 6350.49,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.23,
+        "strategy": {
+          "name": "F3: Overbought Fade (Downtrend) [stop_atr_mult=1.12]",
+          "description": "BB upper touch + RSI overbought in bearish regime \u2014 sell the rip in a downtrend",
+          "direction": "SHORT",
+          "entry_signals": [
+            "bb_touch_upper",
+            "rsi_overbought",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "rsi_ob": 70
+          },
+          "exit": {
+            "stop_atr_mult": 1.12,
+            "target1_atr_mult": 2.0,
+            "target2_atr_mult": 4.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 30
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "G8: Triple Energy Buildup [stop_atr_mult=1.12]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "G8: Triple Energy Buildup [stop_atr_mult=1.12]",
+        "direction": "LONG",
+        "total_trades": 8,
+        "win_rate": 0.625,
+        "profit_factor": 4.09,
+        "expectancy_usd": 1219.67,
+        "total_pnl_usd": 9757.34,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.17
+      },
+      "test": {
+        "name": "G8: Triple Energy Buildup [stop_atr_mult=1.12]",
+        "direction": "LONG",
+        "total_trades": 4,
+        "win_rate": 0.75,
+        "profit_factor": 6.93,
+        "expectancy_usd": 1522.71,
+        "total_pnl_usd": 6090.84,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.49
+      },
+      "full": {
+        "name": "G8: Triple Energy Buildup [stop_atr_mult=1.12]",
+        "direction": "LONG",
+        "total_trades": 8,
+        "win_rate": 0.625,
+        "profit_factor": 4.09,
+        "expectancy_usd": 1219.67,
+        "total_pnl_usd": 9757.34,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.17,
+        "strategy": {
+          "name": "G8: Triple Energy Buildup [stop_atr_mult=1.12]",
+          "description": "OI surge + volume surge + BB squeeze \u2014 all energy indicators say explosion imminent",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "volume_surge",
+            "bb_squeeze"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 3.0,
+            "vol_surge": 1.5,
+            "bb_squeeze_pct": 0.25
+          },
+          "exit": {
+            "stop_atr_mult": 1.12,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 35
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "D1: Volatility Squeeze Breakout [bb_squeeze_pct=0.15]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "D1: Volatility Squeeze Breakout [bb_squeeze_pct=0.15]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 4.05,
+        "expectancy_usd": 1057.72,
+        "total_pnl_usd": 6346.3,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.03
+      },
+      "test": {
+        "name": "D1: Volatility Squeeze Breakout [bb_squeeze_pct=0.15]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 3.57,
+        "expectancy_usd": 1048.29,
+        "total_pnl_usd": 5241.47,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.04
+      },
+      "full": {
+        "name": "D1: Volatility Squeeze Breakout [bb_squeeze_pct=0.15]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 4.05,
+        "expectancy_usd": 1057.72,
+        "total_pnl_usd": 6346.3,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.03,
+        "strategy": {
+          "name": "D1: Volatility Squeeze Breakout [bb_squeeze_pct=0.15]",
+          "description": "BB squeeze + no trend + OI building = coiled spring. Direction TBD.",
+          "direction": "LONG",
+          "entry_signals": [
+            "bb_squeeze",
+            "adx_weak_trend",
+            "oi_surge"
+          ],
+          "entry_params": {
+            "bb_squeeze_pct": 0.15,
+            "adx_weak": 20,
+            "oi_surge_pct": 3.0
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "F6: Fear Oversold Bounce [target2_atr_mult=7.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "F6: Fear Oversold Bounce [target2_atr_mult=7.5]",
+        "direction": "LONG",
+        "total_trades": 10,
+        "win_rate": 0.7,
+        "profit_factor": 3.95,
+        "expectancy_usd": 889.55,
+        "total_pnl_usd": 8895.47,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.84
+      },
+      "test": {
+        "name": "F6: Fear Oversold Bounce [target2_atr_mult=7.5]",
+        "direction": "LONG",
+        "total_trades": 7,
+        "win_rate": 0.857,
+        "profit_factor": 9.05,
+        "expectancy_usd": 1180.71,
+        "total_pnl_usd": 8264.99,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.12
+      },
+      "full": {
+        "name": "F6: Fear Oversold Bounce [target2_atr_mult=7.5]",
+        "direction": "LONG",
+        "total_trades": 10,
+        "win_rate": 0.7,
+        "profit_factor": 3.95,
+        "expectancy_usd": 889.55,
+        "total_pnl_usd": 8895.47,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.84,
+        "strategy": {
+          "name": "F6: Fear Oversold Bounce [target2_atr_mult=7.5]",
+          "description": "Extreme fear + BB lower \u2014 sentiment and price both at extremes",
+          "direction": "LONG",
+          "entry_signals": [
+            "fear_greed_extreme_fear",
+            "bb_touch_lower"
+          ],
+          "entry_params": {
+            "fg_fear": 20
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 7.5,
+            "scale_out_pct": 0.5,
+            "max_bars": 45
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

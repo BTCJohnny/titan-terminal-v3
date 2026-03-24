@@ -1,0 +1,297 @@
+{
+  "phase": 4,
+  "symbol": "ASTER",
+  "timeframe": "1h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "E8: OI Surge + RSI Oversold (ETH) [stop_atr_mult=1.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E8: OI Surge + RSI Oversold (ETH) [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 11,
+        "win_rate": 0.636,
+        "profit_factor": 5.48,
+        "expectancy_usd": 1925.35,
+        "total_pnl_usd": 21178.9,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.68
+      },
+      "test": {
+        "name": "E8: OI Surge + RSI Oversold (ETH) [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 5,
+        "win_rate": 0.6,
+        "profit_factor": 4.55,
+        "expectancy_usd": 1407.38,
+        "total_pnl_usd": 7036.89,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.38
+      },
+      "full": {
+        "name": "E8: OI Surge + RSI Oversold (ETH) [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 11,
+        "win_rate": 0.636,
+        "profit_factor": 5.48,
+        "expectancy_usd": 1925.35,
+        "total_pnl_usd": 21178.9,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.68,
+        "strategy": {
+          "name": "E8: OI Surge + RSI Oversold (ETH) [stop_atr_mult=1.0]",
+          "description": "New money entering while price oversold \u2014 bounce with fuel",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge",
+            "rsi_oversold"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0,
+            "rsi_os": 35
+          },
+          "exit": {
+            "stop_atr_mult": 1.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "C1: OI Accumulation [stop_atr_mult=1.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "C1: OI Accumulation [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 10,
+        "win_rate": 0.6,
+        "profit_factor": 4.52,
+        "expectancy_usd": 1653.05,
+        "total_pnl_usd": 16530.53,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.5
+      },
+      "test": {
+        "name": "C1: OI Accumulation [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 4,
+        "win_rate": 0.5,
+        "profit_factor": 2.98,
+        "expectancy_usd": 978.01,
+        "total_pnl_usd": 3912.05,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.0
+      },
+      "full": {
+        "name": "C1: OI Accumulation [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 10,
+        "win_rate": 0.6,
+        "profit_factor": 4.52,
+        "expectancy_usd": 1653.05,
+        "total_pnl_usd": 16530.53,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.5,
+        "strategy": {
+          "name": "C1: OI Accumulation [stop_atr_mult=1.0]",
+          "description": "Long when OI building while price dips \u2014 someone loading quietly",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_price_divergence_bullish",
+            "rsi_oversold"
+          ],
+          "entry_params": {
+            "rsi_os": 35
+          },
+          "exit": {
+            "stop_atr_mult": 1.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "G7: Compressed Breakdown Bear [stop_atr_mult=0.75]",
+      "walk_forward_pass": false,
+      "train": {
+        "name": "G7: Compressed Breakdown Bear [stop_atr_mult=0.75]",
+        "direction": "SHORT",
+        "total_trades": 4,
+        "win_rate": 0.25,
+        "profit_factor": 1.54,
+        "expectancy_usd": 408.16,
+        "total_pnl_usd": 1632.65,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.47
+      },
+      "test": {
+        "name": "G7: Compressed Breakdown Bear [stop_atr_mult=0.75]",
+        "direction": "?",
+        "total_trades": 0,
+        "win_rate": 0,
+        "profit_factor": 0,
+        "expectancy_usd": 0,
+        "total_pnl_usd": 0,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 0
+      },
+      "full": {
+        "name": "G7: Compressed Breakdown Bear [stop_atr_mult=0.75]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.4,
+        "profit_factor": 3.3,
+        "expectancy_usd": 1565.71,
+        "total_pnl_usd": 7828.57,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.57,
+        "strategy": {
+          "name": "G7: Compressed Breakdown Bear [stop_atr_mult=0.75]",
+          "description": "BB squeeze + MACD bearish cross + death cross \u2014 volatility expansion in downtrend",
+          "direction": "SHORT",
+          "entry_signals": [
+            "bb_squeeze",
+            "macd_bearish_cross",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "bb_squeeze_pct": 0.2
+          },
+          "exit": {
+            "stop_atr_mult": 0.75,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "H3: Double Contrarian Short (Greed + Crowd) [target1_atr_mult=4.5]",
+      "walk_forward_pass": false,
+      "train": {
+        "name": "H3: Double Contrarian Short (Greed + Crowd) [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.8,
+        "profit_factor": 12.08,
+        "expectancy_usd": 1137.51,
+        "total_pnl_usd": 5687.55,
+        "max_drawdown_pct": 0.91,
+        "avg_r_achieved": 1.1
+      },
+      "test": {
+        "name": "H3: Double Contrarian Short (Greed + Crowd) [target1_atr_mult=4.5]",
+        "direction": "?",
+        "total_trades": 0,
+        "win_rate": 0,
+        "profit_factor": 0,
+        "expectancy_usd": 0,
+        "total_pnl_usd": 0,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 0
+      },
+      "full": {
+        "name": "H3: Double Contrarian Short (Greed + Crowd) [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.8,
+        "profit_factor": 12.08,
+        "expectancy_usd": 1137.51,
+        "total_pnl_usd": 5687.55,
+        "max_drawdown_pct": 0.91,
+        "avg_r_achieved": 1.1,
+        "strategy": {
+          "name": "H3: Double Contrarian Short (Greed + Crowd) [target1_atr_mult=4.5]",
+          "description": "Extreme greed + crowded longs \u2014 two independent contrarian sell signals",
+          "direction": "SHORT",
+          "entry_signals": [
+            "fear_greed_extreme_greed",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "fg_greed": 65,
+            "ls_crowd_long": 2.0
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 4.5,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E9: OI Surge Standalone (ETH) [oi_surge_pct=2.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E9: OI Surge Standalone (ETH) [oi_surge_pct=2.5]",
+        "direction": "LONG",
+        "total_trades": 36,
+        "win_rate": 0.667,
+        "profit_factor": 2.75,
+        "expectancy_usd": 739.82,
+        "total_pnl_usd": 26633.43,
+        "max_drawdown_pct": 4.47,
+        "avg_r_achieved": 0.61
+      },
+      "test": {
+        "name": "E9: OI Surge Standalone (ETH) [oi_surge_pct=2.5]",
+        "direction": "LONG",
+        "total_trades": 19,
+        "win_rate": 0.737,
+        "profit_factor": 3.77,
+        "expectancy_usd": 931.32,
+        "total_pnl_usd": 17695.01,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.82
+      },
+      "full": {
+        "name": "E9: OI Surge Standalone (ETH) [oi_surge_pct=2.5]",
+        "direction": "LONG",
+        "total_trades": 36,
+        "win_rate": 0.667,
+        "profit_factor": 2.75,
+        "expectancy_usd": 739.82,
+        "total_pnl_usd": 26633.43,
+        "max_drawdown_pct": 4.47,
+        "avg_r_achieved": 0.61,
+        "strategy": {
+          "name": "E9: OI Surge Standalone (ETH) [oi_surge_pct=2.5]",
+          "description": "Pure OI surge signal \u2014 ETH Phase 1 showed PF 4.92 standalone",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.5
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

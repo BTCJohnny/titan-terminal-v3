@@ -455,9 +455,84 @@ def fetch_coinbase_premium(interval: str = "4h", limit: int = 6,
     return data
 
 
+def fetch_funding_rate_ohlc(symbol: str, interval: str = "4h", limit: int = 1080,
+                             debug: bool = False) -> list | None:
+    """
+    Fetch OI-weighted funding rate OHLC history for a specific symbol.
+    Uses the OI-weighted endpoint which aggregates across exchanges by open interest.
+    Default: 1080 x 4h candles = 180 days.
+    Symbol format: plain symbol (BTC, not BTCUSDT).
+    """
+    cache_key = {"symbol": symbol.upper(), "interval": interval, "limit": str(limit)}
+    hit, cached = _cache_check("coinglass_funding_rate_ohlc", symbol, cache_key)
+    if hit:
+        return cached
+
+    data = cg_get("/api/futures/funding-rate/oi-weight-history",
+                  {"symbol": symbol.upper(), "interval": interval, "limit": str(limit)},
+                  debug=debug)
+    if data:
+        _cache_store("coinglass_funding_rate_ohlc", symbol, cache_key, data)
+    return data
+
+
+def fetch_liquidation_history(symbol: str, interval: str = "4h", limit: int = 1080,
+                               exchange_list: str = "Binance,OKX,Bybit,Bitget,dYdX",
+                               debug: bool = False) -> list | None:
+    """
+    Fetch aggregated liquidation history (long/short totals per interval).
+    Default: 1080 x 4h candles = 180 days.
+    Symbol format: plain symbol (BTC, not BTCUSDT).
+    exchange_list: comma-separated exchanges (required by Coinglass API).
+    """
+    cache_key = {"symbol": symbol.upper(), "interval": interval, "limit": str(limit)}
+    hit, cached = _cache_check("coinglass_liq_history", symbol, cache_key)
+    if hit:
+        return cached
+
+    data = cg_get("/api/futures/liquidation/aggregated-history",
+                  {"symbol": symbol.upper(), "interval": interval, "limit": str(limit),
+                   "exchange_list": exchange_list},
+                  debug=debug)
+    if data:
+        _cache_store("coinglass_liq_history", symbol, cache_key, data)
+    return data
+
+
 # ===========================================================================
 # Interpretation functions
 # ===========================================================================
+
+def interpret_funding_rate_ohlc(data: list) -> list:
+    """
+    Interpret funding rate OHLC history — extract close rate per bar with bias.
+    Returns list of dicts: [{time, close, bias}, ...]
+    """
+    if not data or not isinstance(data, list):
+        return []
+
+    bars = []
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        t = item.get("time", item.get("t", 0))
+        close = float(item.get("close", item.get("c", 0)) or 0)
+
+        if close > 0.0003:
+            bias = "long_crowded"
+        elif close > 0.0001:
+            bias = "moderately_long"
+        elif close < -0.0003:
+            bias = "short_crowded"
+        elif close < -0.0001:
+            bias = "moderately_short"
+        else:
+            bias = "neutral"
+
+        bars.append({"time": t, "close": close, "bias": bias})
+
+    return bars
+
 
 def interpret_coin_liquidations(coins: list, symbol: str) -> dict:
     """

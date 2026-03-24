@@ -1,0 +1,293 @@
+{
+  "phase": 4,
+  "symbol": "BNB",
+  "timeframe": "1h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target1_atr_mult=4.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 3.89,
+        "expectancy_usd": 1273.24,
+        "total_pnl_usd": 8912.68,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.23
+      },
+      "test": {
+        "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 3,
+        "win_rate": 0.667,
+        "profit_factor": 4.58,
+        "expectancy_usd": 1192.77,
+        "total_pnl_usd": 3578.31,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.2
+      },
+      "full": {
+        "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target1_atr_mult=4.5]",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 3.89,
+        "expectancy_usd": 1273.24,
+        "total_pnl_usd": 8912.68,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.23,
+        "strategy": {
+          "name": "E11: Triple Short (MACD + Death Cross + Crowd Long) [target1_atr_mult=4.5]",
+          "description": "All three BTC short signals aligned \u2014 highest conviction",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "trend_bearish",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 1.9
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 4.5,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 3.04,
+        "expectancy_usd": 892.53,
+        "total_pnl_usd": 6247.74,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.88
+      },
+      "test": {
+        "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 3,
+        "win_rate": 0.667,
+        "profit_factor": 3.12,
+        "expectancy_usd": 708.14,
+        "total_pnl_usd": 2124.42,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.73
+      },
+      "full": {
+        "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 7,
+        "win_rate": 0.571,
+        "profit_factor": 3.04,
+        "expectancy_usd": 892.53,
+        "total_pnl_usd": 6247.74,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.88,
+        "strategy": {
+          "name": "E1: MACD Rollover + Death Cross [stop_atr_mult=1.5]",
+          "description": "MACD bearish cross in a confirmed downtrend \u2014 momentum aligns with regime",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "trend_bearish"
+          ],
+          "entry_params": {},
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E2: MACD Rollover + Crowd Long [stop_atr_mult=1.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E2: MACD Rollover + Crowd Long [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.625,
+        "profit_factor": 3.06,
+        "expectancy_usd": 786.21,
+        "total_pnl_usd": 6289.66,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.78
+      },
+      "test": {
+        "name": "E2: MACD Rollover + Crowd Long [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 3,
+        "win_rate": 0.667,
+        "profit_factor": 3.12,
+        "expectancy_usd": 708.14,
+        "total_pnl_usd": 2124.42,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.73
+      },
+      "full": {
+        "name": "E2: MACD Rollover + Crowd Long [stop_atr_mult=1.5]",
+        "direction": "SHORT",
+        "total_trades": 8,
+        "win_rate": 0.625,
+        "profit_factor": 3.06,
+        "expectancy_usd": 786.21,
+        "total_pnl_usd": 6289.66,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 0.78,
+        "strategy": {
+          "name": "E2: MACD Rollover + Crowd Long [stop_atr_mult=1.5]",
+          "description": "MACD bearish cross when crowd is long \u2014 timing + positioning alignment",
+          "direction": "SHORT",
+          "entry_signals": [
+            "macd_bearish_cross",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 1.9
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=2.5]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=2.5]",
+        "direction": "LONG",
+        "total_trades": 21,
+        "win_rate": 0.714,
+        "profit_factor": 3.91,
+        "expectancy_usd": 759.75,
+        "total_pnl_usd": 15954.77,
+        "max_drawdown_pct": 2.81,
+        "avg_r_achieved": 0.67
+      },
+      "test": {
+        "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=2.5]",
+        "direction": "LONG",
+        "total_trades": 9,
+        "win_rate": 0.778,
+        "profit_factor": 4.39,
+        "expectancy_usd": 814.75,
+        "total_pnl_usd": 7332.73,
+        "max_drawdown_pct": 2.81,
+        "avg_r_achieved": 0.78
+      },
+      "full": {
+        "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=2.5]",
+        "direction": "LONG",
+        "total_trades": 21,
+        "win_rate": 0.714,
+        "profit_factor": 3.91,
+        "expectancy_usd": 759.75,
+        "total_pnl_usd": 15954.77,
+        "max_drawdown_pct": 2.81,
+        "avg_r_achieved": 0.67,
+        "strategy": {
+          "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=2.5]",
+          "description": "Pure OI surge signal \u2014 ETH Phase 1 showed PF 4.92 standalone",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0
+          },
+          "exit": {
+            "stop_atr_mult": 2.5,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.85]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.85]",
+        "direction": "SHORT",
+        "total_trades": 23,
+        "win_rate": 0.522,
+        "profit_factor": 2.38,
+        "expectancy_usd": 515.5,
+        "total_pnl_usd": 11856.45,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.48
+      },
+      "test": {
+        "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.85]",
+        "direction": "SHORT",
+        "total_trades": 10,
+        "win_rate": 0.7,
+        "profit_factor": 3.46,
+        "expectancy_usd": 726.51,
+        "total_pnl_usd": 7265.06,
+        "max_drawdown_pct": 4.47,
+        "avg_r_achieved": 0.7
+      },
+      "full": {
+        "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.85]",
+        "direction": "SHORT",
+        "total_trades": 23,
+        "win_rate": 0.522,
+        "profit_factor": 2.38,
+        "expectancy_usd": 515.5,
+        "total_pnl_usd": 11856.45,
+        "max_drawdown_pct": 5.88,
+        "avg_r_achieved": 0.48,
+        "strategy": {
+          "name": "E5: Death Cross + Crowd Long [ls_crowd_long=2.85]",
+          "description": "Bearish regime + crowd positioned wrong \u2014 regime filter + crowd fade",
+          "direction": "SHORT",
+          "entry_signals": [
+            "trend_bearish",
+            "ls_crowd_long"
+          ],
+          "entry_params": {
+            "ls_crowd_long": 2.85
+          },
+          "exit": {
+            "stop_atr_mult": 2.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

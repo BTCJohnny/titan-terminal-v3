@@ -1,0 +1,294 @@
+{
+  "phase": 4,
+  "symbol": "BCH",
+  "timeframe": "1h",
+  "days": 180,
+  "train_days": 120,
+  "test_days": 60,
+  "survivors": [
+    {
+      "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 8.11,
+        "expectancy_usd": 1961.15,
+        "total_pnl_usd": 11766.91,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.84
+      },
+      "test": {
+        "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 3,
+        "win_rate": 0.333,
+        "profit_factor": 3.11,
+        "expectancy_usd": 996.85,
+        "total_pnl_usd": 2990.56,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.04
+      },
+      "full": {
+        "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.667,
+        "profit_factor": 8.11,
+        "expectancy_usd": 1961.15,
+        "total_pnl_usd": 11766.91,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.84,
+        "strategy": {
+          "name": "E9: OI Surge Standalone (ETH) [stop_atr_mult=1.0]",
+          "description": "Pure OI surge signal \u2014 ETH Phase 1 showed PF 4.92 standalone",
+          "direction": "LONG",
+          "entry_signals": [
+            "oi_surge"
+          ],
+          "entry_params": {
+            "oi_surge_pct": 2.0
+          },
+          "exit": {
+            "stop_atr_mult": 1.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 60
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "G12: MACD Bullish + ADX Strong [stop_atr_mult=1.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "G12: MACD Bullish + ADX Strong [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.5,
+        "profit_factor": 3.24,
+        "expectancy_usd": 1195.87,
+        "total_pnl_usd": 7175.21,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.18
+      },
+      "test": {
+        "name": "G12: MACD Bullish + ADX Strong [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 2,
+        "win_rate": 0.5,
+        "profit_factor": 3.29,
+        "expectancy_usd": 1146.5,
+        "total_pnl_usd": 2293.0,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 1.18
+      },
+      "full": {
+        "name": "G12: MACD Bullish + ADX Strong [stop_atr_mult=1.0]",
+        "direction": "LONG",
+        "total_trades": 6,
+        "win_rate": 0.5,
+        "profit_factor": 3.24,
+        "expectancy_usd": 1195.87,
+        "total_pnl_usd": 7175.21,
+        "max_drawdown_pct": 3.96,
+        "avg_r_achieved": 1.18,
+        "strategy": {
+          "name": "G12: MACD Bullish + ADX Strong [stop_atr_mult=1.0]",
+          "description": "MACD momentum turning up in strong trend \u2014 confirmed trend acceleration",
+          "direction": "LONG",
+          "entry_signals": [
+            "macd_bullish_cross",
+            "adx_strong_trend"
+          ],
+          "entry_params": {
+            "adx_strong": 25
+          },
+          "exit": {
+            "stop_atr_mult": 1.0,
+            "target1_atr_mult": 3.0,
+            "target2_atr_mult": 6.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 50
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=1.25]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=1.25]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1124.23,
+        "total_pnl_usd": 5621.14,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.08
+      },
+      "test": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=1.25]",
+        "direction": "SHORT",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 985.0,
+        "total_pnl_usd": 2955.01,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 0.97
+      },
+      "full": {
+        "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=1.25]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1044.77,
+        "total_pnl_usd": 6268.65,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.0,
+        "strategy": {
+          "name": "E12: RSI OB Short + Death Cross (ETH) [target1_atr_mult=1.25]",
+          "description": "RSI overbought in bearish regime \u2014 ETH Phase 1 showed PF 2.30 on RSI OB",
+          "direction": "SHORT",
+          "entry_signals": [
+            "rsi_overbought",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "rsi_ob": 70
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 1.25,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 40
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "F3: Overbought Fade (Downtrend) [target2_atr_mult=5.0]",
+      "walk_forward_pass": true,
+      "train": {
+        "name": "F3: Overbought Fade (Downtrend) [target2_atr_mult=5.0]",
+        "direction": "SHORT",
+        "total_trades": 5,
+        "win_rate": 0.8,
+        "profit_factor": 5.66,
+        "expectancy_usd": 974.7,
+        "total_pnl_usd": 4873.5,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.95
+      },
+      "test": {
+        "name": "F3: Overbought Fade (Downtrend) [target2_atr_mult=5.0]",
+        "direction": "SHORT",
+        "total_trades": 3,
+        "win_rate": 1.0,
+        "profit_factor": "inf",
+        "expectancy_usd": 1165.62,
+        "total_pnl_usd": 3496.86,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 1.15
+      },
+      "full": {
+        "name": "F3: Overbought Fade (Downtrend) [target2_atr_mult=5.0]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.833,
+        "profit_factor": 6.11,
+        "expectancy_usd": 899.3,
+        "total_pnl_usd": 5395.78,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.88,
+        "strategy": {
+          "name": "F3: Overbought Fade (Downtrend) [target2_atr_mult=5.0]",
+          "description": "BB upper touch + RSI overbought in bearish regime \u2014 sell the rip in a downtrend",
+          "direction": "SHORT",
+          "entry_signals": [
+            "bb_touch_upper",
+            "rsi_overbought",
+            "trend_bearish"
+          ],
+          "entry_params": {
+            "rsi_ob": 70
+          },
+          "exit": {
+            "stop_atr_mult": 1.5,
+            "target1_atr_mult": 2.0,
+            "target2_atr_mult": 5.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 30
+          },
+          "filters": {}
+        }
+      }
+    },
+    {
+      "name": "H6: Greed Standalone Short [stop_atr_mult=3.75]",
+      "walk_forward_pass": false,
+      "train": {
+        "name": "H6: Greed Standalone Short [stop_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.833,
+        "profit_factor": 3.88,
+        "expectancy_usd": 501.84,
+        "total_pnl_usd": 3011.04,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.5
+      },
+      "test": {
+        "name": "H6: Greed Standalone Short [stop_atr_mult=3.75]",
+        "direction": "?",
+        "total_trades": 0,
+        "win_rate": 0,
+        "profit_factor": 0,
+        "expectancy_usd": 0,
+        "total_pnl_usd": 0,
+        "max_drawdown_pct": 0,
+        "avg_r_achieved": 0
+      },
+      "full": {
+        "name": "H6: Greed Standalone Short [stop_atr_mult=3.75]",
+        "direction": "SHORT",
+        "total_trades": 6,
+        "win_rate": 0.833,
+        "profit_factor": 3.88,
+        "expectancy_usd": 501.84,
+        "total_pnl_usd": 3011.04,
+        "max_drawdown_pct": 2.0,
+        "avg_r_achieved": 0.5,
+        "strategy": {
+          "name": "H6: Greed Standalone Short [stop_atr_mult=3.75]",
+          "description": "Extreme greed standalone \u2014 contrarian fade at sentiment peak",
+          "direction": "SHORT",
+          "entry_signals": [
+            "fear_greed_extreme_greed"
+          ],
+          "entry_params": {
+            "fg_greed": 65
+          },
+          "exit": {
+            "stop_atr_mult": 3.75,
+            "target1_atr_mult": 4.0,
+            "target2_atr_mult": 8.0,
+            "scale_out_pct": 0.5,
+            "max_bars": 90
+          },
+          "filters": {}
+        }
+      }
+    }
+  ]
+}

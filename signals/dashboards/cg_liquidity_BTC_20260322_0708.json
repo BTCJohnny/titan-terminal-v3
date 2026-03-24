@@ -1,0 +1,182 @@
+{
+  "fetched_at": "2026-03-22T07:08:41.387238",
+  "symbol": "BTC",
+  "current_price": 68636.0,
+  "funding": {
+    "symbol": "BTC",
+    "avg_rate": -0.00300287,
+    "avg_rate_pct": "-0.3003%",
+    "max_rate": 0.0004,
+    "max_exchange": "Coinbase",
+    "min_rate": -0.006785,
+    "min_exchange": "Bybit",
+    "num_exchanges": 21,
+    "annualized_cost_pct": -438.42,
+    "bias": "short_crowded",
+    "interpretation": "BTC avg funding: -0.3003% across 21 exchanges. Shorts paying heavily \u2014 crowded short positioning, squeeze UP risk. Annualized cost: -438.4% for the dominant side"
+  },
+  "open_interest": {
+    "history": {
+      "symbol": "BTC",
+      "current_oi_usd": 46460099816.092,
+      "oi_24h_ago_usd": 47286470770.0,
+      "oi_change_24h_pct": -1.75,
+      "oi_change_period_pct": -6.56,
+      "oi_trend": "flat",
+      "interpretation": "BTC OI: $46.46B (-1.7% 24h). OI stable \u2014 no significant position changes"
+    },
+    "exchanges": {
+      "symbol": "BTC",
+      "total_oi_usd": 46425132652.8986,
+      "change_1h_pct": 0.0,
+      "change_4h_pct": 0.3,
+      "change_24h_pct": -2.03,
+      "momentum": "stable",
+      "top_exchange_changes": [
+        {
+          "exchange": "dYdX",
+          "change_1h_pct": -0.88,
+          "oi_usd": 14691255.178598976
+        },
+        {
+          "exchange": "KuCoin",
+          "change_1h_pct": 0.73,
+          "oi_usd": 493254097.77778
+        },
+        {
+          "exchange": "CoinEx",
+          "change_1h_pct": -0.63,
+          "oi_usd": 83931156.8275
+        }
+      ],
+      "interpretation": "BTC total OI: $46.43B (-2.0% 24h). Biggest mover: dYdX (-0.9% 1h)"
+    }
+  },
+  "long_short": {
+    "global": {
+      "symbol": "BTC",
+      "current_long_pct": 61.83,
+      "current_short_pct": 38.17,
+      "current_ratio": 1.62,
+      "trend": "more_longs",
+      "extreme": false,
+      "contrarian_signal": null,
+      "interpretation": "BTC Global L/S: 1.62x (61.8% long / 38.2% short). Crowd shifting long \u2014 retail piling into longs"
+    },
+    "top_traders": {
+      "symbol": "BTC",
+      "top_account_long_pct": 62.01,
+      "top_account_ratio": 1.63,
+      "top_position_long_pct": 50.4,
+      "top_position_ratio": 1.02,
+      "account_position_divergence": true,
+      "smart_money_lean": "neutral",
+      "interpretation": "BTC Top Traders \u2014 Account: 1.63x (62.0% long), Position: 1.02x (50.4% long). Account/Position divergence: many small longs (acct 62%) but position weight lower (50%) \u2014 retail long, smart money less convinced"
+    }
+  },
+  "liquidation": {
+    "symbol": "BTC",
+    "total_24h_usd": 10055912.89058,
+    "long_liq_24h_usd": 8119430.15812,
+    "short_liq_24h_usd": 1936482.73246,
+    "long_short_ratio": 4.19,
+    "bias": "long_pain",
+    "recent_acceleration": false,
+    "timeframe_breakdown": {
+      "24h": {
+        "total": 10055912.89058,
+        "long": 8119430.15812,
+        "short": 1936482.73246
+      },
+      "12h": {
+        "total": 8486001.48607,
+        "long": 7189205.10003,
+        "short": 1296796.38604
+      },
+      "4h": {
+        "total": 951350.34411,
+        "long": 737920.97394,
+        "short": 213429.37017
+      },
+      "1h": {
+        "total": 304902.39066,
+        "long": 257646.91956,
+        "short": 47255.4711
+      }
+    },
+    "interpretation": "BTC 24h liquidations: $10.1M (Long: $8.1M | Short: $1.9M). Longs getting wrecked 4.2x more than shorts \u2014 bearish pressure, price declining"
+  },
+  "max_pain": {
+    "nearest_expiry": "260322",
+    "max_pain_price": 70000.0,
+    "distance_pct": 1.99,
+    "direction": "above",
+    "put_call_oi_ratio": 0.67,
+    "expiries": [
+      {
+        "date": "260322",
+        "max_pain_price": 70000.0,
+        "call_oi": 2469.89,
+        "put_oi": 3217.8,
+        "put_call_ratio": 1.3,
+        "distance_pct": 1.99
+      },
+      {
+        "date": "260323",
+        "max_pain_price": 70000.0,
+        "call_oi": 1606.87,
+        "put_oi": 2623.31,
+        "put_call_ratio": 1.63,
+        "distance_pct": 1.99
+      },
+      {
+        "date": "260324",
+        "max_pain_price": 70000.0,
+        "call_oi": 734.48,
+        "put_oi": 1421.53,
+        "put_call_ratio": 1.94,
+        "distance_pct": 1.99
+      },
+      {
+        "date": "260325",
+        "max_pain_price": 69000.0,
+        "call_oi": 427.0,
+        "put_oi": 347.63,
+        "put_call_ratio": 0.81,
+        "distance_pct": 0.53
+      },
+      {
+        "date": "260327",
+        "max_pain_price": 75000.0,
+        "call_oi": 124598.95,
+        "put_oi": 79797.82,
+        "put_call_ratio": 0.64,
+        "distance_pct": 9.27
+      }
+    ],
+    "interpretation": "Nearest options max pain: $70,000 (+2.0% from $68,636). Max pain ABOVE price \u2014 magnetic pull upward. MMs benefit if price rises to $70,000. Put/Call OI ratio: 0.67x \u2014 call-heavy, bullish positioning"
+  },
+  "options": {
+    "total_oi_usd": 42319299055.98117,
+    "volume_24h_usd": 2191072131.086754,
+    "oi_change_24h_pct": 0.11,
+    "interpretation": "Options OI: $42.32B | 24h Volume: $2.19B"
+  },
+  "setup": {
+    "detected": true,
+    "direction": "long",
+    "confidence": "medium",
+    "snap_back_target": 70000.0,
+    "thesis": "Liquidity Grab Fade LONG: Longs getting liquidated 4.2x more than shorts \u2014 flush underway + Max pain $70,000 is +2.0% above \u2014 magnetic pull for snap-back",
+    "components": {
+      "conditions_met": 2,
+      "reasons": [
+        "Longs getting liquidated 4.2x more than shorts \u2014 flush underway",
+        "Max pain $70,000 is +2.0% above \u2014 magnetic pull for snap-back"
+      ],
+      "max_pain_price": 70000.0,
+      "liquidation_bias": "long_pain",
+      "ls_ratio": 4.19
+    }
+  }
+}

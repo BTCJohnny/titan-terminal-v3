@@ -1,0 +1,132 @@
+{
+  "fetched_at": "2026-03-21T08:01:17.253086",
+  "symbol": "TAO",
+  "current_price": 277.0,
+  "funding": {
+    "symbol": "TAO",
+    "avg_rate": -0.0025617,
+    "avg_rate_pct": "-0.2562%",
+    "max_rate": 0.0285346,
+    "max_exchange": "Crypto.com",
+    "min_rate": -0.036536,
+    "min_exchange": "CoinEx",
+    "num_exchanges": 20,
+    "annualized_cost_pct": -669.87,
+    "bias": "short_crowded",
+    "interpretation": "TAO avg funding: -0.2562% across 20 exchanges. Shorts paying heavily \u2014 crowded short positioning, squeeze UP risk. Annualized cost: -669.9% for the dominant side"
+  },
+  "open_interest": {
+    "history": {
+      "symbol": "TAO",
+      "current_oi_usd": 334059254.1998,
+      "oi_24h_ago_usd": 374780418.0,
+      "oi_change_24h_pct": -10.87,
+      "oi_change_period_pct": 13.19,
+      "oi_trend": "falling",
+      "interpretation": "TAO OI: $334.1M (-10.9% 24h). OI contracting \u2014 positions being closed"
+    },
+    "exchanges": {
+      "symbol": "TAO",
+      "total_oi_usd": 334059254.1998,
+      "change_1h_pct": -0.91,
+      "change_4h_pct": -2.8,
+      "change_24h_pct": -16.8,
+      "momentum": "stable",
+      "top_exchange_changes": [
+        {
+          "exchange": "Aster",
+          "change_1h_pct": -9.65,
+          "oi_usd": 1424376.789
+        },
+        {
+          "exchange": "HTX",
+          "change_1h_pct": -7.51,
+          "oi_usd": 171271.73701
+        },
+        {
+          "exchange": "MEXC",
+          "change_1h_pct": 7.25,
+          "oi_usd": 27666072.2268
+        }
+      ],
+      "interpretation": "TAO total OI: $334.1M (-16.8% 24h). Biggest mover: Aster (-9.7% 1h)"
+    }
+  },
+  "long_short": {
+    "global": {
+      "symbol": "TAO",
+      "current_long_pct": 54.61,
+      "current_short_pct": 45.39,
+      "current_ratio": 1.2,
+      "trend": "more_longs",
+      "extreme": false,
+      "contrarian_signal": null,
+      "interpretation": "TAO Global L/S: 1.20x (54.6% long / 45.4% short). Crowd shifting long \u2014 retail piling into longs"
+    },
+    "top_traders": {
+      "symbol": "TAO",
+      "top_account_long_pct": 53.36,
+      "top_account_ratio": 1.14,
+      "top_position_long_pct": 54.23,
+      "top_position_ratio": 1.19,
+      "account_position_divergence": false,
+      "smart_money_lean": "long",
+      "interpretation": "TAO Top Traders \u2014 Account: 1.14x (53.4% long), Position: 1.19x (54.2% long). Smart money lean: LONG (position-weighted)"
+    }
+  },
+  "liquidation": {
+    "symbol": "TAO",
+    "total_24h_usd": 1143027.43586,
+    "long_liq_24h_usd": 756762.30655,
+    "short_liq_24h_usd": 386265.12931,
+    "long_short_ratio": 1.96,
+    "bias": "balanced",
+    "recent_acceleration": false,
+    "timeframe_breakdown": {
+      "24h": {
+        "total": 1143027.43586,
+        "long": 756762.30655,
+        "short": 386265.12931
+      },
+      "12h": {
+        "total": 330030.59558,
+        "long": 223194.88126,
+        "short": 106835.71432
+      },
+      "4h": {
+        "total": 20260.11217,
+        "long": 19368.66901,
+        "short": 891.44316
+      },
+      "1h": {
+        "total": 5548.00353,
+        "long": 5542.81292,
+        "short": 5.19061
+      }
+    },
+    "interpretation": "TAO 24h liquidations: $1.1M (Long: $757K | Short: $386K). Balanced liquidation (L/S ratio: 2.0x)"
+  },
+  "max_pain": {
+    "nearest_expiry": null,
+    "max_pain_price": 0,
+    "distance_pct": 0,
+    "direction": "at",
+    "put_call_oi_ratio": 1.0,
+    "expiries": [],
+    "interpretation": "No options market for TAO"
+  },
+  "options": {
+    "total_oi_usd": 0,
+    "volume_24h_usd": 0,
+    "oi_change_24h_pct": 0,
+    "interpretation": "Options info unavailable"
+  },
+  "setup": {
+    "detected": false,
+    "direction": null,
+    "confidence": "low",
+    "snap_back_target": null,
+    "thesis": "No liquidity grab setup detected",
+    "components": {}
+  }
+}
