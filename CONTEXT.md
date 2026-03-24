@@ -90,6 +90,8 @@
    - Key levels (support, resistance from S/R analysis)
    - What would change the verdict (invalidation criteria)
 
+6. **Save output:** Write the complete analysis to `signals/dashboards/analyze_[TOKEN]_YYYYMMDD_HHMM.md` using the token name (UPPERCASE) and current UTC time. Example: `analyze_ETH_20260324_1520.md`.
+
 **Nansen budget:** ~15-20 credits per analysis.
 
 ---
@@ -125,6 +127,8 @@
    - Position size based on 2% risk rule
    - R:R calculation for each target
    - Category limit check from `_config/position-sizing.md`
+
+5. **Save output:** Write the complete target package to `signals/dashboards/targets_[TOKEN]_YYYYMMDD_HHMM.md` using the token name (UPPERCASE) and current UTC time. Example: `targets_ETH_20260324_1530.md`.
 
 **Accepts flexible input:**
 - Minimal: `/targets ETH LONG` — Claude finds levels from TA
