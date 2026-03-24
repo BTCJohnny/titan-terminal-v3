@@ -40,6 +40,8 @@
    - 0-5 opportunity cards, each with: token, direction, conviction, alpha thesis (2-3 sentences WHY), key data points, signal alignment
    - Nansen credits used
 
+7. **Save output:** Write the complete hunt output to `signals/dashboards/hunt_YYYYMMDD_HHMM.md` using current UTC time. This matches the existing naming convention for CEX snapshots (`cex_YYYYMMDD_HHMM.md`) and Coinglass reports (`cg_liquidity_*_YYYYMMDD_HHMM.json`).
+
 **Reference files:** `_config/thesis.md`, `_config/signal-hierarchy.md`, `_config/universe.md`, `_config/red-flags.md`, `_config/interpreters/`
 
 ---
