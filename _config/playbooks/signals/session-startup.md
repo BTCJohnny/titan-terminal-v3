@@ -94,10 +94,10 @@ For automated monitoring, add to crontab:
 
 ```bash
 # Check watchlist every 6 hours
-0 */6 * * * cd /Users/johnny_main/Developer/projects/titan-terminal-v2 && python3 src/watchers/watchlist_monitor.py review --cron
+0 */6 * * * cd /Users/johnny_main/Developer/projects/titan-terminal-v3 && python3 src/watchers/watchlist_monitor.py review --cron
 
 # Check for new signals every 4 hours
-0 */4 * * * cd /Users/johnny_main/Developer/projects/titan-terminal-v2 && python3 src/fetchers/signals_fetcher.py recent --hours 4 >> signals/dashboards/new_signals.log
+0 */4 * * * cd /Users/johnny_main/Developer/projects/titan-terminal-v3 && python3 src/fetchers/signals_fetcher.py recent --hours 4 >> signals/dashboards/new_signals.log
 ```
 
 ## Workflow Integration

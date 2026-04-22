@@ -1,4 +1,4 @@
-# Titan Terminal v2 — Rework Design Doc
+# Titan Terminal v3 — Rework Design Doc
 
 **Created:** 2026-03-24
 **Status:** Design complete, build starting
@@ -20,7 +20,7 @@ When something looks interesting, John takes those insights to his exchange or t
 | Project | Purpose | Location | Repo |
 |---------|---------|----------|------|
 | **Titan Trader** | Autotrading system (pipelines, paper engine, backtesting, cron) | `/Users/johnny_main/Developer/projects/titan-trader` | BTCJohnny/titan-trader (private) |
-| **Titan Terminal v2** | Intelligence terminal (alpha surfacing, reasoning, dashboard) | `/Users/johnny_main/Developer/projects/titan-terminal-v2` | BTCJohnny/titan-terminal-v2 |
+| **Titan Terminal v3** | Intelligence terminal (alpha surfacing, reasoning, dashboard) | `/Users/johnny_main/Developer/projects/titan-terminal-v3` | BTCJohnny/titan-terminal-v3 |
 
 ---
 
@@ -226,7 +226,7 @@ Each card shows:
 
 | Step | What | Prompt |
 |------|------|--------|
-| 1 | Strip titan-terminal-v2 down to terminal components | Ready to write |
+| 1 | Strip titan-terminal-v3 down to terminal components | Ready to write |
 | 2 | Rewrite CLAUDE.md + CONTEXT.md for terminal identity | Next session |
 | 3 | Write 3 commands: /hunt, /analyze, /targets | Next session |
 | 4 | Build dashboard artifact template (React) | Next session |

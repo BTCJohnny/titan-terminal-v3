@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Titan Terminal v2 — Technical Analysis Engine
+Titan Terminal v3 — Technical Analysis Engine
 ==============================================
 CLI tool for downloading, caching, and analyzing crypto OHLCV data.
 All computation is deterministic Python math. Claude Code interprets the results.
@@ -1743,7 +1743,7 @@ def main():
     init_db()
 
     parser = argparse.ArgumentParser(
-        description="Titan Terminal v2 — Technical Analysis Engine",
+        description="Titan Terminal v3 — Technical Analysis Engine",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")

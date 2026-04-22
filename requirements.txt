@@ -1,4 +1,4 @@
-# Titan Terminal v2 — Python Dependencies
+# Titan Terminal v3 — Python Dependencies
 
 # Primary: Binance Futures data via CCXT
 ccxt>=4.0.0

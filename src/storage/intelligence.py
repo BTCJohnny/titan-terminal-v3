@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Titan Terminal v2
+Titan Terminal v3
 ===========================
 Query/response tracking for MCP calls, LLM interpretations, and trade cards.
 Enables future model evaluation and cost tracking.

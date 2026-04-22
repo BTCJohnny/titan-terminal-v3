@@ -1,5 +1,5 @@
 #!/bin/bash
-# Titan Terminal v2 — Snapshot Cron Wrapper
+# Titan Terminal v3 — Snapshot Cron Wrapper
 # Runs Coinglass or Nansen snapshot with timestamped log output.
 #
 # Usage:
@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-PROJECT_DIR="/Users/johnny_main/Developer/projects/titan-terminal-v2"
+PROJECT_DIR="/Users/johnny_main/Developer/projects/titan-terminal-v3"
 PYTHON="/opt/homebrew/bin/python3"
 LOG_DIR="$PROJECT_DIR/logs/cron"
 TIMESTAMP=$(date -u +"%Y-%m-%d_%H")
