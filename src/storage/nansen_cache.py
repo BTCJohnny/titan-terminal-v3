@@ -94,6 +94,32 @@ TTL_HOURS = {
     "coinglass_btc_etf": 6,
     "coinglass_fear_greed": 6,
     "coinglass_coinbase_premium": 1,
+    # Coinglass snapshot pipeline TTLs
+    "coinglass_spot_cvd": 4,
+    "coinglass_spot_taker": 4,
+    "coinglass_spot_netflow": 4,
+    "coinglass_spot_coin_netflow": 4,
+    "coinglass_futures_basis": 4,
+    "coinglass_futures_spot_vol": 6,
+    "coinglass_opt_fut_oi_ratio": 6,
+    "coinglass_agg_orderbook": 4,
+    "coinglass_oi_exchange_hist": 4,
+    "coinglass_liq_heatmap": 2,
+    "coinglass_liq_heatmap_m3": 2,
+    "coinglass_btc_sth_sopr": 6,
+    "coinglass_btc_lth_sopr": 6,
+    "coinglass_btc_sth_rp": 6,
+    "coinglass_btc_lth_rp": 6,
+    "coinglass_btc_nupl": 6,
+    "coinglass_btc_active_addr": 6,
+    "coinglass_btc_reserve_risk": 6,
+    "coinglass_btc_correlation": 6,
+    "coinglass_btc_macro_osc": 6,
+    "coinglass_btc_etf_assets": 6,
+    "coinglass_btc_etf_premium": 6,
+    "coinglass_grayscale_premium": 6,
+    "coinglass_funding_rate_ohlc": 4,
+    "coinglass_liq_history": 4,
     "default": 6,
 }
 
@@ -203,21 +229,21 @@ def get_stats() -> dict:
     """Return cache statistics."""
     conn = get_connection()
 
-    total = conn.execute("SELECT COUNT(*) FROM mcp_queries WHERE tool_source='nansen_mcp'").fetchone()[0]
+    total = conn.execute("SELECT COUNT(*) FROM mcp_queries WHERE tool_source IN ('nansen_mcp','nansen_api')").fetchone()[0]
     by_tool = conn.execute(
         """SELECT tool_name, COUNT(*) as cnt,
                   MAX(timestamp_utc) as latest,
                   SUM(r.response_size_bytes) as total_bytes
            FROM mcp_queries q
            JOIN mcp_responses r ON q.query_id = r.query_id
-           WHERE q.tool_source = 'nansen_mcp'
+           WHERE q.tool_source IN ('nansen_mcp', 'nansen_api')
            GROUP BY tool_name
            ORDER BY cnt DESC"""
     ).fetchall()
     by_token = conn.execute(
         """SELECT context_token, COUNT(*) as cnt
            FROM mcp_queries
-           WHERE tool_source = 'nansen_mcp'
+           WHERE tool_source IN ('nansen_mcp', 'nansen_api')
            GROUP BY context_token
            ORDER BY cnt DESC"""
     ).fetchall()

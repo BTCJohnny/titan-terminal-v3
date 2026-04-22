@@ -135,10 +135,28 @@ def cg_get(endpoint: str, params: dict | None = None, debug: bool = False) -> di
             body = e.read().decode()[:200]
         except Exception:
             pass
-        print(f"  ⚠️  Coinglass HTTP {e.code}: {body}", file=sys.stderr)
+        if e.code == 429:
+            print(f"  Rate limited (429). Waiting 60s then retrying...", file=sys.stderr)
+            time.sleep(60)
+            try:
+                req2 = urllib.request.Request(
+                    url,
+                    headers={"CG-API-KEY": api_key, "Accept": "application/json"},
+                    method="GET"
+                )
+                with urllib.request.urlopen(req2, timeout=30) as resp2:
+                    raw2 = resp2.read().decode()
+                    data2 = json.loads(raw2)
+                    if isinstance(data2, dict) and str(data2.get("code", "")) == "0":
+                        return data2.get("data")
+                    return data2
+            except Exception as retry_err:
+                print(f"  Retry failed: {retry_err}", file=sys.stderr)
+                return None
+        print(f"  Coinglass HTTP {e.code}: {body}", file=sys.stderr)
         return None
     except Exception as e:
-        print(f"  ⚠️  Coinglass API error: {e}", file=sys.stderr)
+        print(f"  Coinglass API error: {e}", file=sys.stderr)
         return None
 
 
@@ -455,9 +473,415 @@ def fetch_coinbase_premium(interval: str = "4h", limit: int = 6,
     return data
 
 
+def fetch_funding_rate_ohlc(symbol: str, interval: str = "4h", limit: int = 1080,
+                             debug: bool = False) -> list | None:
+    """
+    Fetch OI-weighted funding rate OHLC history for a specific symbol.
+    Uses the OI-weighted endpoint which aggregates across exchanges by open interest.
+    Default: 1080 x 4h candles = 180 days.
+    Symbol format: plain symbol (BTC, not BTCUSDT).
+    """
+    cache_key = {"symbol": symbol.upper(), "interval": interval, "limit": str(limit)}
+    hit, cached = _cache_check("coinglass_funding_rate_ohlc", symbol, cache_key)
+    if hit:
+        return cached
+
+    data = cg_get("/api/futures/funding-rate/oi-weight-history",
+                  {"symbol": symbol.upper(), "interval": interval, "limit": str(limit)},
+                  debug=debug)
+    if data:
+        _cache_store("coinglass_funding_rate_ohlc", symbol, cache_key, data)
+    return data
+
+
+def fetch_liquidation_history(symbol: str, interval: str = "4h", limit: int = 1080,
+                               exchange_list: str = "Binance,OKX,Bybit,Bitget,dYdX",
+                               debug: bool = False) -> list | None:
+    """
+    Fetch aggregated liquidation history (long/short totals per interval).
+    Default: 1080 x 4h candles = 180 days.
+    Symbol format: plain symbol (BTC, not BTCUSDT).
+    exchange_list: comma-separated exchanges (required by Coinglass API).
+    """
+    cache_key = {"symbol": symbol.upper(), "interval": interval, "limit": str(limit)}
+    hit, cached = _cache_check("coinglass_liq_history", symbol, cache_key)
+    if hit:
+        return cached
+
+    data = cg_get("/api/futures/liquidation/aggregated-history",
+                  {"symbol": symbol.upper(), "interval": interval, "limit": str(limit),
+                   "exchange_list": exchange_list},
+                  debug=debug)
+    if data:
+        _cache_store("coinglass_liq_history", symbol, cache_key, data)
+    return data
+
+
+# ===========================================================================
+# Snapshot endpoints — Spot CVD & Taker
+# ===========================================================================
+
+def fetch_spot_aggregated_cvd(symbol: str, interval: str = "h4",
+                               exchange_list: str = "Binance,OKX,Bybit,Bitget",
+                               debug: bool = False) -> list | None:
+    """Fetch aggregated spot CVD history. Spot CVD rising + funding negative = strongest bullish signal."""
+    cache_key = {"symbol": symbol.upper(), "interval": interval}
+    hit, cached = _cache_check("coinglass_spot_cvd", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/spot/aggregated-cvd/history",
+                  {"symbol": symbol.upper(), "interval": interval,
+                   "exchange_list": exchange_list}, debug=debug)
+    if data:
+        _cache_store("coinglass_spot_cvd", symbol, cache_key, data)
+    return data
+
+
+def fetch_spot_taker_buy_sell(symbol: str, interval: str = "h4",
+                               exchange_list: str = "Binance,OKX,Bybit,Bitget",
+                               debug: bool = False) -> list | None:
+    """Fetch aggregated spot taker buy/sell volume history."""
+    cache_key = {"symbol": symbol.upper(), "interval": interval}
+    hit, cached = _cache_check("coinglass_spot_taker", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/spot/aggregated-taker-buy-sell-volume/history",
+                  {"symbol": symbol.upper(), "interval": interval,
+                   "exchange_list": exchange_list}, debug=debug)
+    if data:
+        _cache_store("coinglass_spot_taker", symbol, cache_key, data)
+    return data
+
+
+def fetch_spot_netflow_list(symbol: str, debug: bool = False) -> list | None:
+    """Fetch spot net flow list across exchanges."""
+    cache_key = {"symbol": symbol.upper()}
+    hit, cached = _cache_check("coinglass_spot_netflow", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/spot/netflow-list",
+                  {"symbol": symbol.upper()}, debug=debug)
+    if data:
+        _cache_store("coinglass_spot_netflow", symbol, cache_key, data)
+    return data
+
+
+def fetch_spot_coin_netflow(symbol: str, debug: bool = False) -> dict | None:
+    """Fetch per-coin spot flow detail."""
+    cache_key = {"symbol": symbol.upper()}
+    hit, cached = _cache_check("coinglass_spot_coin_netflow", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/spot/coin/netflow",
+                  {"symbol": symbol.upper()}, debug=debug)
+    if data:
+        _cache_store("coinglass_spot_coin_netflow", symbol, cache_key, data)
+    return data
+
+
+# ===========================================================================
+# Snapshot endpoints — Futures Basis & Speculation
+# ===========================================================================
+
+def fetch_futures_basis(symbol: str, interval: str = "h4",
+                        exchange: str = "Binance",
+                        debug: bool = False) -> list | None:
+    """Fetch futures basis history. Widening = speculative excess, narrowing = deleveraging."""
+    pair = _ensure_pair_format(symbol)
+    cache_key = {"symbol": pair, "interval": interval, "exchange": exchange}
+    hit, cached = _cache_check("coinglass_futures_basis", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/futures/basis/history",
+                  {"symbol": pair, "exchange": exchange, "interval": interval},
+                  debug=debug)
+    if data:
+        _cache_store("coinglass_futures_basis", symbol, cache_key, data)
+    return data
+
+
+def fetch_futures_spot_volume_ratio(symbol: str = "BTC", interval: str = "h4",
+                                     exchange_list: str = "Binance,OKX,Bybit,Bitget",
+                                     debug: bool = False) -> dict | list | None:
+    """Fetch futures/spot volume ratio. High = overleveraged market."""
+    cache_key = {"symbol": symbol.upper(), "interval": interval}
+    hit, cached = _cache_check("coinglass_futures_spot_vol", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/futures_spot_volume_ratio",
+                  {"symbol": symbol.upper(), "interval": interval,
+                   "exchange_list": exchange_list}, debug=debug)
+    if data:
+        _cache_store("coinglass_futures_spot_vol", symbol, cache_key, data)
+    return data
+
+
+def fetch_options_futures_oi_ratio(debug: bool = False) -> dict | list | None:
+    """Fetch options/futures OI ratio. Options OI rising = hedging increasing."""
+    cache_key = {"type": "options_futures_oi_ratio"}
+    hit, cached = _cache_check("coinglass_opt_fut_oi_ratio", "_MARKET", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/option-vs-futures-oi-ratio", debug=debug)
+    if data:
+        _cache_store("coinglass_opt_fut_oi_ratio", "_MARKET", cache_key, data)
+    return data
+
+
+# ===========================================================================
+# Snapshot endpoints — Large Orders & Orderbook
+# ===========================================================================
+
+def fetch_aggregated_orderbook(symbol: str, interval: str = "h4",
+                                exchange_list: str = "Binance,OKX,Bybit,Bitget",
+                                debug: bool = False) -> list | None:
+    """Fetch aggregated ask/bid history. Shows bid/ask imbalance over time."""
+    cache_key = {"symbol": symbol.upper(), "interval": interval}
+    hit, cached = _cache_check("coinglass_agg_orderbook", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/futures/orderbook/aggregated-ask-bids-history",
+                  {"symbol": symbol.upper(), "interval": interval,
+                   "exchange_list": exchange_list}, debug=debug)
+    if data:
+        _cache_store("coinglass_agg_orderbook", symbol, cache_key, data)
+    return data
+
+
+# ===========================================================================
+# Snapshot endpoints — OI by Exchange
+# ===========================================================================
+
+def fetch_oi_exchange_history(symbol: str, range_val: str = "all",
+                               debug: bool = False) -> dict | list | None:
+    """Fetch OI by exchange over time. CME rising = institutional, Bybit = retail."""
+    cache_key = {"symbol": symbol.upper(), "range": range_val}
+    hit, cached = _cache_check("coinglass_oi_exchange_hist", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/futures/open-interest/exchange-history-chart",
+                  {"symbol": symbol.upper(), "range": range_val}, debug=debug)
+    if data:
+        _cache_store("coinglass_oi_exchange_hist", symbol, cache_key, data)
+    return data
+
+
+# ===========================================================================
+# Snapshot endpoints — Liquidation Heatmaps
+# ===========================================================================
+
+def fetch_liq_heatmap_model1(symbol: str, debug: bool = False) -> dict | list | None:
+    """Fetch aggregated liquidation heatmap (model 1). Shows liq cluster targets."""
+    cache_key = {"symbol": symbol.upper(), "model": "1"}
+    hit, cached = _cache_check("coinglass_liq_heatmap", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/futures/liquidation/aggregated-heatmap/model1",
+                  {"symbol": symbol.upper()}, debug=debug)
+    if data:
+        _cache_store("coinglass_liq_heatmap", symbol, cache_key, data)
+    return data
+
+
+def fetch_liq_heatmap_model3(symbol: str, debug: bool = False) -> dict | list | None:
+    """Fetch aggregated liquidation heatmap (model 3). Cross-reference with model 1."""
+    cache_key = {"symbol": symbol.upper(), "model": "3"}
+    hit, cached = _cache_check("coinglass_liq_heatmap_m3", symbol, cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/futures/liquidation/aggregated-heatmap/model3",
+                  {"symbol": symbol.upper()}, debug=debug)
+    if data:
+        _cache_store("coinglass_liq_heatmap_m3", symbol, cache_key, data)
+    return data
+
+
+# ===========================================================================
+# Snapshot endpoints — BTC Macro On-Chain
+# ===========================================================================
+
+def fetch_btc_sth_sopr(debug: bool = False) -> dict | list | None:
+    """STH SOPR < 1 at VP support = capitulation buy zone."""
+    cache_key = {"type": "sth_sopr"}
+    hit, cached = _cache_check("coinglass_btc_sth_sopr", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/bitcoin-sth-sopr", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_sth_sopr", "BTC", cache_key, data)
+    return data
+
+
+def fetch_btc_lth_sopr(debug: bool = False) -> dict | list | None:
+    """LTH distributing at VAH = macro distribution."""
+    cache_key = {"type": "lth_sopr"}
+    hit, cached = _cache_check("coinglass_btc_lth_sopr", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/bitcoin-lth-sopr", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_lth_sopr", "BTC", cache_key, data)
+    return data
+
+
+def fetch_btc_sth_realized_price(debug: bool = False) -> dict | list | None:
+    """STH cost basis — dynamic support/resistance."""
+    cache_key = {"type": "sth_realized_price"}
+    hit, cached = _cache_check("coinglass_btc_sth_rp", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/bitcoin-sth-realized-price", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_sth_rp", "BTC", cache_key, data)
+    return data
+
+
+def fetch_btc_lth_realized_price(debug: bool = False) -> dict | list | None:
+    """LTH cost basis — deep macro floor."""
+    cache_key = {"type": "lth_realized_price"}
+    hit, cached = _cache_check("coinglass_btc_lth_rp", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/bitcoin-lth-realized-price", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_lth_rp", "BTC", cache_key, data)
+    return data
+
+
+def fetch_btc_nupl(debug: bool = False) -> dict | list | None:
+    """Net unrealized P/L — euphoria/capitulation gauge."""
+    cache_key = {"type": "nupl"}
+    hit, cached = _cache_check("coinglass_btc_nupl", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/bitcoin-net-unrealized-profit-loss", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_nupl", "BTC", cache_key, data)
+    return data
+
+
+def fetch_btc_active_addresses(debug: bool = False) -> dict | list | None:
+    """Network activity — rising activity + rising VA = real demand."""
+    cache_key = {"type": "active_addresses"}
+    hit, cached = _cache_check("coinglass_btc_active_addr", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/bitcoin-active-addresses", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_active_addr", "BTC", cache_key, data)
+    return data
+
+
+def fetch_btc_reserve_risk(debug: bool = False) -> dict | list | None:
+    """Risk/reward ratio from HODLer conviction."""
+    cache_key = {"type": "reserve_risk"}
+    hit, cached = _cache_check("coinglass_btc_reserve_risk", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/bitcoin-reserve-risk", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_reserve_risk", "BTC", cache_key, data)
+    return data
+
+
+def fetch_btc_correlation(debug: bool = False) -> dict | list | None:
+    """BTC vs SPY/GLD/TLT — regime context."""
+    cache_key = {"type": "correlation"}
+    hit, cached = _cache_check("coinglass_btc_correlation", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/bitcoin-correlation", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_correlation", "BTC", cache_key, data)
+    return data
+
+
+def fetch_btc_macro_oscillator(debug: bool = False) -> dict | list | None:
+    """BMO composite — confirms macro cycle position."""
+    cache_key = {"type": "macro_oscillator"}
+    hit, cached = _cache_check("coinglass_btc_macro_osc", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/index/bitcoin-macro-oscillator", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_macro_osc", "BTC", cache_key, data)
+    return data
+
+
+# ===========================================================================
+# Snapshot endpoints — ETF Detail
+# ===========================================================================
+
+def fetch_btc_etf_net_assets(debug: bool = False) -> list | None:
+    """BTC ETF AUM trend — rising AUM + positive flows = institutional conviction."""
+    cache_key = {"type": "btc_etf_net_assets"}
+    hit, cached = _cache_check("coinglass_btc_etf_assets", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/etf/bitcoin/net-assets/history", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_etf_assets", "BTC", cache_key, data)
+    return data
+
+
+def fetch_btc_etf_premium_discount(debug: bool = False) -> list | None:
+    """ETF NAV divergence — premium = demand exceeding supply."""
+    cache_key = {"type": "btc_etf_premium"}
+    hit, cached = _cache_check("coinglass_btc_etf_premium", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/etf/bitcoin/premium-discount/history", debug=debug)
+    if data:
+        _cache_store("coinglass_btc_etf_premium", "BTC", cache_key, data)
+    return data
+
+
+def fetch_grayscale_premium(debug: bool = False) -> list | None:
+    """GBTC premium/discount — institutional sentiment barometer."""
+    cache_key = {"type": "grayscale_premium"}
+    hit, cached = _cache_check("coinglass_grayscale_premium", "BTC", cache_key)
+    if hit:
+        return cached
+    data = cg_get("/api/grayscale/premium-history", debug=debug)
+    if data:
+        _cache_store("coinglass_grayscale_premium", "BTC", cache_key, data)
+    return data
+
+
 # ===========================================================================
 # Interpretation functions
 # ===========================================================================
+
+def interpret_funding_rate_ohlc(data: list) -> list:
+    """
+    Interpret funding rate OHLC history — extract close rate per bar with bias.
+    Returns list of dicts: [{time, close, bias}, ...]
+    """
+    if not data or not isinstance(data, list):
+        return []
+
+    bars = []
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        t = item.get("time", item.get("t", 0))
+        close = float(item.get("close", item.get("c", 0)) or 0)
+
+        if close > 0.0003:
+            bias = "long_crowded"
+        elif close > 0.0001:
+            bias = "moderately_long"
+        elif close < -0.0003:
+            bias = "short_crowded"
+        elif close < -0.0001:
+            bias = "moderately_short"
+        else:
+            bias = "neutral"
+
+        bars.append({"time": t, "close": close, "bias": bias})
+
+    return bars
+
 
 def interpret_coin_liquidations(coins: list, symbol: str) -> dict:
     """
@@ -1792,6 +2216,202 @@ def render_market_pulse(data: dict) -> str:
 
 
 # ===========================================================================
+# Snapshot-all orchestrator (cron pipeline)
+# ===========================================================================
+
+def run_snapshot_all(debug: bool = False) -> dict:
+    """
+    Run all snapshot endpoints for the 6h cron pipeline.
+    Fetches ~35 endpoints, stores into titan_intelligence.db snapshot tables.
+    Returns summary dict with counts.
+    """
+    import uuid as _uuid
+    run_id = str(_uuid.uuid4())[:8]
+    started = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # Import storage
+    try:
+        from src.storage.intelligence import (
+            log_cg_snapshot, log_snapshot_run, finish_snapshot_run,
+            log_derivatives_snapshot, log_market_snapshot)
+        log_snapshot_run(run_id, "coinglass")
+    except Exception as e:
+        print(f"  Warning: Could not init snapshot metadata: {e}", file=sys.stderr)
+
+    succeeded = 0
+    failed = 0
+    rows = 0
+    errors = []
+
+    def _snap(label, fetch_fn, table, symbol=None, endpoint=None,
+              interval=None, model=None, indicator=None):
+        nonlocal succeeded, failed, rows, errors
+        try:
+            print(f"  [{label}] Fetching...", end=" ", flush=True, file=sys.stderr)
+            data = fetch_fn()
+            if data is None:
+                print("EMPTY", file=sys.stderr)
+                failed += 1
+                errors.append(f"{label}: returned None")
+                return
+            row_id = log_cg_snapshot(
+                table, symbol=symbol, endpoint=endpoint, data=data,
+                interval=interval, model=model, indicator=indicator)
+            if row_id > 0:
+                print("OK", file=sys.stderr)
+                succeeded += 1
+                rows += 1
+            else:
+                print("STORE_FAIL", file=sys.stderr)
+                failed += 1
+                errors.append(f"{label}: storage failed")
+        except Exception as e:
+            print(f"ERROR: {e}", file=sys.stderr)
+            failed += 1
+            errors.append(f"{label}: {str(e)[:100]}")
+
+    print(f"\n  === Coinglass Snapshot Run {run_id} ===", file=sys.stderr)
+    print(f"  Started: {started}", file=sys.stderr)
+
+    # ── 1. Spot CVD & Taker (BTC, ETH) ──
+    for sym in ["BTC", "ETH"]:
+        _snap(f"Spot CVD {sym}",
+              lambda s=sym: fetch_spot_aggregated_cvd(s, debug=debug),
+              "spot_flow_snapshots", symbol=sym, endpoint="aggregated_cvd", interval="h4")
+        _snap(f"Spot Taker {sym}",
+              lambda s=sym: fetch_spot_taker_buy_sell(s, debug=debug),
+              "spot_flow_snapshots", symbol=sym, endpoint="taker_buy_sell", interval="h4")
+        _snap(f"Spot Netflow {sym}",
+              lambda s=sym: fetch_spot_netflow_list(s, debug=debug),
+              "spot_flow_snapshots", symbol=sym, endpoint="netflow_list")
+        _snap(f"Spot Coin Netflow {sym}",
+              lambda s=sym: fetch_spot_coin_netflow(s, debug=debug),
+              "spot_flow_snapshots", symbol=sym, endpoint="coin_netflow")
+
+    # ── 2. Futures Basis & Speculation ──
+    for sym in ["BTC", "ETH"]:
+        _snap(f"Futures Basis {sym}",
+              lambda s=sym: fetch_futures_basis(s, debug=debug),
+              "basis_snapshots", symbol=sym, endpoint="futures_basis", interval="h4")
+    for sym in ["BTC", "ETH"]:
+        _snap(f"Futures/Spot Vol Ratio {sym}",
+              lambda s=sym: fetch_futures_spot_volume_ratio(s, debug=debug),
+              "basis_snapshots", symbol=sym, endpoint="futures_spot_vol_ratio", interval="h4")
+    _snap("Options/Futures OI Ratio",
+          lambda: fetch_options_futures_oi_ratio(debug=debug),
+          "basis_snapshots", symbol="_MARKET", endpoint="options_futures_oi_ratio")
+
+    # ── 3. Large Orders & Orderbook ──
+    for sym in ["BTC", "ETH"]:
+        _snap(f"Large Orders {sym}",
+              lambda s=sym: fetch_large_limit_orders(s, debug=debug),
+              "orderbook_snapshots", symbol=sym, endpoint="large_limit_order")
+        _snap(f"Agg Orderbook {sym}",
+              lambda s=sym: fetch_aggregated_orderbook(s, debug=debug),
+              "orderbook_snapshots", symbol=sym, endpoint="aggregated_ask_bids", interval="h4")
+
+    # ── 4. OI by Exchange ──
+    for sym in ["BTC", "ETH"]:
+        _snap(f"OI Exchange Hist {sym}",
+              lambda s=sym: fetch_oi_exchange_history(s, range_val="4h", debug=debug),
+              "oi_exchange_snapshots", symbol=sym, interval="4h")
+
+    # ── 5. Liquidation Heatmaps ──
+    for sym in ["BTC", "ETH"]:
+        _snap(f"Liq Heatmap M1 {sym}",
+              lambda s=sym: fetch_liq_heatmap_model1(s, debug=debug),
+              "liquidation_heatmap_snapshots", symbol=sym, model="model1")
+        _snap(f"Liq Heatmap M3 {sym}",
+              lambda s=sym: fetch_liq_heatmap_model3(s, debug=debug),
+              "liquidation_heatmap_snapshots", symbol=sym, model="model3")
+
+    # ── 6. BTC Macro On-Chain ──
+    btc_onchain = [
+        ("STH SOPR", fetch_btc_sth_sopr, "sth_sopr"),
+        ("LTH SOPR", fetch_btc_lth_sopr, "lth_sopr"),
+        ("STH Realized Price", fetch_btc_sth_realized_price, "sth_realized_price"),
+        ("LTH Realized Price", fetch_btc_lth_realized_price, "lth_realized_price"),
+        ("NUPL", fetch_btc_nupl, "nupl"),
+        ("Active Addresses", fetch_btc_active_addresses, "active_addresses"),
+        ("Reserve Risk", fetch_btc_reserve_risk, "reserve_risk"),
+        ("Correlation", fetch_btc_correlation, "correlation"),
+        ("Macro Oscillator", fetch_btc_macro_oscillator, "macro_oscillator"),
+    ]
+    for label, fn, ind in btc_onchain:
+        _snap(f"BTC {label}",
+              lambda f=fn: f(debug=debug),
+              "btc_onchain_snapshots", symbol="BTC", indicator=ind)
+
+    # Coinbase Premium (uses existing function)
+    _snap("Coinbase Premium",
+          lambda: fetch_coinbase_premium(interval="h4", limit=6, debug=debug),
+          "btc_onchain_snapshots", symbol="BTC", indicator="coinbase_premium")
+
+    # ── 7. ETF Detail ──
+    _snap("BTC ETF Net Assets",
+          lambda: fetch_btc_etf_net_assets(debug=debug),
+          "etf_flow_snapshots", symbol="BTC", endpoint="net_assets")
+    _snap("BTC ETF Premium/Discount",
+          lambda: fetch_btc_etf_premium_discount(debug=debug),
+          "etf_flow_snapshots", symbol="BTC", endpoint="premium_discount")
+    _snap("Grayscale Premium",
+          lambda: fetch_grayscale_premium(debug=debug),
+          "etf_flow_snapshots", symbol="BTC", endpoint="grayscale_premium")
+
+    # ── 8. Existing derivatives + market pulse (bonus — also store to time-series) ──
+    try:
+        pulse = run_market_pulse(debug=debug)
+        if pulse:
+            log_market_snapshot(pulse)
+            succeeded += 1
+            rows += 2  # BTC + ETH rows
+            print(f"  [Market Pulse] OK", file=sys.stderr)
+    except Exception as e:
+        failed += 1
+        errors.append(f"market_pulse: {str(e)[:100]}")
+        print(f"  [Market Pulse] ERROR: {e}", file=sys.stderr)
+
+    for sym in ["BTC", "ETH"]:
+        try:
+            analysis = run_derivatives_analysis(sym, debug=debug)
+            if analysis:
+                log_derivatives_snapshot(analysis)
+                succeeded += 1
+                rows += 1
+                print(f"  [Derivatives {sym}] OK", file=sys.stderr)
+        except Exception as e:
+            failed += 1
+            errors.append(f"derivatives_{sym}: {str(e)[:100]}")
+            print(f"  [Derivatives {sym}] ERROR: {e}", file=sys.stderr)
+
+    # Finish metadata
+    try:
+        finish_snapshot_run(run_id, succeeded, failed, rows, errors or None)
+    except Exception:
+        pass
+
+    finished = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    print(f"\n  === Snapshot Complete ===", file=sys.stderr)
+    print(f"  Run ID: {run_id}", file=sys.stderr)
+    print(f"  Finished: {finished}", file=sys.stderr)
+    print(f"  Succeeded: {succeeded} | Failed: {failed} | Rows: {rows}", file=sys.stderr)
+    if errors:
+        print(f"  Errors:", file=sys.stderr)
+        for e in errors:
+            print(f"    - {e}", file=sys.stderr)
+
+    return {
+        "run_id": run_id,
+        "started": started,
+        "finished": finished,
+        "succeeded": succeeded,
+        "failed": failed,
+        "rows_inserted": rows,
+        "errors": errors,
+    }
+
+
+# ===========================================================================
 # CLI
 # ===========================================================================
 
@@ -1807,17 +2427,46 @@ def main():
     parser.add_argument("--json", action="store_true", help="Output raw JSON to stdout")
     parser.add_argument("--debug", action="store_true", help="Print raw API responses to stderr")
     parser.add_argument("--no-save", action="store_true", help="Don't save to file")
+    parser.add_argument("--snapshot-all", action="store_true",
+                        help="Cron mode: snapshot all endpoints into titan_intelligence.db")
     args = parser.parse_args()
 
-    if not args.token and not args.scan and not args.market:
+    if not args.token and not args.scan and not args.market and not args.snapshot_all:
         parser.print_help()
         sys.exit(1)
 
     api_key = _get_api_key()
     if not api_key:
-        print("\n  ⚠️  COINGLASS_API_KEY not set.")
+        print("\n  COINGLASS_API_KEY not set.")
         print("  Add your key to .env: COINGLASS_API_KEY=your_key_here")
         sys.exit(1)
+
+    # --snapshot-all mode: cron pipeline
+    if args.snapshot_all:
+        # PID file to prevent concurrent runs
+        pid_file = PROJECT_ROOT / "logs" / "coinglass_snapshot.pid"
+        pid_file.parent.mkdir(parents=True, exist_ok=True)
+        if pid_file.exists():
+            try:
+                old_pid = int(pid_file.read_text().strip())
+                # Check if PID is still running
+                os.kill(old_pid, 0)
+                print(f"Snapshot already running (PID {old_pid}). Skipping.", file=sys.stderr)
+                sys.exit(0)
+            except (ProcessLookupError, ValueError):
+                pass  # Stale PID file, continue
+        pid_file.write_text(str(os.getpid()))
+        try:
+            result = run_snapshot_all(debug=args.debug)
+            if args.json:
+                print(json.dumps(result, indent=2, default=str))
+            sys.exit(0 if result["failed"] == 0 else 1)
+        finally:
+            try:
+                pid_file.unlink()
+            except Exception:
+                pass
+        return
 
     # --market mode: macro dashboard
     if args.market:

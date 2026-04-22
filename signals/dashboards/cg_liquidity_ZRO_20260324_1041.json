@@ -1,0 +1,132 @@
+{
+  "fetched_at": "2026-03-24T10:41:57.563471",
+  "symbol": "ZRO",
+  "current_price": 2.19,
+  "funding": {
+    "symbol": "ZRO",
+    "avg_rate": 8.251e-05,
+    "avg_rate_pct": "0.0083%",
+    "max_rate": 0.0307,
+    "max_exchange": "KuCoin",
+    "min_rate": -0.02806841,
+    "min_exchange": "HTX",
+    "num_exchanges": 20,
+    "annualized_cost_pct": 21.58,
+    "bias": "neutral",
+    "interpretation": "ZRO avg funding: 0.0083% across 20 exchanges. Neutral funding \u2014 no directional crowding. Annualized cost: 21.6% for the dominant side"
+  },
+  "open_interest": {
+    "history": {
+      "symbol": "ZRO",
+      "current_oi_usd": 139743392.882,
+      "oi_24h_ago_usd": 118731374.0,
+      "oi_change_24h_pct": 17.7,
+      "oi_change_period_pct": 15.49,
+      "oi_trend": "rising",
+      "interpretation": "ZRO OI: $139.7M (+17.7% 24h). OI expanding \u2014 new positions entering the market"
+    },
+    "exchanges": {
+      "symbol": "ZRO",
+      "total_oi_usd": 139743392.882,
+      "change_1h_pct": -0.39,
+      "change_4h_pct": 4.15,
+      "change_24h_pct": 23.12,
+      "momentum": "stable",
+      "top_exchange_changes": [
+        {
+          "exchange": "OKX",
+          "change_1h_pct": 4.76,
+          "oi_usd": 6654774.069
+        },
+        {
+          "exchange": "Bitget",
+          "change_1h_pct": -3.16,
+          "oi_usd": 5576332.5469
+        },
+        {
+          "exchange": "CoinEx",
+          "change_1h_pct": -2.87,
+          "oi_usd": 251596.51075
+        }
+      ],
+      "interpretation": "ZRO total OI: $139.7M (+23.1% 24h). Biggest mover: OKX (+4.8% 1h)"
+    }
+  },
+  "long_short": {
+    "global": {
+      "symbol": "ZRO",
+      "current_long_pct": 47.56,
+      "current_short_pct": 52.44,
+      "current_ratio": 0.91,
+      "trend": "more_longs",
+      "extreme": false,
+      "contrarian_signal": null,
+      "interpretation": "ZRO Global L/S: 0.91x (47.6% long / 52.4% short). Crowd shifting long \u2014 retail piling into longs"
+    },
+    "top_traders": {
+      "symbol": "ZRO",
+      "top_account_long_pct": 49.02,
+      "top_account_ratio": 0.96,
+      "top_position_long_pct": 50.19,
+      "top_position_ratio": 1.01,
+      "account_position_divergence": false,
+      "smart_money_lean": "neutral",
+      "interpretation": "ZRO Top Traders \u2014 Account: 0.96x (49.0% long), Position: 1.01x (50.2% long)"
+    }
+  },
+  "liquidation": {
+    "symbol": "ZRO",
+    "total_24h_usd": 63248.99426508,
+    "long_liq_24h_usd": 24387.35555735,
+    "short_liq_24h_usd": 38861.63870773,
+    "long_short_ratio": 0.63,
+    "bias": "balanced",
+    "recent_acceleration": false,
+    "timeframe_breakdown": {
+      "24h": {
+        "total": 63248.99426508,
+        "long": 24387.35555735,
+        "short": 38861.63870773
+      },
+      "12h": {
+        "total": 24893.52770043,
+        "long": 15268.9165561,
+        "short": 9624.61114433
+      },
+      "4h": {
+        "total": 9256.88493784,
+        "long": 7878.19824876,
+        "short": 1378.68668908
+      },
+      "1h": {
+        "total": 2.48787,
+        "long": 2.48787,
+        "short": 0.0
+      }
+    },
+    "interpretation": "ZRO 24h liquidations: $63K (Long: $24K | Short: $39K). Balanced liquidation (L/S ratio: 0.6x)"
+  },
+  "max_pain": {
+    "nearest_expiry": null,
+    "max_pain_price": 0,
+    "distance_pct": 0,
+    "direction": "at",
+    "put_call_oi_ratio": 1.0,
+    "expiries": [],
+    "interpretation": "No options market for ZRO"
+  },
+  "options": {
+    "total_oi_usd": 0,
+    "volume_24h_usd": 0,
+    "oi_change_24h_pct": 0,
+    "interpretation": "Options info unavailable"
+  },
+  "setup": {
+    "detected": false,
+    "direction": null,
+    "confidence": "low",
+    "snap_back_target": null,
+    "thesis": "No liquidity grab setup detected",
+    "components": {}
+  }
+}

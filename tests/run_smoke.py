@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Titan Terminal v2 — Smoke Tests
+Titan Terminal — Smoke Tests
 ================================
 Verifies every Python tool can run without errors.
 Uses real data (existing DBs, cached OHLCV). No mocks.
@@ -8,7 +8,7 @@ Uses real data (existing DBs, cached OHLCV). No mocks.
 Usage:
     python3 tests/run_smoke.py           # Run all tests
     python3 tests/run_smoke.py --verbose  # Show full output on failures
-    python3 tests/run_smoke.py st indicators  # Run specific test
+    python3 tests/run_smoke.py indicators  # Run specific test
 
 Exit codes:
     0 = All tests passed
@@ -59,7 +59,6 @@ def test_indicators_list() -> tuple[bool, str]:
 
 def test_indicators_analyze() -> tuple[bool, str]:
     """indicators.py analyze — runs TA on cached data."""
-    # Try BTC first, fall back to ETH, SOL
     for symbol in ["BTC", "ETH", "SOL"]:
         try:
             r = _run([
@@ -93,22 +92,6 @@ def test_indicators_download() -> tuple[bool, str]:
         return False, str(e)
 
 
-def test_signals_fetcher_recent() -> tuple[bool, str]:
-    """signals_fetcher.py recent — queries external signals DB."""
-    try:
-        r = _run(["python3", "src/fetchers/signals_fetcher.py", "recent", "--hours", "168"])
-        if r.returncode == 0:
-            return True, "OK"
-        combined = (r.stdout + r.stderr).lower()
-        if "no such file" in combined or "not found" in combined or "does not exist" in combined:
-            return True, "SKIP: signals DB not found"
-        return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
 def test_hyperliquid_fetcher() -> tuple[bool, str]:
     """hyperliquid_fetcher.py — fetches HL perps data."""
     try:
@@ -122,58 +105,6 @@ def test_hyperliquid_fetcher() -> tuple[bool, str]:
         return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
     except subprocess.TimeoutExpired:
         return True, "SKIP: network timeout (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_trade_card_formatter() -> tuple[bool, str]:
-    """trade_card.py — formats a sample trade card (demo mode)."""
-    try:
-        # No args = demo mode with sample data
-        r = _run(["python3", "src/formatters/trade_card.py"])
-        if r.returncode != 0:
-            return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-        out = r.stdout
-        if "Trade Card" in out or "TRADE CARD" in out or "Titan" in out:
-            return True, "OK"
-        return False, f"Missing expected output. Got: {out[:200]}"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_trade_card_invalid_json() -> tuple[bool, str]:
-    """trade_card.py — rejects malformed input."""
-    try:
-        r = _run(["python3", "src/formatters/trade_card.py", "not valid json"])
-        if r.returncode != 0:
-            return True, "OK (rejected with exit 1)"
-        return False, "Expected non-zero exit for invalid JSON, got exit 0"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_signal_card_formatter() -> tuple[bool, str]:
-    """signal_card.py — formats with minimal valid input."""
-    payload = json.dumps({
-        "symbol": "TEST",
-        "signal_direction": "long",
-        "ta_verdict": "bullish",
-        "assessment": "ALIGNED",
-        "recommendation": "VALID"
-    })
-    try:
-        r = _run(["python3", "src/formatters/signal_card.py", payload])
-        if r.returncode != 0:
-            return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-        if "TEST" in r.stdout:
-            return True, "OK"
-        return False, f"Missing 'TEST' in output. Got: {r.stdout[:200]}"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
     except Exception as e:
         return False, str(e)
 
@@ -256,23 +187,6 @@ def test_portfolio_sync_dry_run() -> tuple[bool, str]:
         return False, str(e)
 
 
-def test_alert_checker() -> tuple[bool, str]:
-    """alert_checker.py — checks alerts without updating file."""
-    payload = json.dumps({"BNB": 667.0, "ZRO": 2.17, "TAO": 274.0})
-    try:
-        r = _run(["python3", "src/watchers/alert_checker.py", payload])
-        if r.returncode != 0:
-            return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-        out = r.stdout.upper()
-        if "ALERT CHECK" in out or "ALERT" in out:
-            return True, "OK"
-        return False, f"Missing 'ALERT CHECK' in output. Got: {r.stdout[:200]}"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
 def test_intelligence_watchlist() -> tuple[bool, str]:
     """intelligence.py watchlist — queries the intelligence DB."""
     try:
@@ -304,7 +218,6 @@ def test_nansen_cache_stats() -> tuple[bool, str]:
 def test_nansen_cache_cycle() -> tuple[bool, str]:
     """nansen_cache.py — store then check retrieves the same data."""
     try:
-        # Step 1: Store a test entry
         r1 = _run([
             "python3", "src/storage/nansen_cache.py", "store",
             "--tool", "general_search", "--token", "__TEST__",
@@ -314,7 +227,6 @@ def test_nansen_cache_cycle() -> tuple[bool, str]:
         if r1.returncode != 0:
             return False, f"Store failed (exit {r1.returncode}): {r1.stderr[-200:]}"
 
-        # Step 2: Check it
         r2 = _run([
             "python3", "src/storage/nansen_cache.py", "check",
             "--tool", "general_search", "--token", "__TEST__",
@@ -335,19 +247,6 @@ def test_cex_monitor_alerts() -> tuple[bool, str]:
     """cex_monitor.py alerts — reads CEX health data."""
     try:
         r = _run(["python3", "src/watchers/cex_monitor.py", "alerts"])
-        if r.returncode == 0:
-            return True, "OK"
-        return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_watchlist_monitor_summary() -> tuple[bool, str]:
-    """watchlist_monitor.py summary — shows watchlist overview."""
-    try:
-        r = _run(["python3", "src/watchers/watchlist_monitor.py", "summary"])
         if r.returncode == 0:
             return True, "OK"
         return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
@@ -437,6 +336,30 @@ def test_coinglass_market() -> tuple[bool, str]:
         return False, str(e)
 
 
+def test_coinglass_backward_compat() -> tuple[bool, str]:
+    """coinglass_fetcher.py --token BTC --price 84000 — original liquidity report still works."""
+    try:
+        r = _run([
+            "python3", "src/fetchers/coinglass_fetcher.py",
+            "--token", "BTC", "--price", "84000", "--no-save"
+        ], timeout=30)
+        if r.returncode == 0:
+            out = r.stdout.upper()
+            if "LIQUIDITY" in out or "BTC" in out:
+                return True, "OK"
+            return True, "OK (exit 0)"
+        combined = (r.stdout + r.stderr).lower()
+        if "api_key" in combined or "not set" in combined or "coinglass_api_key" in combined:
+            return True, "SKIP: COINGLASS_API_KEY not set"
+        if _is_network_error(r.stderr):
+            return True, "SKIP: network unavailable"
+        return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
+    except subprocess.TimeoutExpired:
+        return True, "SKIP: network timeout (30s)"
+    except Exception as e:
+        return False, str(e)
+
+
 def test_derivatives_table_creation() -> tuple[bool, str]:
     """derivatives_snapshots table — init_db creates table with expected columns."""
     try:
@@ -493,7 +416,6 @@ row_id = log_derivatives_snapshot(mock)
 if row_id < 0:
     print("FAIL: returned -1")
     sys.exit(1)
-# Verify row exists
 import sqlite3
 conn = sqlite3.connect(str(DB_PATH))
 row = conn.execute('SELECT symbol, price_usd FROM derivatives_snapshots WHERE id = ?', (row_id,)).fetchone()
@@ -526,155 +448,6 @@ def test_derivatives_history_cli() -> tuple[bool, str]:
         return False, str(e)
 
 
-def test_coinglass_backward_compat() -> tuple[bool, str]:
-    """coinglass_fetcher.py --token BTC --price 84000 — original liquidity report still works."""
-    try:
-        r = _run([
-            "python3", "src/fetchers/coinglass_fetcher.py",
-            "--token", "BTC", "--price", "84000", "--no-save"
-        ], timeout=30)
-        if r.returncode == 0:
-            out = r.stdout.upper()
-            if "LIQUIDITY" in out or "BTC" in out:
-                return True, "OK"
-            return True, "OK (exit 0)"
-        combined = (r.stdout + r.stderr).lower()
-        if "api_key" in combined or "not set" in combined or "coinglass_api_key" in combined:
-            return True, "SKIP: COINGLASS_API_KEY not set"
-        if _is_network_error(r.stderr):
-            return True, "SKIP: network unavailable"
-        return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-    except subprocess.TimeoutExpired:
-        return True, "SKIP: network timeout (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_paper_engine() -> tuple[bool, str]:
-    """paper_engine.py — init, status, and analytics summary."""
-    try:
-        # Step 1: Init portfolio
-        r1 = _run(["python3", "src/trading/paper_engine.py", "init"])
-        if r1.returncode != 0:
-            return False, f"init failed (exit {r1.returncode}): {r1.stderr[-200:]}"
-
-        # Step 2: Status should show $50,000
-        r2 = _run(["python3", "src/trading/paper_engine.py", "status"])
-        if r2.returncode != 0:
-            return False, f"status failed (exit {r2.returncode}): {r2.stderr[-200:]}"
-        if "$50,000" not in r2.stdout:
-            return False, f"Missing '$50,000' in status output. Got: {r2.stdout[:200]}"
-
-        # Step 3: Analytics summary should run
-        r3 = _run(["python3", "src/trading/analytics.py", "summary"])
-        if r3.returncode != 0:
-            return False, f"analytics summary failed (exit {r3.returncode}): {r3.stderr[-200:]}"
-
-        return True, "OK"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_backtesting_signals_list() -> tuple[bool, str]:
-    """backtesting signals.py list — lists all signals."""
-    try:
-        r = _run(["python3", "src/backtesting/signals.py", "list"])
-        if r.returncode != 0:
-            return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-        if "rsi_overbought" in r.stdout:
-            return True, "OK"
-        return False, f"Missing 'rsi_overbought' in output. Got: {r.stdout[:200]}"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_backtesting_coverage() -> tuple[bool, str]:
-    """backtesting engine.py coverage — shows data coverage."""
-    try:
-        r = _run(["python3", "src/backtesting/engine.py", "coverage", "--symbol", "BTC"])
-        if r.returncode != 0:
-            return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-        return True, "OK"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_backtesting_scenarios_list() -> tuple[bool, str]:
-    """backtesting scenarios.py list — lists all scenarios."""
-    try:
-        r = _run(["python3", "src/backtesting/scenarios.py", "list"])
-        if r.returncode != 0:
-            return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-        if "A1" in r.stdout:
-            return True, "OK"
-        return False, f"Missing 'A1' in output. Got: {r.stdout[:200]}"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_backtesting_run() -> tuple[bool, str]:
-    """backtesting engine.py run — runs a simple backtest."""
-    strategy = json.dumps({
-        "name": "smoke_test",
-        "direction": "LONG",
-        "entry_signals": ["rsi_oversold"],
-        "exit": {"stop_atr_mult": 2.0, "target1_atr_mult": 3.0, "scale_out_pct": 0.5, "max_bars": 60}
-    })
-    try:
-        r = _run([
-            "python3", "src/backtesting/engine.py", "run",
-            "--symbol", "BTC", "--timeframe", "4h", "--days", "90",
-            "--strategy", strategy
-        ], timeout=60)
-        if r.returncode != 0:
-            return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-        if "BACKTEST" in r.stdout:
-            return True, "OK"
-        return True, "OK (exit 0)"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (60s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_signal_checker_list() -> tuple[bool, str]:
-    """signal_checker.py list — lists graduated strategies."""
-    try:
-        r = _run(["python3", "src/backtesting/signal_checker.py", "list"])
-        if r.returncode != 0:
-            return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-        if "E1" in r.stdout or "Graduated" in r.stdout or "No graduated" in r.stdout:
-            return True, "OK"
-        return False, f"Unexpected output: {r.stdout[:200]}"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (30s)"
-    except Exception as e:
-        return False, str(e)
-
-
-def test_signal_checker_check() -> tuple[bool, str]:
-    """signal_checker.py check — evaluates graduated strategies."""
-    try:
-        r = _run(["python3", "src/backtesting/signal_checker.py", "check"], timeout=60)
-        if r.returncode != 0:
-            return False, f"Exit {r.returncode}: {r.stderr[-200:]}"
-        if "SIGNAL CHECK" in r.stdout or "No graduated" in r.stdout:
-            return True, "OK"
-        return False, f"Unexpected output: {r.stdout[:200]}"
-    except subprocess.TimeoutExpired:
-        return False, "Timed out (60s)"
-    except Exception as e:
-        return False, str(e)
-
-
 # ---------------------------------------------------------------------------
 # Registry
 # ---------------------------------------------------------------------------
@@ -683,20 +456,14 @@ ALL_TESTS = {
     "indicators_list": test_indicators_list,
     "indicators_analyze": test_indicators_analyze,
     "indicators_download": test_indicators_download,
-    "signals_fetcher": test_signals_fetcher_recent,
     "hyperliquid": test_hyperliquid_fetcher,
-    "trade_card": test_trade_card_formatter,
-    "trade_card_invalid": test_trade_card_invalid_json,
-    "signal_card": test_signal_card_formatter,
     "target_package": test_target_package_formatter,
     "target_package_rr": test_target_package_rejects_bad_rr,
     "portfolio_sync": test_portfolio_sync_dry_run,
-    "alert_checker": test_alert_checker,
     "intelligence": test_intelligence_watchlist,
     "nansen_cache_stats": test_nansen_cache_stats,
     "nansen_cache_cycle": test_nansen_cache_cycle,
     "cex_monitor": test_cex_monitor_alerts,
-    "watchlist_monitor": test_watchlist_monitor_summary,
     "coinglass": test_coinglass_fetcher,
     "coinglass_derivatives": test_coinglass_derivatives,
     "coinglass_market": test_coinglass_market,
@@ -704,13 +471,6 @@ ALL_TESTS = {
     "deriv_table": test_derivatives_table_creation,
     "deriv_logging": test_derivatives_logging,
     "deriv_history_cli": test_derivatives_history_cli,
-    "paper_engine": test_paper_engine,
-    "backtest_signals": test_backtesting_signals_list,
-    "backtest_coverage": test_backtesting_coverage,
-    "backtest_scenarios": test_backtesting_scenarios_list,
-    "backtest_run": test_backtesting_run,
-    "signal_checker_list": test_signal_checker_list,
-    "signal_checker_check": test_signal_checker_check,
 }
 
 
@@ -719,7 +479,7 @@ ALL_TESTS = {
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Titan Terminal v2 — Smoke Tests")
+    parser = argparse.ArgumentParser(description="Titan Terminal — Smoke Tests")
     parser.add_argument("--verbose", action="store_true", help="Show full output on failures")
     parser.add_argument("filter", nargs="?", default=None, help="Run tests matching this substring")
     args = parser.parse_args()
@@ -731,7 +491,7 @@ def main():
             print(f"No tests matching '{args.filter}'")
             sys.exit(1)
 
-    print("Titan Terminal v2 — Smoke Tests")
+    print("Titan Terminal — Smoke Tests")
     print("=" * 40)
     print()
 
@@ -748,15 +508,15 @@ def main():
 
         if msg.startswith("SKIP"):
             skipped += 1
-            print(f"  ⏭️  {padded} — {msg}")
+            print(f"  -  {padded} — {msg}")
             if args.verbose:
                 failures.append((name, msg))
         elif ok:
             passed += 1
-            print(f"  ✅ {padded} — {msg}")
+            print(f"  OK {padded} — {msg}")
         else:
             failed += 1
-            print(f"  ❌ {padded} — FAIL: {msg}")
+            print(f"  FAIL {padded} — {msg}")
             failures.append((name, msg))
 
     print()

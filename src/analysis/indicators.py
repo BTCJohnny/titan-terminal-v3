@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Titan Terminal v2 — Technical Analysis Engine
+Titan Terminal v3 — Technical Analysis Engine
 ==============================================
 CLI tool for downloading, caching, and analyzing crypto OHLCV data.
 All computation is deterministic Python math. Claude Code interprets the results.
@@ -83,6 +83,14 @@ def fmt_num(value, decimals: int = 2) -> str:
         return "N/A"
     return f"{value:,.{decimals}f}"
 
+
+def _format_divergence_line(div) -> str:
+    """Format a divergence dict as a one-line string for the report."""
+    if not div:
+        return "None detected"
+    return f"{div['label']} ({div['strength']}, score {div['score']}/100, {div['bars_ago']} bars ago)"
+
+
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
@@ -109,9 +117,21 @@ CMC_TIMEFRAME_MAP = {
 # How many candles to fetch per timeframe (Coinbase returns up to 300)
 CANDLES_PER_REQUEST = 300
 
-# Default candle count for initial fetch (180 days at 4h = 1080 bars)
+# Default candle count for initial fetch per timeframe (~180 days of data)
 # Hyperliquid supports up to 5000 if needed
 DEFAULT_CANDLE_COUNT = 1080
+
+# Per-timeframe minimum candle counts (ensures sufficient history for analysis)
+TIMEFRAME_CANDLE_MINIMUMS = {
+    "1h": 4320,   # 180 days × 24h
+    "4h": 1080,   # 180 days × 6
+    "1d": 365,    # 365 days
+    "1w": 200,    # ~4 years
+}
+
+def get_default_candle_count(timeframe: str) -> int:
+    """Return the target candle count for a given timeframe."""
+    return TIMEFRAME_CANDLE_MINIMUMS.get(timeframe, DEFAULT_CANDLE_COUNT)
 
 
 # ============================================================================
@@ -289,7 +309,7 @@ def calculate_candles_needed(symbol: str, timeframe: str) -> tuple[int, str]:
 
     if latest_ts is None:
         # No cache - do initial full fetch
-        return DEFAULT_CANDLE_COUNT, "initial"
+        return get_default_candle_count(timeframe), "initial"
 
     # Calculate gap from last cached candle to now
     tf_ms = {
@@ -458,10 +478,10 @@ def fetch_from_hyperliquid(symbol: str, timeframe: str, candle_count: int = None
     Args:
         symbol: Token symbol (e.g., BTC, ETH)
         timeframe: Candle timeframe (e.g., 4h, 1d)
-        candle_count: Number of candles to fetch (default: DEFAULT_CANDLE_COUNT)
+        candle_count: Number of candles to fetch (default: per-timeframe minimum)
     """
     if candle_count is None:
-        candle_count = DEFAULT_CANDLE_COUNT
+        candle_count = get_default_candle_count(timeframe)
     hl_tf = HL_TIMEFRAME_MAP.get(timeframe)
     if not hl_tf:
         return []
@@ -961,6 +981,217 @@ def calculate_obv(candles: list) -> list:
 
 
 # ============================================================================
+# RSI DIVERGENCE DETECTION
+# ============================================================================
+
+def detect_array_swing_points(values: list, lookback: int = 3) -> dict:
+    """
+    Detect swing highs and lows in a 1D numeric array (e.g. RSI values).
+
+    Args:
+        values: List of numeric values (may contain None for warmup period)
+        lookback: Bars on each side to confirm a swing (default: 3)
+
+    Returns:
+        {"swing_highs": [(idx, value), ...],
+         "swing_lows": [(idx, value), ...]}
+    """
+    if len(values) < lookback * 2 + 1:
+        return {"swing_highs": [], "swing_lows": []}
+
+    swing_highs = []
+    swing_lows = []
+
+    for i in range(lookback, len(values) - lookback):
+        if values[i] is None:
+            continue
+
+        # Check for swing high
+        is_high = True
+        for j in range(i - lookback, i + lookback + 1):
+            if j != i and (values[j] is None or values[j] >= values[i]):
+                is_high = False
+                break
+        if is_high:
+            swing_highs.append((i, values[i]))
+
+        # Check for swing low
+        is_low = True
+        for j in range(i - lookback, i + lookback + 1):
+            if j != i and (values[j] is None or values[j] <= values[i]):
+                is_low = False
+                break
+        if is_low:
+            swing_lows.append((i, values[i]))
+
+    return {"swing_highs": swing_highs, "swing_lows": swing_lows}
+
+
+def _score_divergence(bars_ago: int, rsi_delta: float, span_bars: int, report_window: int = 50) -> tuple:
+    """
+    Score a divergence on recency, RSI magnitude, and span.
+
+    Returns:
+        (score: int, strength: str)
+    """
+    # Recency: 0-40 pts — more recent = higher score
+    recency = max(0, 40 * (1 - bars_ago / report_window))
+
+    # RSI magnitude: 0-35 pts — larger RSI delta = stronger signal (caps at delta=35)
+    magnitude = min(35, rsi_delta * 1.0)
+
+    # Span: 0-25 pts — peaks around 25 bars, triangular approximation
+    span = max(0, 25 * (1 - abs(span_bars - 25) / 50))
+
+    score = int(recency + magnitude + span)
+    if score >= 70:
+        strength = "strong"
+    elif score >= 40:
+        strength = "moderate"
+    else:
+        strength = "weak"
+
+    return score, strength
+
+
+def detect_rsi_divergences(
+    candles: list,
+    rsi: list,
+    scan_window: int = 100,
+    report_window: int = 50,
+    match_tolerance: int = 5
+) -> list:
+    """
+    Detect RSI divergences by comparing price swing points to RSI swing points.
+
+    Args:
+        candles: Full list of OHLCV candle dicts
+        rsi: Full RSI array (same length as candles)
+        scan_window: How far back to look for swing points (default: 100)
+        report_window: Only report divergences completing within this many bars (default: 50)
+        match_tolerance: +/- bars to match a price swing to an RSI swing (default: 5)
+
+    Returns:
+        List of divergence dicts sorted by score descending.
+    """
+    n = len(candles)
+    if n < scan_window:
+        scan_window = n
+
+    offset = n - scan_window
+
+    # Detect price swings on the scan window
+    price_swings = detect_swing_points(candles[offset:], lookback=5)
+    # Detect RSI swings on the scan window
+    rsi_swings = detect_array_swing_points(rsi[offset:], lookback=3)
+
+    def _match_swings(price_pts, rsi_pts):
+        """Match price swing points to nearest RSI swing points within tolerance."""
+        matched = []
+        for p_idx, p_val, _ts in price_pts:
+            best = None
+            best_dist = match_tolerance + 1
+            for r_idx, r_val in rsi_pts:
+                dist = abs(p_idx - r_idx)
+                if dist <= match_tolerance and dist < best_dist:
+                    best = (r_idx, r_val)
+                    best_dist = dist
+            if best:
+                matched.append((p_idx, p_val, best[0], best[1]))
+        return matched
+
+    matched_highs = _match_swings(price_swings["swing_highs"], rsi_swings["swing_highs"])
+    matched_lows = _match_swings(price_swings["swing_lows"], rsi_swings["swing_lows"])
+
+    divergences = []
+
+    # Check consecutive matched swing highs for bearish divergences
+    for i in range(1, len(matched_highs)):
+        p_idx_a, p_val_a, r_idx_a, r_val_a = matched_highs[i - 1]
+        p_idx_b, p_val_b, r_idx_b, r_val_b = matched_highs[i]
+
+        bars_ago = scan_window - 1 - p_idx_b
+        span = p_idx_b - p_idx_a
+
+        if bars_ago >= report_window:
+            continue
+
+        div_type = None
+        if p_val_b > p_val_a and r_val_b < r_val_a:
+            div_type = "bearish"
+            label = "Regular Bearish"
+        elif p_val_b < p_val_a and r_val_b > r_val_a:
+            div_type = "hidden_bearish"
+            label = "Hidden Bearish"
+
+        if div_type:
+            rsi_delta = abs(r_val_b - r_val_a)
+            score, strength = _score_divergence(bars_ago, rsi_delta, span, report_window)
+            divergences.append({
+                "type": div_type,
+                "label": label,
+                "price_points": [(p_idx_a + offset, round(p_val_a, 2)),
+                                 (p_idx_b + offset, round(p_val_b, 2))],
+                "rsi_points": [(r_idx_a + offset, round(r_val_a, 2)),
+                               (r_idx_b + offset, round(r_val_b, 2))],
+                "bars_ago": bars_ago,
+                "rsi_delta": round(rsi_delta, 1),
+                "span_bars": span,
+                "score": score,
+                "strength": strength,
+                "timestamp": candles[p_idx_b + offset]["t"]
+            })
+
+    # Check consecutive matched swing lows for bullish divergences
+    for i in range(1, len(matched_lows)):
+        p_idx_a, p_val_a, r_idx_a, r_val_a = matched_lows[i - 1]
+        p_idx_b, p_val_b, r_idx_b, r_val_b = matched_lows[i]
+
+        bars_ago = scan_window - 1 - p_idx_b
+        span = p_idx_b - p_idx_a
+
+        if bars_ago >= report_window:
+            continue
+
+        div_type = None
+        if p_val_b < p_val_a and r_val_b > r_val_a:
+            div_type = "bullish"
+            label = "Regular Bullish"
+        elif p_val_b > p_val_a and r_val_b < r_val_a:
+            div_type = "hidden_bullish"
+            label = "Hidden Bullish"
+
+        if div_type:
+            rsi_delta = abs(r_val_b - r_val_a)
+            score, strength = _score_divergence(bars_ago, rsi_delta, span, report_window)
+            divergences.append({
+                "type": div_type,
+                "label": label,
+                "price_points": [(p_idx_a + offset, round(p_val_a, 2)),
+                                 (p_idx_b + offset, round(p_val_b, 2))],
+                "rsi_points": [(r_idx_a + offset, round(r_val_a, 2)),
+                               (r_idx_b + offset, round(r_val_b, 2))],
+                "bars_ago": bars_ago,
+                "rsi_delta": round(rsi_delta, 1),
+                "span_bars": span,
+                "score": score,
+                "strength": strength,
+                "timestamp": candles[p_idx_b + offset]["t"]
+            })
+
+    # Deduplicate: if two divergences of the same type share a swing point, keep higher score
+    seen = {}
+    deduped = []
+    for d in sorted(divergences, key=lambda x: x["score"], reverse=True):
+        key = (d["type"], tuple(d["price_points"][1]))
+        if key not in seen:
+            seen[key] = True
+            deduped.append(d)
+
+    return sorted(deduped, key=lambda x: x["score"], reverse=True)
+
+
+# ============================================================================
 # SUPPORT/RESISTANCE DETECTION
 # ============================================================================
 
@@ -1234,6 +1465,11 @@ def analyze_symbol(symbol: str, timeframe: str = "4h", indicators: list = None) 
         rsi = calculate_rsi(closes)
         result["indicators"]["RSI_14"] = round(rsi[-1], 2) if rsi[-1] else None
 
+        # RSI Divergence detection
+        divergences = detect_rsi_divergences(candles, rsi)
+        result["indicators"]["RSI_divergences"] = divergences
+        result["indicators"]["RSI_primary_divergence"] = divergences[0] if divergences else None
+
     if "sma" in indicators:
         sma_20 = calculate_sma(closes, 20)
         sma_50 = calculate_sma(closes, 50)
@@ -1288,9 +1524,29 @@ def generate_report(symbol: str, timeframe: str = "4h") -> str:
     # Determine signals
     signals = []
 
-    # RSI Signal
+    # RSI Signal — Divergence is primary, OB/OS is secondary
     rsi = ind.get("RSI_14")
-    if rsi:
+    primary_div = ind.get("RSI_primary_divergence")
+
+    if primary_div and primary_div["strength"] != "weak":
+        div = primary_div
+        signals.append(
+            f"RSI DIVERGENCE: {div['label']} (score {div['score']}/100, "
+            f"{div['strength']}) — {div['bars_ago']} bars ago, "
+            f"RSI delta {div['rsi_delta']:.1f}"
+        )
+        # OB/OS as reinforcing context
+        if rsi and rsi > 70:
+            if div["type"] in ("bearish", "hidden_bearish"):
+                signals.append(f"  + RSI Overbought ({rsi}) — reinforces bearish divergence")
+            else:
+                signals.append(f"  + RSI Overbought ({rsi})")
+        elif rsi and rsi < 30:
+            if div["type"] in ("bullish", "hidden_bullish"):
+                signals.append(f"  + RSI Oversold ({rsi}) — reinforces bullish divergence")
+            else:
+                signals.append(f"  + RSI Oversold ({rsi})")
+    elif rsi:
         if rsi > 70:
             signals.append(f"RSI OVERBOUGHT ({rsi})")
         elif rsi < 30:
@@ -1367,6 +1623,7 @@ Latest Price: ${price:,.2f} ({analysis['latest_time']})
 INDICATORS
 ----------
 RSI (14):        {fmt_num(ind.get('RSI_14'))}
+RSI Divergence:  {_format_divergence_line(ind.get('RSI_primary_divergence'))}
 MACD:            {fmt_num(ind.get('MACD'), 4)} | Signal: {fmt_num(ind.get('MACD_Signal'), 4)} | Hist: {fmt_num(ind.get('MACD_Histogram'), 4)}
 Bollinger Bands: Upper {fmt_price(ind.get('BB_Upper'))} | Mid {fmt_price(ind.get('BB_Middle'))} | Lower {fmt_price(ind.get('BB_Lower'))}
 SMA:             20: {fmt_price(ind.get('SMA_20'))} | 50: {fmt_price(ind.get('SMA_50'))} | 200: {fmt_price(ind.get('SMA_200'))}
@@ -1397,9 +1654,15 @@ def cmd_download(args):
     candles_needed, fetch_mode = calculate_candles_needed(symbol, timeframe)
     cached_count = get_cached_candle_count(symbol, timeframe)
 
-    # --full flag forces full 4500-bar fetch regardless of cache
+    # --full flag forces full backfill to timeframe minimum regardless of cache
+    target_count = get_default_candle_count(timeframe)
     if args.full:
-        candles_needed = DEFAULT_CANDLE_COUNT
+        candles_needed = target_count
+        fetch_mode = "full_backfill"
+
+    # Auto-backfill if cache is below the timeframe minimum
+    elif fetch_mode == "incremental" and cached_count < target_count:
+        candles_needed = target_count
         fetch_mode = "full_backfill"
 
     if fetch_mode == "initial":
@@ -1415,7 +1678,7 @@ def cmd_download(args):
     if not args.force and fetch_mode == "incremental" and not should_refresh(symbol, timeframe):
         last = get_last_update(symbol, timeframe)
         print(f"Data is fresh (last update: {last.strftime('%Y-%m-%d %H:%M UTC')})")
-        print(f"Use --force to re-download anyway, or --full to backfill to {DEFAULT_CANDLE_COUNT} bars.")
+        print(f"Use --force to re-download anyway, or --full to backfill to {target_count} bars.")
         return
 
     candles, source = fetch_candles_from_api(symbol, timeframe, candles_needed)
@@ -1480,7 +1743,7 @@ def main():
     init_db()
 
     parser = argparse.ArgumentParser(
-        description="Titan Terminal v2 — Technical Analysis Engine",
+        description="Titan Terminal v3 — Technical Analysis Engine",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")

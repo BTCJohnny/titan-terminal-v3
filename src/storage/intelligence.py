@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Titan Terminal v2
+Titan Terminal v3
 ===========================
 Query/response tracking for MCP calls, LLM interpretations, and trade cards.
 Enables future model evaluation and cost tracking.
@@ -11,6 +11,7 @@ Storage: SQLite (data/titan_intelligence.db)
 import sqlite3
 import json
 import uuid
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, List, Any
@@ -20,7 +21,7 @@ from typing import Optional, Dict, List, Any
 # ============================================================================
 
 DB_PATH = Path(__file__).parent.parent.parent / "data" / "titan_intelligence.db"
-REFRESH_CONFIG_PATH = Path(__file__).parent.parent.parent / "config" / "refresh_tokens.json"
+COWORK_DB_PATH = Path("/Users/johnny_main/Developer/Claude_Cowork/Alpha-Terminal/database/titan_intelligence.db")
 
 # ============================================================================
 # DATABASE INITIALIZATION
@@ -137,74 +138,6 @@ CREATE INDEX IF NOT EXISTS idx_trade_cards_timestamp ON trade_cards(timestamp_ut
 CREATE INDEX IF NOT EXISTS idx_cex_snapshots_asset ON cex_snapshots(asset, timestamp_utc);
 CREATE INDEX IF NOT EXISTS idx_mentor_token ON mentor_consultations(token);
 CREATE INDEX IF NOT EXISTS idx_mentor_timestamp ON mentor_consultations(timestamp_utc);
-
--- Track mentor-approved trade setups for backtesting
-CREATE TABLE IF NOT EXISTS trade_setups (
-    id INTEGER PRIMARY KEY,
-    setup_id TEXT UNIQUE,
-    timestamp_utc TEXT,
-
-    -- Token & Direction
-    token TEXT,
-    direction TEXT,  -- "LONG" or "SHORT"
-
-    -- Setup Definition
-    entry_price REAL,
-    stop_loss REAL,
-    target_1 REAL,
-    target_2 REAL,
-    target_3 REAL,  -- Third target for scaling out
-    risk_reward_ratio REAL,
-
-    -- Position Sizing (from Target Package)
-    position_size_units REAL,  -- Units of token to buy/sell
-    position_size_usd REAL,    -- Total position value in USD
-    account_balance_at_setup REAL,  -- Account balance when setup was created
-
-    -- Analysis Context (JSON for flexibility)
-    ta_summary TEXT,
-    onchain_summary TEXT,
-    accumulation_score INTEGER,  -- 0-5
-    signal_summary TEXT,  -- "RSI oversold + Smart money buying"
-
-    -- Mentor Verdict
-    mentor_agrees INTEGER,  -- Boolean
-    mentor_confidence_adj REAL,
-    mentor_reasoning TEXT,
-    mentor_action TEXT,  -- "proceed", "wait", "reverse", "reduce_size"
-    mentor_consultation_id TEXT,  -- FK to mentor_consultations
-
-    -- Skill/Strategy Reference
-    skill_name TEXT,  -- e.g., "pre-breakout-accumulator"
-    pattern_type TEXT,  -- e.g., "Range Deviation", "Accumulation Long", "Distribution Short"
-
-    -- Notes (free-text cross-reference: trade card path, thesis summary, context)
-    notes TEXT,
-
-    -- Execution Status
-    status TEXT,  -- "PENDING", "ENTERED", "CLOSED", "EXPIRED", "SKIPPED"
-    entered_at TEXT,
-    actual_entry_price REAL,
-
-    -- Outcome (populated after close)
-    closed_at TEXT,
-    close_price REAL,
-    pnl_percent REAL,
-    pnl_usd REAL,
-    outcome TEXT,  -- "WIN", "LOSS", "BREAKEVEN", "PARTIAL"
-    hit_target INTEGER,  -- Which target hit (1, 2, or 0 for stop)
-
-    -- Post-Trade Analysis
-    what_worked TEXT,
-    what_failed TEXT,
-    lessons_learned TEXT,
-    evaluation_notes TEXT
-);
-
-CREATE INDEX IF NOT EXISTS idx_setups_token ON trade_setups(token);
-CREATE INDEX IF NOT EXISTS idx_setups_status ON trade_setups(status);
-CREATE INDEX IF NOT EXISTS idx_setups_outcome ON trade_setups(outcome);
-CREATE INDEX IF NOT EXISTS idx_setups_timestamp ON trade_setups(timestamp_utc);
 
 -- Token flow snapshots for time-series tracking
 CREATE TABLE IF NOT EXISTS flow_snapshots (
@@ -573,66 +506,260 @@ CREATE INDEX IF NOT EXISTS idx_deriv_timestamp ON derivatives_snapshots(timestam
 CREATE INDEX IF NOT EXISTS idx_deriv_funding_bias ON derivatives_snapshots(funding_bias);
 CREATE INDEX IF NOT EXISTS idx_deriv_ls_extreme ON derivatives_snapshots(ls_extreme);
 
--- Wyckoff phase scan results (batch scans across token list)
-CREATE TABLE IF NOT EXISTS wyckoff_scans (
-    id INTEGER PRIMARY KEY,
-    scan_id TEXT UNIQUE,
-    batch_id TEXT,
-    scan_date TEXT,
+"""
 
-    -- Token info
-    token TEXT NOT NULL,
-    timeframe TEXT DEFAULT '1d',
-    price_at_scan REAL,
+# ============================================================================
+# SNAPSHOT PIPELINE TABLES (cron-fed, 6h cadence)
+# ============================================================================
 
-    -- Wyckoff classification
-    cycle_type TEXT,
-    phase TEXT,
-    confidence INTEGER,
-
-    -- Key events detected
-    spring_detected INTEGER DEFAULT 0,
-    upthrust_detected INTEGER DEFAULT 0,
-    sos_detected INTEGER DEFAULT 0,
-    sow_detected INTEGER DEFAULT 0,
-    events_detail TEXT,
-
-    -- Range structure
-    support_level REAL,
-    resistance_level REAL,
-    range_width_pct REAL,
-    position_in_range TEXT,
-
-    -- Volume analysis
-    volume_trend TEXT,
-    obv_divergence INTEGER DEFAULT 0,
-    volume_confirmation TEXT,
-
-    -- Interpretation
-    phase_progression TEXT,
-    watch_conditions TEXT,
-    trading_implications TEXT,
-
-    -- Outcome tracking
-    price_7d_later REAL,
-    price_14d_later REAL,
-    price_30d_later REAL,
-    pct_change_7d REAL,
-    pct_change_14d REAL,
-    pct_change_30d REAL,
-    phase_7d_later TEXT,
-    outcome_notes TEXT,
-
-    -- Metadata
-    created_at TEXT
+SNAPSHOT_SCHEMA = """
+-- Spot CVD & Taker Data (Coinglass)
+CREATE TABLE IF NOT EXISTS spot_flow_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    endpoint TEXT NOT NULL,
+    interval TEXT,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
 );
+CREATE INDEX IF NOT EXISTS idx_spot_flow_symbol ON spot_flow_snapshots(symbol, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_spot_flow_endpoint ON spot_flow_snapshots(endpoint);
 
-CREATE INDEX IF NOT EXISTS idx_wyckoff_token ON wyckoff_scans(token);
-CREATE INDEX IF NOT EXISTS idx_wyckoff_date ON wyckoff_scans(scan_date);
-CREATE INDEX IF NOT EXISTS idx_wyckoff_phase ON wyckoff_scans(phase);
-CREATE INDEX IF NOT EXISTS idx_wyckoff_confidence ON wyckoff_scans(confidence DESC);
-CREATE INDEX IF NOT EXISTS idx_wyckoff_batch ON wyckoff_scans(batch_id);
-CREATE INDEX IF NOT EXISTS idx_wyckoff_cycle ON wyckoff_scans(cycle_type);
+-- Futures Basis & Speculation (Coinglass)
+CREATE TABLE IF NOT EXISTS basis_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT,
+    endpoint TEXT NOT NULL,
+    interval TEXT,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_basis_symbol ON basis_snapshots(symbol, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_basis_endpoint ON basis_snapshots(endpoint);
+
+-- Large Orders & Orderbook (Coinglass)
+CREATE TABLE IF NOT EXISTS orderbook_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    endpoint TEXT NOT NULL,
+    interval TEXT,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_orderbook_symbol ON orderbook_snapshots(symbol, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_orderbook_endpoint ON orderbook_snapshots(endpoint);
+
+-- OI by Exchange over time (Coinglass)
+CREATE TABLE IF NOT EXISTS oi_exchange_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    interval TEXT,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_oi_exchange_symbol ON oi_exchange_snapshots(symbol, timestamp_utc);
+
+-- Liquidation Heatmaps (Coinglass)
+CREATE TABLE IF NOT EXISTS liquidation_heatmap_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    model TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_liq_heatmap_symbol ON liquidation_heatmap_snapshots(symbol, timestamp_utc);
+
+-- BTC Macro On-Chain (Coinglass)
+CREATE TABLE IF NOT EXISTS btc_onchain_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    indicator TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_btc_onchain_indicator ON btc_onchain_snapshots(indicator, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_btc_onchain_time ON btc_onchain_snapshots(timestamp_utc);
+
+-- Nansen Flow Snapshots (cron-fed from cache)
+CREATE TABLE IF NOT EXISTS nansen_flow_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    tool_name TEXT NOT NULL,
+    holder_segment TEXT,
+    lookback_period TEXT,
+    data_json TEXT NOT NULL,
+    source_query_id TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_nansen_flow_token ON nansen_flow_snapshots(token, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_nansen_flow_tool ON nansen_flow_snapshots(tool_name);
+
+-- Nansen Holder Snapshots
+CREATE TABLE IF NOT EXISTS nansen_holder_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    chain TEXT,
+    label_type TEXT,
+    mode TEXT,
+    data_json TEXT NOT NULL,
+    source_query_id TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_nansen_holder_token ON nansen_holder_snapshots(token, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_nansen_holder_label ON nansen_holder_snapshots(label_type);
+
+-- Nansen Perp Trade Snapshots
+CREATE TABLE IF NOT EXISTS nansen_perp_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    source_query_id TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_nansen_perp_time ON nansen_perp_snapshots(timestamp_utc);
+
+-- Nansen Quant Score Snapshots
+CREATE TABLE IF NOT EXISTS nansen_quant_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    source_query_id TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_nansen_quant_token ON nansen_quant_snapshots(token, timestamp_utc);
+
+-- Snapshot Metadata (tracks each cron run)
+CREATE TABLE IF NOT EXISTS snapshot_metadata (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id TEXT NOT NULL,
+    run_type TEXT NOT NULL,
+    started_at TEXT NOT NULL,
+    finished_at TEXT,
+    endpoints_succeeded INTEGER DEFAULT 0,
+    endpoints_failed INTEGER DEFAULT 0,
+    total_rows_inserted INTEGER DEFAULT 0,
+    error_log TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_snapshot_meta_type ON snapshot_metadata(run_type, started_at);
+CREATE INDEX IF NOT EXISTS idx_snapshot_meta_run ON snapshot_metadata(run_id);
+
+-- Structured output from /analyze command
+CREATE TABLE IF NOT EXISTS analyze_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    report_id TEXT UNIQUE,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    price_usd REAL,
+
+    -- Verdict
+    verdict TEXT,
+    conviction TEXT,
+    direction TEXT,
+
+    -- Accumulation Score (0-5)
+    accumulation_score REAL,
+    exchange_flows_signal TEXT,
+    fresh_wallets_signal TEXT,
+    smart_money_signal TEXT,
+    top_pnl_signal TEXT,
+    whale_signal TEXT,
+
+    -- Signal Hierarchy Pillar Verdicts
+    onchain_verdict TEXT,
+    perps_verdict TEXT,
+    derivatives_verdict TEXT,
+    ta_verdict TEXT,
+
+    -- Key Levels (JSON arrays)
+    support_levels_json TEXT,
+    resistance_levels_json TEXT,
+
+    -- TA Summary
+    ta_weekly_rsi REAL,
+    ta_daily_rsi REAL,
+    ta_4h_rsi REAL,
+    ta_weekly_adx REAL,
+    ta_daily_adx REAL,
+    ta_trend_direction TEXT,
+
+    -- Derivatives Summary
+    funding_rate REAL,
+    oi_usd REAL,
+    oi_change_24h_pct REAL,
+    ls_global_ratio REAL,
+    ls_crowding TEXT,
+
+    -- Invalidation
+    invalidation_criteria TEXT,
+
+    -- Cost tracking
+    nansen_credits_used INTEGER,
+
+    -- Full report
+    full_markdown TEXT,
+
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_analyze_token ON analyze_snapshots(token, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_analyze_verdict ON analyze_snapshots(verdict, token);
+
+-- Structured output from /accum-distro command
+CREATE TABLE IF NOT EXISTS accum_distro_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    report_id TEXT UNIQUE,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    chain TEXT,
+    token_address TEXT,
+    price_usd REAL,
+
+    -- Layer Verdicts
+    layer1_verdict TEXT,
+    layer2_verdict TEXT,
+    layer3_verdict TEXT,
+
+    -- Layer 1: CEX Flows
+    cex_net_flow_usd REAL,
+    cex_inflow_usd REAL,
+    cex_outflow_usd REAL,
+    cex_flow_vs_avg REAL,
+
+    -- Layer 2: Smart Money
+    sm_holders_count INTEGER,
+    sm_balance_usd REAL,
+    sm_balance_change_24h_pct REAL,
+    sm_net_buy_volume_usd REAL,
+    sm_buyer_count INTEGER,
+    sm_seller_count INTEGER,
+
+    -- Layer 3: Fresh Wallets
+    fresh_wallet_count INTEGER,
+    fresh_wallet_max_score INTEGER,
+    fresh_wallet_total_usd REAL,
+
+    -- Final Verdict
+    final_verdict TEXT,
+    conviction TEXT,
+
+    -- Cost tracking
+    nansen_credits_used INTEGER,
+
+    -- Full report
+    full_markdown TEXT,
+
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_accum_distro_token ON accum_distro_snapshots(token, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_accum_distro_verdict ON accum_distro_snapshots(final_verdict, token);
 """
 
 
@@ -642,7 +769,8 @@ def init_db() -> None:
     conn = sqlite3.connect(DB_PATH)
     # Execute statements individually to handle legacy table schema mismatches
     # (e.g., cex_snapshots was created with different columns than SCHEMA defines)
-    for statement in SCHEMA.split(';'):
+    combined_schema = SCHEMA + "\n" + SNAPSHOT_SCHEMA
+    for statement in combined_schema.split(';'):
         statement = statement.strip()
         if statement:
             try:
@@ -657,51 +785,8 @@ def init_db() -> None:
 
 
 def migrate_db() -> None:
-    """
-    Run database migrations for schema updates.
-    Adds new columns to existing tables if they don't exist.
-    """
-    conn = sqlite3.connect(DB_PATH)
-
-    # Get existing columns in trade_setups
-    cursor = conn.execute("PRAGMA table_info(trade_setups)")
-    existing_columns = {row[1] for row in cursor.fetchall()}
-
-    # New columns to add (column_name, type, default)
-    new_columns = [
-        ("target_3", "REAL", None),
-        ("position_size_units", "REAL", None),
-        ("position_size_usd", "REAL", None),
-        ("account_balance_at_setup", "REAL", None),
-        ("notes", "TEXT", None),
-    ]
-
-    for col_name, col_type, default in new_columns:
-        if col_name not in existing_columns:
-            default_clause = f" DEFAULT {default}" if default is not None else ""
-            conn.execute(f"ALTER TABLE trade_setups ADD COLUMN {col_name} {col_type}{default_clause}")
-
-    # Wyckoff scans table
-    try:
-        conn.execute("SELECT 1 FROM wyckoff_scans LIMIT 1")
-    except sqlite3.OperationalError:
-        for statement in [s.strip() for s in SCHEMA.split(';') if 'wyckoff_scans' in s.lower()]:
-            if statement:
-                conn.execute(statement + ';')
-        conn.commit()
-
-    # Create any new tables (safe — all use IF NOT EXISTS)
-    for statement in SCHEMA.split(';'):
-        statement = statement.strip()
-        if statement:
-            try:
-                conn.execute(statement)
-            except sqlite3.OperationalError as e:
-                if 'already exists' not in str(e) and 'no such column' not in str(e):
-                    raise
-
-    conn.commit()
-    conn.close()
+    """Run database migrations — create any new tables if not present."""
+    init_db()
 
 
 def get_connection() -> sqlite3.Connection:
@@ -714,6 +799,24 @@ def get_connection() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def sync_to_cowork() -> bool:
+    """Copy local DB to Cowork directory so it has fresh data."""
+    if not DB_PATH.exists():
+        print(f"[sync] Source DB not found: {DB_PATH}")
+        return False
+    if not COWORK_DB_PATH.parent.exists():
+        print(f"[sync] Cowork directory not found: {COWORK_DB_PATH.parent}")
+        return False
+    try:
+        shutil.copy2(DB_PATH, COWORK_DB_PATH)
+        size_mb = COWORK_DB_PATH.stat().st_size / (1024 * 1024)
+        print(f"[sync] Copied {size_mb:.1f}MB → {COWORK_DB_PATH}")
+        return True
+    except Exception as e:
+        print(f"[sync] Failed: {e}")
+        return False
 
 
 # ============================================================================
@@ -982,641 +1085,6 @@ def get_mentor_stats() -> Dict:
 
     conn.close()
     return stats
-
-
-# ============================================================================
-# TRADE SETUP TRACKING
-# ============================================================================
-
-def log_trade_setup(
-    token: str,
-    direction: str,
-    entry_price: float,
-    stop_loss: float,
-    target_1: float,
-    target_2: float = None,
-    risk_reward_ratio: float = None,
-    ta_summary: str = None,
-    onchain_summary: str = None,
-    accumulation_score: int = None,
-    signal_summary: str = None,
-    mentor_agrees: bool = None,
-    mentor_confidence_adj: float = None,
-    mentor_reasoning: str = None,
-    mentor_action: str = None,
-    mentor_consultation_id: str = None,
-    skill_name: str = None,
-    pattern_type: str = None,
-    notes: str = None
-) -> str:
-    """
-    Log a new trade setup.
-
-    Returns:
-        setup_id for tracking
-    """
-    setup_id = str(uuid.uuid4())[:8]  # Short ID for easier CLI use
-    timestamp = datetime.now(timezone.utc).isoformat()
-
-    # Calculate R:R if not provided
-    if risk_reward_ratio is None and entry_price and stop_loss and target_1:
-        risk = abs(entry_price - stop_loss)
-        reward = abs(target_1 - entry_price)
-        risk_reward_ratio = round(reward / risk, 2) if risk > 0 else None
-
-    conn = get_connection()
-    conn.execute(
-        """INSERT INTO trade_setups
-           (setup_id, timestamp_utc, token, direction, entry_price, stop_loss,
-            target_1, target_2, risk_reward_ratio, ta_summary, onchain_summary,
-            accumulation_score, signal_summary, mentor_agrees, mentor_confidence_adj,
-            mentor_reasoning, mentor_action, mentor_consultation_id, skill_name,
-            pattern_type, notes, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (setup_id, timestamp, token.upper(), direction.upper(), entry_price, stop_loss,
-         target_1, target_2, risk_reward_ratio, ta_summary, onchain_summary,
-         accumulation_score, signal_summary, 1 if mentor_agrees else (0 if mentor_agrees is not None else None),
-         mentor_confidence_adj, mentor_reasoning, mentor_action, mentor_consultation_id,
-         skill_name, pattern_type, notes, "PENDING")
-    )
-    conn.commit()
-    conn.close()
-
-    return setup_id
-
-
-def update_setup_metadata(
-    setup_id: str,
-    pattern_type: str = None,
-    notes: str = None,
-    signal_summary: str = None,
-) -> bool:
-    """
-    Update editable pre-trade fields on an existing setup.
-    Only updates fields that are explicitly provided (not None).
-
-    Returns:
-        True if a row was updated, False if setup_id not found.
-    """
-    updates, params = [], []
-    if pattern_type is not None:
-        updates.append("pattern_type = ?")
-        params.append(pattern_type)
-    if notes is not None:
-        updates.append("notes = ?")
-        params.append(notes)
-    if signal_summary is not None:
-        updates.append("signal_summary = ?")
-        params.append(signal_summary)
-
-    if not updates:
-        return False
-
-    params.append(setup_id)
-    conn = get_connection()
-    cur = conn.execute(
-        f"UPDATE trade_setups SET {', '.join(updates)} WHERE setup_id = ?", params
-    )
-    conn.commit()
-    affected = cur.rowcount
-    conn.close()
-    return affected > 0
-
-
-def log_trade_setup_with_sizing(
-    token: str,
-    direction: str,
-    entry_price: float,
-    stop_loss: float,
-    target_1: float = None,
-    target_2: float = None,
-    target_3: float = None,
-    risk_reward_ratio: float = None,
-    position_size_units: float = None,
-    position_size_usd: float = None,
-    account_balance_at_setup: float = None,
-    ta_summary: str = None,
-    onchain_summary: str = None,
-    accumulation_score: int = None,
-    signal_summary: str = None,
-    skill_name: str = None,
-    pattern_type: str = None
-) -> str:
-    """
-    Log a new trade setup with position sizing from Target Package.
-
-    This is an extended version of log_trade_setup that includes:
-    - target_3: Third profit target for scaling out
-    - position_size_units: Number of units to buy/sell
-    - position_size_usd: Total position value in USD
-    - account_balance_at_setup: Account balance when setup was created
-
-    Returns:
-        setup_id for tracking
-    """
-    setup_id = str(uuid.uuid4())[:8]
-    timestamp = datetime.now(timezone.utc).isoformat()
-
-    # Calculate R:R from T3 if not provided (T3 is the main target for RR)
-    if risk_reward_ratio is None and entry_price and stop_loss:
-        target = target_3 or target_2 or target_1
-        if target:
-            risk = abs(entry_price - stop_loss)
-            reward = abs(target - entry_price)
-            risk_reward_ratio = round(reward / risk, 2) if risk > 0 else None
-
-    conn = get_connection()
-    conn.execute(
-        """INSERT INTO trade_setups
-           (setup_id, timestamp_utc, token, direction, entry_price, stop_loss,
-            target_1, target_2, target_3, risk_reward_ratio,
-            position_size_units, position_size_usd, account_balance_at_setup,
-            ta_summary, onchain_summary, accumulation_score, signal_summary,
-            skill_name, pattern_type, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (setup_id, timestamp, token.upper(), direction.upper(), entry_price, stop_loss,
-         target_1, target_2, target_3, risk_reward_ratio,
-         position_size_units, position_size_usd, account_balance_at_setup,
-         ta_summary, onchain_summary, accumulation_score, signal_summary,
-         skill_name, pattern_type, "PENDING")
-    )
-    conn.commit()
-    conn.close()
-
-    return setup_id
-
-
-def update_setup_entered(setup_id: str, actual_entry_price: float) -> None:
-    """Mark setup as entered with actual price."""
-    timestamp = datetime.now(timezone.utc).isoformat()
-
-    conn = get_connection()
-    conn.execute(
-        """UPDATE trade_setups
-           SET status = 'ENTERED', entered_at = ?, actual_entry_price = ?
-           WHERE setup_id = ?""",
-        (timestamp, actual_entry_price, setup_id)
-    )
-    conn.commit()
-    conn.close()
-
-
-def update_setup_closed(
-    setup_id: str,
-    close_price: float,
-    outcome: str,
-    hit_target: int = None,
-    pnl_percent: float = None,
-    pnl_usd: float = None
-) -> None:
-    """Close a setup and record outcome."""
-    timestamp = datetime.now(timezone.utc).isoformat()
-
-    # Calculate PnL percent if not provided
-    conn = get_connection()
-    cursor = conn.execute(
-        "SELECT actual_entry_price, entry_price, direction FROM trade_setups WHERE setup_id = ?",
-        (setup_id,)
-    )
-    row = cursor.fetchone()
-
-    if row and pnl_percent is None:
-        entry = row['actual_entry_price'] or row['entry_price']
-        direction = row['direction']
-        if entry and close_price:
-            if direction == 'LONG':
-                pnl_percent = round(((close_price - entry) / entry) * 100, 2)
-            else:  # SHORT
-                pnl_percent = round(((entry - close_price) / entry) * 100, 2)
-
-    conn.execute(
-        """UPDATE trade_setups
-           SET status = 'CLOSED', closed_at = ?, close_price = ?, outcome = ?,
-               hit_target = ?, pnl_percent = ?, pnl_usd = ?
-           WHERE setup_id = ?""",
-        (timestamp, close_price, outcome.upper(), hit_target, pnl_percent, pnl_usd, setup_id)
-    )
-    conn.commit()
-    conn.close()
-
-
-def add_setup_lessons(
-    setup_id: str,
-    what_worked: str = None,
-    what_failed: str = None,
-    lessons_learned: str = None,
-    evaluation_notes: str = None
-) -> None:
-    """Add post-trade analysis to a setup."""
-    conn = get_connection()
-    conn.execute(
-        """UPDATE trade_setups
-           SET what_worked = ?, what_failed = ?, lessons_learned = ?, evaluation_notes = ?
-           WHERE setup_id = ?""",
-        (what_worked, what_failed, lessons_learned, evaluation_notes, setup_id)
-    )
-    conn.commit()
-    conn.close()
-
-
-def get_setup_stats(
-    token: str = None,
-    skill_name: str = None,
-    days: int = 90
-) -> Dict:
-    """Get win rate, avg PnL, best/worst setups."""
-    conn = get_connection()
-    stats = {}
-
-    # Build WHERE clause
-    conditions = ["status = 'CLOSED'", f"timestamp_utc >= datetime('now', '-{days} days')"]
-    params = []
-
-    if token:
-        conditions.append("token = ?")
-        params.append(token.upper())
-    if skill_name:
-        conditions.append("skill_name = ?")
-        params.append(skill_name)
-
-    where_clause = " AND ".join(conditions)
-
-    # Total closed setups
-    cursor = conn.execute(f"SELECT COUNT(*) FROM trade_setups WHERE {where_clause}", params)
-    stats['total_closed'] = cursor.fetchone()[0]
-
-    # Win/loss counts
-    cursor = conn.execute(
-        f"SELECT outcome, COUNT(*) FROM trade_setups WHERE {where_clause} GROUP BY outcome",
-        params
-    )
-    outcome_counts = {row[0]: row[1] for row in cursor.fetchall()}
-    stats['wins'] = outcome_counts.get('WIN', 0)
-    stats['losses'] = outcome_counts.get('LOSS', 0)
-    stats['breakeven'] = outcome_counts.get('BREAKEVEN', 0)
-    stats['partial'] = outcome_counts.get('PARTIAL', 0)
-
-    # Win rate
-    total_decided = stats['wins'] + stats['losses']
-    stats['win_rate'] = round(stats['wins'] / total_decided, 2) if total_decided > 0 else 0
-
-    # Average PnL
-    cursor = conn.execute(
-        f"SELECT AVG(pnl_percent) FROM trade_setups WHERE {where_clause} AND pnl_percent IS NOT NULL",
-        params
-    )
-    stats['avg_pnl_percent'] = round(cursor.fetchone()[0] or 0, 2)
-
-    # Average winning trade
-    cursor = conn.execute(
-        f"SELECT AVG(pnl_percent) FROM trade_setups WHERE {where_clause} AND outcome = 'WIN'",
-        params
-    )
-    stats['avg_win_percent'] = round(cursor.fetchone()[0] or 0, 2)
-
-    # Average losing trade
-    cursor = conn.execute(
-        f"SELECT AVG(pnl_percent) FROM trade_setups WHERE {where_clause} AND outcome = 'LOSS'",
-        params
-    )
-    stats['avg_loss_percent'] = round(cursor.fetchone()[0] or 0, 2)
-
-    # Best trade
-    cursor = conn.execute(
-        f"""SELECT setup_id, token, pnl_percent FROM trade_setups
-            WHERE {where_clause} AND pnl_percent IS NOT NULL
-            ORDER BY pnl_percent DESC LIMIT 1""",
-        params
-    )
-    row = cursor.fetchone()
-    stats['best_trade'] = dict(row) if row else None
-
-    # Worst trade
-    cursor = conn.execute(
-        f"""SELECT setup_id, token, pnl_percent FROM trade_setups
-            WHERE {where_clause} AND pnl_percent IS NOT NULL
-            ORDER BY pnl_percent ASC LIMIT 1""",
-        params
-    )
-    row = cursor.fetchone()
-    stats['worst_trade'] = dict(row) if row else None
-
-    # By direction
-    cursor = conn.execute(
-        f"""SELECT direction, COUNT(*), AVG(pnl_percent)
-            FROM trade_setups WHERE {where_clause}
-            GROUP BY direction""",
-        params
-    )
-    stats['by_direction'] = {row[0]: {'count': row[1], 'avg_pnl': round(row[2] or 0, 2)}
-                            for row in cursor.fetchall()}
-
-    # Pending setups count
-    cursor = conn.execute("SELECT COUNT(*) FROM trade_setups WHERE status = 'PENDING'")
-    stats['pending'] = cursor.fetchone()[0]
-
-    # Entered but not closed
-    cursor = conn.execute("SELECT COUNT(*) FROM trade_setups WHERE status = 'ENTERED'")
-    stats['active'] = cursor.fetchone()[0]
-
-    conn.close()
-    return stats
-
-
-def get_recent_setups(
-    status: str = None,
-    limit: int = 20
-) -> List[Dict]:
-    """Get recent setups, optionally filtered by status."""
-    conn = get_connection()
-
-    if status:
-        cursor = conn.execute(
-            """SELECT * FROM trade_setups
-               WHERE status = ?
-               ORDER BY timestamp_utc DESC LIMIT ?""",
-            (status.upper(), limit)
-        )
-    else:
-        cursor = conn.execute(
-            "SELECT * FROM trade_setups ORDER BY timestamp_utc DESC LIMIT ?",
-            (limit,)
-        )
-
-    rows = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return rows
-
-
-def get_setup_by_id(setup_id: str) -> Optional[Dict]:
-    """Get a specific setup by ID."""
-    conn = get_connection()
-    cursor = conn.execute("SELECT * FROM trade_setups WHERE setup_id = ?", (setup_id,))
-    row = cursor.fetchone()
-    conn.close()
-    return dict(row) if row else None
-
-
-def get_latest_cached_price(token: str) -> Optional[float]:
-    """
-    Fetch the most recent close price from the local OHLCV cache.
-    Prefers 4h data, falls back to 1d. No API calls.
-    """
-    ohlcv_db = DB_PATH.parent / "titan_data.db"
-    if not ohlcv_db.exists():
-        return None
-    try:
-        conn = sqlite3.connect(ohlcv_db)
-        for tf in ("4h", "1d", "1w"):
-            row = conn.execute(
-                "SELECT close FROM ohlcv WHERE symbol = ? AND timeframe = ? ORDER BY timestamp DESC LIMIT 1",
-                (token.upper(), tf)
-            ).fetchone()
-            if row:
-                conn.close()
-                return float(row[0])
-        conn.close()
-    except Exception:
-        pass
-    return None
-
-
-def monitor_active_setups() -> str:
-    """
-    Pull live prices from OHLCV cache and assess all PENDING and ENTERED setups.
-    Returns a formatted dashboard string.
-    """
-    conn = get_connection()
-    rows = conn.execute(
-        "SELECT * FROM trade_setups WHERE status IN ('PENDING', 'ENTERED') ORDER BY timestamp_utc DESC"
-    ).fetchall()
-    conn.close()
-
-    setups = [dict(r) for r in rows]
-    if not setups:
-        return "No active setups to monitor."
-
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
-    lines = [f"{'─' * 68}", f"  📊 TITAN TRADE MONITOR — {now_str}", f"{'─' * 68}", ""]
-
-    alerts = []
-
-    for s in setups:
-        token   = s["token"]
-        sid     = s["setup_id"]
-        dirn    = s["direction"]
-        status  = s["status"]
-        entry   = float(s["entry_price"])
-        stop    = float(s["stop_loss"])
-        t1      = float(s["target_1"]) if s["target_1"] else None
-        t2      = float(s["target_2"]) if s["target_2"] else None
-        actual  = float(s["actual_entry_price"]) if s["actual_entry_price"] else None
-        rr      = s["risk_reward_ratio"]
-
-        price = get_latest_cached_price(token)
-
-        # ── price unavailable ────────────────────────────────────────────────
-        if price is None:
-            lines.append(f"  [{sid}] {token} {dirn} ({status})")
-            lines.append(f"    ⚠️  Price unavailable — run: python3 src/data/ohlcv_client.py download {token} --timeframe 4h")
-            lines.append("")
-            continue
-
-        ref_price = actual if actual else entry
-        is_long   = dirn.upper() == "LONG"
-
-        # ── P&L and direction math ───────────────────────────────────────────
-        if is_long:
-            pnl_pct      = (price - ref_price) / ref_price * 100
-            stop_dist    = (price - stop) / price * 100       # % above stop
-            t1_dist      = ((t1 - price) / price * 100) if t1 else None
-            t2_dist      = ((t2 - price) / price * 100) if t2 else None
-            stop_hit     = price <= stop
-            t1_hit       = t1 and price >= t1
-            t2_hit       = t2 and price >= t2
-            entry_triggered = price <= entry  # price came down to entry zone
-        else:  # SHORT
-            pnl_pct      = (ref_price - price) / ref_price * 100
-            stop_dist    = (stop - price) / price * 100       # % below stop
-            t1_dist      = ((price - t1) / price * 100) if t1 else None
-            t2_dist      = ((price - t2) / price * 100) if t2 else None
-            stop_hit     = price >= stop
-            t1_hit       = t1 and price <= t1
-            t2_hit       = t2 and price <= t2
-            entry_triggered = price >= entry  # price came up to entry zone
-
-        # ── status icon ──────────────────────────────────────────────────────
-        if status == "ENTERED":
-            if stop_hit:
-                icon = "🔴 STOP HIT"
-                alerts.append(f"  🔴 {token} [{sid}] — STOP HIT at ${price:.4g} (stop ${stop:.4g}). Close immediately.")
-            elif t2_hit:
-                icon = "🟢 T2 HIT"
-                alerts.append(f"  🟢 {token} [{sid}] — T2 HIT at ${price:.4g}. Consider closing full or scaling out.")
-            elif t1_hit:
-                icon = "🟢 T1 HIT"
-                alerts.append(f"  🟡 {token} [{sid}] — T1 HIT at ${price:.4g}. Consider partial close / move stop to breakeven.")
-            elif pnl_pct > 0:
-                icon = "📈 IN PROFIT"
-            else:
-                icon = "📉 UNDERWATER"
-        else:  # PENDING
-            if entry_triggered:
-                icon = "🟡 ENTRY ZONE"
-                alerts.append(f"  🟡 {token} [{sid}] — Price ${price:.4g} is at/past entry ${entry:.4g}. Trigger check needed.")
-            elif stop_hit:
-                icon = "❌ INVALIDATED"
-                alerts.append(f"  ❌ {token} [{sid}] — Setup INVALIDATED. Price ${price:.4g} hit stop before entry.")
-            else:
-                icon = "⏳ WAITING"
-
-        # ── format row ───────────────────────────────────────────────────────
-        pnl_str  = f"{pnl_pct:+.2f}%" if status == "ENTERED" else "—"
-        label    = s.get("pattern_type") or ""
-        label_str = f"  [{label}]" if label else ""
-        lines.append(f"  [{sid}]  {token} {dirn}{label_str}  |  {icon}")
-        lines.append(f"    Price: ${price:.4g}  |  Entry: ${entry:.4g}  |  Stop: ${stop:.4g}  |  R:R {rr}")
-
-        level_parts = []
-        if t1:
-            dist_str = f"{t1_dist:+.1f}%" if t1_dist is not None else ""
-            level_parts.append(f"T1 ${t1:.4g} ({dist_str})")
-        if t2:
-            dist_str = f"{t2_dist:+.1f}%" if t2_dist is not None else ""
-            level_parts.append(f"T2 ${t2:.4g} ({dist_str})")
-        if level_parts:
-            lines.append(f"    Targets: {' | '.join(level_parts)}")
-
-        if status == "ENTERED":
-            stop_side = "above" if not is_long else "below"
-            lines.append(f"    P&L: {pnl_str}  |  Stop {stop_side} by {abs(stop_dist):.1f}%")
-        else:
-            lines.append(f"    Status: waiting for entry trigger")
-
-        if s.get("notes"):
-            lines.append(f"    📎 {s['notes']}")
-
-        lines.append("")
-
-    # ── alerts block ─────────────────────────────────────────────────────────
-    if alerts:
-        lines.insert(2, "")
-        lines.insert(2, f"{'─' * 68}")
-        for a in reversed(alerts):
-            lines.insert(2, a)
-        lines.insert(2, "  ⚡ ACTION REQUIRED:")
-        lines.insert(2, f"{'─' * 68}")
-
-    lines.append(f"{'─' * 68}")
-    lines.append("  Commands: enter-setup | close-setup | list-setups --status ENTERED")
-    lines.append(f"{'─' * 68}")
-    return "\n".join(lines)
-
-
-# ============================================================================
-# OHLCV REFRESH LIST
-# ============================================================================
-
-def get_refresh_token_list() -> List[str]:
-    """Return the always-on token list from config/refresh_tokens.json."""
-    if not REFRESH_CONFIG_PATH.exists():
-        return []
-    data = json.loads(REFRESH_CONFIG_PATH.read_text())
-    return [t.upper() for t in data.get("tokens", [])]
-
-
-def add_to_refresh_list(token: str) -> bool:
-    """Add token to the always-on refresh list. Returns True if added, False if already present."""
-    token = token.upper()
-    if REFRESH_CONFIG_PATH.exists():
-        data = json.loads(REFRESH_CONFIG_PATH.read_text())
-    else:
-        data = {"tokens": [], "timeframes": ["4h", "1d"]}
-    if token in [t.upper() for t in data["tokens"]]:
-        return False
-    data["tokens"].append(token)
-    REFRESH_CONFIG_PATH.write_text(json.dumps(data, indent=2))
-    return True
-
-
-def remove_from_refresh_list(token: str) -> bool:
-    """Remove token from the always-on refresh list. Returns True if removed."""
-    token = token.upper()
-    if not REFRESH_CONFIG_PATH.exists():
-        return False
-    data = json.loads(REFRESH_CONFIG_PATH.read_text())
-    original_len = len(data["tokens"])
-    data["tokens"] = [t for t in data["tokens"] if t.upper() != token]
-    if len(data["tokens"]) == original_len:
-        return False
-    REFRESH_CONFIG_PATH.write_text(json.dumps(data, indent=2))
-    return True
-
-
-def refresh_active_tokens() -> Dict:
-    """
-    Download fresh OHLCV data for:
-      1. All tokens in config/refresh_tokens.json (constant list)
-      2. All tokens with PENDING or ENTERED trade setups
-
-    Returns a summary dict with tokens refreshed and any errors.
-    """
-    import subprocess
-
-    # Get constant list
-    constant_tokens = get_refresh_token_list()
-
-    # Get active setup tokens
-    conn = get_connection()
-    rows = conn.execute(
-        "SELECT DISTINCT token FROM trade_setups WHERE status IN ('PENDING', 'ENTERED')"
-    ).fetchall()
-    conn.close()
-    setup_tokens = [row[0] for row in rows]
-
-    # Merge and deduplicate (constant list first, preserving order)
-    seen: Dict[str, None] = {}
-    for t in constant_tokens + setup_tokens:
-        seen[t.upper()] = None
-    all_tokens = list(seen.keys())
-
-    if not all_tokens:
-        return {"tokens": [], "constant_list": [], "setup_tokens": [],
-                "refreshed": [], "errors": []}
-
-    # Timeframes from config
-    timeframes = ["4h", "1d"]
-    if REFRESH_CONFIG_PATH.exists():
-        cfg = json.loads(REFRESH_CONFIG_PATH.read_text())
-        timeframes = cfg.get("timeframes", timeframes)
-
-    ohlcv_script = Path(__file__).parent.parent / "data" / "ohlcv_client.py"
-
-    refreshed = []
-    errors = []
-
-    for token in all_tokens:
-        token_ok = True
-        for tf in timeframes:
-            result = subprocess.run(
-                ["python3", str(ohlcv_script), "download", token, "--timeframe", tf],
-                capture_output=True, text=True, timeout=120
-            )
-            if result.returncode != 0:
-                err_msg = (result.stderr or result.stdout or "unknown error").strip()[:120]
-                errors.append(f"{token} {tf}: {err_msg}")
-                token_ok = False
-        if token_ok:
-            refreshed.append(token)
-
-    return {
-        "tokens": all_tokens,
-        "constant_list": constant_tokens,
-        "setup_tokens": setup_tokens,
-        "refreshed": refreshed,
-        "errors": errors,
-    }
-
 
 # ============================================================================
 # FLOW SNAPSHOT LOGGING
@@ -2309,270 +1777,6 @@ def get_flow_stats() -> Dict:
 
 
 # ============================================================================
-# WYCKOFF SCAN LOGGING
-# ============================================================================
-
-
-def log_wyckoff_scan(
-    scan_date: str,
-    results: List[Dict],
-    batch_id: str = None
-) -> str:
-    """
-    Store Wyckoff scan results for a batch of tokens.
-
-    Args:
-        scan_date: YYYY-MM-DD
-        results: List of dicts with Wyckoff classification data
-        batch_id: Optional batch ID (auto-generated if not provided)
-
-    Returns:
-        batch_id for the scan batch
-    """
-    if batch_id is None:
-        batch_id = str(uuid.uuid4())[:8]
-    timestamp = datetime.now(timezone.utc).isoformat()
-    conn = get_connection()
-
-    for result in results:
-        scan_id = str(uuid.uuid4())[:8]
-        events_detail = json.dumps(result.get('events_detail', [])) if result.get('events_detail') else None
-        conn.execute(
-            """INSERT INTO wyckoff_scans
-               (scan_id, batch_id, scan_date, token, timeframe, price_at_scan,
-                cycle_type, phase, confidence,
-                spring_detected, upthrust_detected, sos_detected, sow_detected,
-                events_detail, support_level, resistance_level, range_width_pct,
-                position_in_range, volume_trend, obv_divergence, volume_confirmation,
-                phase_progression, watch_conditions, trading_implications, created_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (scan_id, batch_id, scan_date,
-             result.get('token', '').upper(),
-             result.get('timeframe', '1d'),
-             result.get('price_at_scan'),
-             result.get('cycle_type'),
-             result.get('phase'),
-             result.get('confidence'),
-             1 if result.get('spring_detected') else 0,
-             1 if result.get('upthrust_detected') else 0,
-             1 if result.get('sos_detected') else 0,
-             1 if result.get('sow_detected') else 0,
-             events_detail,
-             result.get('support_level'),
-             result.get('resistance_level'),
-             result.get('range_width_pct'),
-             result.get('position_in_range'),
-             result.get('volume_trend'),
-             1 if result.get('obv_divergence') else 0,
-             result.get('volume_confirmation'),
-             result.get('phase_progression'),
-             result.get('watch_conditions'),
-             result.get('trading_implications'),
-             timestamp)
-        )
-
-    conn.commit()
-    conn.close()
-    return batch_id
-
-
-def get_wyckoff_history(
-    token: Optional[str] = None,
-    phase: Optional[str] = None,
-    cycle_type: Optional[str] = None,
-    min_confidence: int = 0,
-    days: int = 90,
-    limit: int = 50
-) -> List[Dict]:
-    """
-    Query historical Wyckoff scan results with filters.
-
-    Args:
-        token: Filter by token symbol
-        phase: Filter by phase (A/B/C/D/E)
-        cycle_type: Filter by 'accumulation' or 'distribution'
-        min_confidence: Minimum confidence threshold
-        days: Lookback period in days
-        limit: Max results
-
-    Returns:
-        List of scan result dicts, most recent first
-    """
-    conn = get_connection()
-    conditions = [f"scan_date >= date('now', '-{days} days')"]
-    params = []
-
-    if token:
-        conditions.append("token = ?")
-        params.append(token.upper())
-    if phase:
-        conditions.append("phase = ?")
-        params.append(phase.upper())
-    if cycle_type:
-        conditions.append("cycle_type = ?")
-        params.append(cycle_type.lower())
-    if min_confidence > 0:
-        conditions.append("confidence >= ?")
-        params.append(min_confidence)
-
-    where = " AND ".join(conditions)
-    params.append(limit)
-
-    rows = conn.execute(
-        f"SELECT * FROM wyckoff_scans WHERE {where} ORDER BY scan_date DESC, confidence DESC LIMIT ?",
-        params
-    ).fetchall()
-    conn.close()
-
-    columns = [
-        'id', 'scan_id', 'batch_id', 'scan_date', 'token', 'timeframe', 'price_at_scan',
-        'cycle_type', 'phase', 'confidence',
-        'spring_detected', 'upthrust_detected', 'sos_detected', 'sow_detected',
-        'events_detail', 'support_level', 'resistance_level', 'range_width_pct',
-        'position_in_range', 'volume_trend', 'obv_divergence', 'volume_confirmation',
-        'phase_progression', 'watch_conditions', 'trading_implications',
-        'price_7d_later', 'price_14d_later', 'price_30d_later',
-        'pct_change_7d', 'pct_change_14d', 'pct_change_30d',
-        'phase_7d_later', 'outcome_notes', 'created_at'
-    ]
-    return [dict(zip(columns, row)) for row in rows]
-
-
-def get_wyckoff_latest(tokens: List[str] = None) -> List[Dict]:
-    """
-    Get the most recent Wyckoff scan for each token.
-
-    Args:
-        tokens: Optional list of tokens to filter. If None, returns all.
-
-    Returns:
-        List of the latest scan per token, sorted by confidence DESC
-    """
-    conn = get_connection()
-
-    query = """
-        SELECT w.* FROM wyckoff_scans w
-        INNER JOIN (
-            SELECT token, MAX(scan_date) as max_date
-            FROM wyckoff_scans
-            GROUP BY token
-        ) latest ON w.token = latest.token AND w.scan_date = latest.max_date
-    """
-    params = []
-
-    if tokens:
-        placeholders = ','.join(['?' for _ in tokens])
-        query += f" WHERE w.token IN ({placeholders})"
-        params = [t.upper() for t in tokens]
-
-    query += " ORDER BY w.confidence DESC"
-
-    rows = conn.execute(query, params).fetchall()
-    conn.close()
-
-    columns = [
-        'id', 'scan_id', 'batch_id', 'scan_date', 'token', 'timeframe', 'price_at_scan',
-        'cycle_type', 'phase', 'confidence',
-        'spring_detected', 'upthrust_detected', 'sos_detected', 'sow_detected',
-        'events_detail', 'support_level', 'resistance_level', 'range_width_pct',
-        'position_in_range', 'volume_trend', 'obv_divergence', 'volume_confirmation',
-        'phase_progression', 'watch_conditions', 'trading_implications',
-        'price_7d_later', 'price_14d_later', 'price_30d_later',
-        'pct_change_7d', 'pct_change_14d', 'pct_change_30d',
-        'phase_7d_later', 'outcome_notes', 'created_at'
-    ]
-    return [dict(zip(columns, row)) for row in rows]
-
-
-def get_wyckoff_phase_transitions(token: str, days: int = 90) -> List[Dict]:
-    """
-    Show how a token's Wyckoff phase has changed over time.
-    Useful for spotting phase progression (B->C->D = accumulation advancing).
-
-    Args:
-        token: Token symbol
-        days: Lookback period
-
-    Returns:
-        List of scans for this token, oldest first, for timeline view
-    """
-    conn = get_connection()
-    rows = conn.execute(
-        """SELECT scan_date, cycle_type, phase, confidence,
-                  spring_detected, upthrust_detected, sos_detected, sow_detected,
-                  price_at_scan, volume_trend, watch_conditions
-           FROM wyckoff_scans
-           WHERE token = ? AND scan_date >= date('now', ? || ' days')
-           ORDER BY scan_date ASC""",
-        (token.upper(), f"-{days}")
-    ).fetchall()
-    conn.close()
-
-    columns = ['scan_date', 'cycle_type', 'phase', 'confidence',
-               'spring_detected', 'upthrust_detected', 'sos_detected', 'sow_detected',
-               'price_at_scan', 'volume_trend', 'watch_conditions']
-    return [dict(zip(columns, row)) for row in rows]
-
-
-def update_wyckoff_outcome(
-    scan_id: str,
-    price_7d: float = None,
-    price_14d: float = None,
-    price_30d: float = None,
-    phase_7d_later: str = None,
-    outcome_notes: str = None
-) -> None:
-    """
-    Fill in outcome data for a past Wyckoff scan.
-
-    Args:
-        scan_id: The scan_id to update
-        price_7d/14d/30d: Price at those intervals after the scan
-        phase_7d_later: Did the phase change?
-        outcome_notes: Any notes on the outcome
-    """
-    conn = get_connection()
-
-    # Get original price for % calculation
-    row = conn.execute(
-        "SELECT price_at_scan FROM wyckoff_scans WHERE scan_id = ?",
-        (scan_id,)
-    ).fetchone()
-    if not row or not row[0]:
-        conn.close()
-        return
-
-    price_at_scan = row[0]
-    updates = []
-    params = []
-
-    if price_7d is not None:
-        updates.extend(["price_7d_later = ?", "pct_change_7d = ?"])
-        params.extend([price_7d, ((price_7d - price_at_scan) / price_at_scan) * 100])
-    if price_14d is not None:
-        updates.extend(["price_14d_later = ?", "pct_change_14d = ?"])
-        params.extend([price_14d, ((price_14d - price_at_scan) / price_at_scan) * 100])
-    if price_30d is not None:
-        updates.extend(["price_30d_later = ?", "pct_change_30d = ?"])
-        params.extend([price_30d, ((price_30d - price_at_scan) / price_at_scan) * 100])
-    if phase_7d_later:
-        updates.append("phase_7d_later = ?")
-        params.append(phase_7d_later)
-    if outcome_notes:
-        updates.append("outcome_notes = ?")
-        params.append(outcome_notes)
-
-    if updates:
-        params.append(scan_id)
-        conn.execute(
-            f"UPDATE wyckoff_scans SET {', '.join(updates)} WHERE scan_id = ?",
-            params
-        )
-        conn.commit()
-    conn.close()
-
-
-# ============================================================================
 # SIGNAL VALIDATION LOGGING
 # ============================================================================
 
@@ -2979,6 +2183,10 @@ def get_active_watchlist(
                 pass
 
     return rows
+
+
+# Alias for backwards compatibility
+get_watchlist = get_active_watchlist
 
 
 def get_watchlist_item(watch_id: str) -> Optional[Dict]:
@@ -3686,6 +2894,452 @@ def export_derivatives_csv(symbol: str = None, days: int = 30,
 
 
 # ============================================================================
+# SNAPSHOT PIPELINE FUNCTIONS (cron-fed)
+# ============================================================================
+
+def log_cg_snapshot(table: str, symbol: str, endpoint: str, data,
+                    interval: str = None, model: str = None,
+                    indicator: str = None) -> int:
+    """
+    Generic logger for Coinglass snapshot tables.
+
+    Args:
+        table: Target table name
+        symbol: Token symbol (or None for market-wide)
+        endpoint: Endpoint identifier
+        data: Raw data (dict or list) to store as JSON
+        interval: Time interval if applicable
+        model: Model identifier (for liquidation heatmaps)
+        indicator: Indicator name (for btc_onchain)
+
+    Returns:
+        Row ID or -1 on error
+    """
+    if data is None:
+        return -1
+    timestamp = datetime.now(timezone.utc).isoformat()
+    data_json = json.dumps(data) if not isinstance(data, str) else data
+
+    conn = get_connection()
+    try:
+        if table == "spot_flow_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO spot_flow_snapshots
+                   (timestamp_utc, symbol, endpoint, interval, data_json)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (timestamp, symbol.upper(), endpoint, interval, data_json))
+        elif table == "basis_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO basis_snapshots
+                   (timestamp_utc, symbol, endpoint, interval, data_json)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (timestamp, symbol.upper() if symbol else None, endpoint,
+                 interval, data_json))
+        elif table == "orderbook_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO orderbook_snapshots
+                   (timestamp_utc, symbol, endpoint, interval, data_json)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (timestamp, symbol.upper(), endpoint, interval, data_json))
+        elif table == "oi_exchange_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO oi_exchange_snapshots
+                   (timestamp_utc, symbol, interval, data_json)
+                   VALUES (?, ?, ?, ?)""",
+                (timestamp, symbol.upper(), interval, data_json))
+        elif table == "liquidation_heatmap_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO liquidation_heatmap_snapshots
+                   (timestamp_utc, symbol, model, data_json)
+                   VALUES (?, ?, ?, ?)""",
+                (timestamp, symbol.upper(), model, data_json))
+        elif table == "btc_onchain_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO btc_onchain_snapshots
+                   (timestamp_utc, indicator, data_json)
+                   VALUES (?, ?, ?)""",
+                (timestamp, indicator, data_json))
+        elif table == "etf_flow_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO etf_flow_snapshots
+                   (timestamp_utc, asset, data_json)
+                   VALUES (?, ?, ?)""",
+                (timestamp, symbol.upper() if symbol else "BTC", data_json))
+        else:
+            conn.close()
+            return -1
+        conn.commit()
+        row_id = cursor.lastrowid
+        conn.close()
+        return row_id
+    except Exception as e:
+        conn.close()
+        import sys as _sys
+        print(f"  Warning: log_cg_snapshot({table}) failed: {e}", file=_sys.stderr)
+        return -1
+
+
+def log_nansen_snapshot(table: str, token: str, data, tool_name: str = None,
+                        holder_segment: str = None, lookback_period: str = None,
+                        chain: str = None, label_type: str = None,
+                        mode: str = None, source_query_id: str = None) -> int:
+    """
+    Logger for Nansen snapshot tables.
+
+    Returns:
+        Row ID or -1 on error
+    """
+    if data is None:
+        return -1
+    timestamp = datetime.now(timezone.utc).isoformat()
+    data_json = json.dumps(data) if not isinstance(data, str) else data
+
+    conn = get_connection()
+    try:
+        if table == "nansen_flow_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO nansen_flow_snapshots
+                   (timestamp_utc, token, tool_name, holder_segment,
+                    lookback_period, data_json, source_query_id)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (timestamp, token.upper(), tool_name, holder_segment,
+                 lookback_period, data_json, source_query_id))
+        elif table == "nansen_holder_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO nansen_holder_snapshots
+                   (timestamp_utc, token, chain, label_type, mode,
+                    data_json, source_query_id)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (timestamp, token.upper(), chain, label_type, mode,
+                 data_json, source_query_id))
+        elif table == "nansen_perp_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO nansen_perp_snapshots
+                   (timestamp_utc, data_json, source_query_id)
+                   VALUES (?, ?, ?)""",
+                (timestamp, data_json, source_query_id))
+        elif table == "nansen_quant_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO nansen_quant_snapshots
+                   (timestamp_utc, token, data_json, source_query_id)
+                   VALUES (?, ?, ?, ?)""",
+                (timestamp, token.upper(), data_json, source_query_id))
+        else:
+            conn.close()
+            return -1
+        conn.commit()
+        row_id = cursor.lastrowid
+        conn.close()
+        return row_id
+    except Exception as e:
+        conn.close()
+        import sys as _sys
+        print(f"  Warning: log_nansen_snapshot({table}) failed: {e}", file=_sys.stderr)
+        return -1
+
+
+def log_snapshot_run(run_id: str, run_type: str) -> int:
+    """Start a snapshot run — insert metadata row. Returns row ID."""
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    cursor = conn.execute(
+        """INSERT INTO snapshot_metadata
+           (run_id, run_type, started_at)
+           VALUES (?, ?, ?)""",
+        (run_id, run_type, timestamp))
+    conn.commit()
+    row_id = cursor.lastrowid
+    conn.close()
+    return row_id
+
+
+def finish_snapshot_run(run_id: str, succeeded: int, failed: int,
+                        rows_inserted: int, errors: list = None) -> None:
+    """Finish a snapshot run — update metadata with results."""
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    conn.execute(
+        """UPDATE snapshot_metadata
+           SET finished_at = ?, endpoints_succeeded = ?, endpoints_failed = ?,
+               total_rows_inserted = ?, error_log = ?
+           WHERE run_id = ?""",
+        (timestamp, succeeded, failed, rows_inserted,
+         json.dumps(errors) if errors else None, run_id))
+    conn.commit()
+    conn.close()
+
+
+def log_analyze_report(
+    token: str,
+    price_usd: float = None,
+    verdict: str = None,
+    conviction: str = None,
+    direction: str = None,
+    accumulation_score: float = None,
+    exchange_flows_signal: str = None,
+    fresh_wallets_signal: str = None,
+    smart_money_signal: str = None,
+    top_pnl_signal: str = None,
+    whale_signal: str = None,
+    onchain_verdict: str = None,
+    perps_verdict: str = None,
+    derivatives_verdict: str = None,
+    ta_verdict: str = None,
+    support_levels: list = None,
+    resistance_levels: list = None,
+    ta_weekly_rsi: float = None,
+    ta_daily_rsi: float = None,
+    ta_4h_rsi: float = None,
+    ta_weekly_adx: float = None,
+    ta_daily_adx: float = None,
+    ta_trend_direction: str = None,
+    funding_rate: float = None,
+    oi_usd: float = None,
+    oi_change_24h_pct: float = None,
+    ls_global_ratio: float = None,
+    ls_crowding: str = None,
+    invalidation_criteria: str = None,
+    nansen_credits_used: int = None,
+    full_markdown: str = None,
+) -> str:
+    """Log structured /analyze output. Returns report_id."""
+    report_id = str(uuid.uuid4())[:12]
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    try:
+        conn.execute(
+            """INSERT INTO analyze_snapshots (
+                report_id, timestamp_utc, token, price_usd,
+                verdict, conviction, direction,
+                accumulation_score,
+                exchange_flows_signal, fresh_wallets_signal,
+                smart_money_signal, top_pnl_signal, whale_signal,
+                onchain_verdict, perps_verdict, derivatives_verdict, ta_verdict,
+                support_levels_json, resistance_levels_json,
+                ta_weekly_rsi, ta_daily_rsi, ta_4h_rsi,
+                ta_weekly_adx, ta_daily_adx, ta_trend_direction,
+                funding_rate, oi_usd, oi_change_24h_pct,
+                ls_global_ratio, ls_crowding,
+                invalidation_criteria, nansen_credits_used, full_markdown
+            ) VALUES (
+                ?, ?, ?, ?,
+                ?, ?, ?,
+                ?,
+                ?, ?,
+                ?, ?, ?,
+                ?, ?, ?, ?,
+                ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?,
+                ?, ?, ?
+            )""",
+            (report_id, timestamp, token.upper(), price_usd,
+             verdict, conviction, direction,
+             accumulation_score,
+             exchange_flows_signal, fresh_wallets_signal,
+             smart_money_signal, top_pnl_signal, whale_signal,
+             onchain_verdict, perps_verdict, derivatives_verdict, ta_verdict,
+             json.dumps(support_levels) if support_levels else None,
+             json.dumps(resistance_levels) if resistance_levels else None,
+             ta_weekly_rsi, ta_daily_rsi, ta_4h_rsi,
+             ta_weekly_adx, ta_daily_adx, ta_trend_direction,
+             funding_rate, oi_usd, oi_change_24h_pct,
+             ls_global_ratio, ls_crowding,
+             invalidation_criteria, nansen_credits_used, full_markdown))
+        conn.commit()
+        conn.close()
+        return report_id
+    except Exception as e:
+        conn.close()
+        import sys as _sys
+        print(f"  Warning: log_analyze_report failed: {e}", file=_sys.stderr)
+        return ""
+
+
+def get_latest_analyze(token: str) -> Optional[Dict]:
+    """Get the most recent analyze snapshot for a token."""
+    conn = get_connection()
+    row = conn.execute(
+        """SELECT * FROM analyze_snapshots
+           WHERE token = ? ORDER BY timestamp_utc DESC LIMIT 1""",
+        (token.upper(),)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_analyze_history(token: str, limit: int = 10) -> List[Dict]:
+    """Get analyze snapshot history for a token."""
+    conn = get_connection()
+    rows = conn.execute(
+        """SELECT report_id, timestamp_utc, token, price_usd,
+                  verdict, conviction, direction, accumulation_score,
+                  onchain_verdict, perps_verdict, derivatives_verdict, ta_verdict,
+                  ta_trend_direction, ls_crowding, nansen_credits_used
+           FROM analyze_snapshots
+           WHERE token = ? ORDER BY timestamp_utc DESC LIMIT ?""",
+        (token.upper(), limit)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def log_accum_distro_report(
+    token: str,
+    chain: str = None,
+    token_address: str = None,
+    price_usd: float = None,
+    layer1_verdict: str = None,
+    layer2_verdict: str = None,
+    layer3_verdict: str = None,
+    cex_net_flow_usd: float = None,
+    cex_inflow_usd: float = None,
+    cex_outflow_usd: float = None,
+    cex_flow_vs_avg: float = None,
+    sm_holders_count: int = None,
+    sm_balance_usd: float = None,
+    sm_balance_change_24h_pct: float = None,
+    sm_net_buy_volume_usd: float = None,
+    sm_buyer_count: int = None,
+    sm_seller_count: int = None,
+    fresh_wallet_count: int = None,
+    fresh_wallet_max_score: int = None,
+    fresh_wallet_total_usd: float = None,
+    final_verdict: str = None,
+    conviction: str = None,
+    nansen_credits_used: int = None,
+    full_markdown: str = None,
+) -> str:
+    """Log structured /accum-distro output. Returns report_id."""
+    report_id = str(uuid.uuid4())[:12]
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    try:
+        conn.execute(
+            """INSERT INTO accum_distro_snapshots (
+                report_id, timestamp_utc, token, chain, token_address, price_usd,
+                layer1_verdict, layer2_verdict, layer3_verdict,
+                cex_net_flow_usd, cex_inflow_usd, cex_outflow_usd, cex_flow_vs_avg,
+                sm_holders_count, sm_balance_usd, sm_balance_change_24h_pct,
+                sm_net_buy_volume_usd, sm_buyer_count, sm_seller_count,
+                fresh_wallet_count, fresh_wallet_max_score, fresh_wallet_total_usd,
+                final_verdict, conviction, nansen_credits_used, full_markdown
+            ) VALUES (
+                ?, ?, ?, ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?, ?
+            )""",
+            (report_id, timestamp, token.upper(), chain, token_address, price_usd,
+             layer1_verdict, layer2_verdict, layer3_verdict,
+             cex_net_flow_usd, cex_inflow_usd, cex_outflow_usd, cex_flow_vs_avg,
+             sm_holders_count, sm_balance_usd, sm_balance_change_24h_pct,
+             sm_net_buy_volume_usd, sm_buyer_count, sm_seller_count,
+             fresh_wallet_count, fresh_wallet_max_score, fresh_wallet_total_usd,
+             final_verdict, conviction, nansen_credits_used, full_markdown))
+        conn.commit()
+        conn.close()
+        return report_id
+    except Exception as e:
+        conn.close()
+        import sys as _sys
+        print(f"  Warning: log_accum_distro_report failed: {e}", file=_sys.stderr)
+        return ""
+
+
+def get_latest_accum_distro(token: str) -> Optional[Dict]:
+    """Get the most recent accum/distro snapshot for a token."""
+    conn = get_connection()
+    row = conn.execute(
+        """SELECT * FROM accum_distro_snapshots
+           WHERE token = ? ORDER BY timestamp_utc DESC LIMIT 1""",
+        (token.upper(),)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_accum_distro_history(token: str, limit: int = 10) -> List[Dict]:
+    """Get accum/distro snapshot history for a token."""
+    conn = get_connection()
+    rows = conn.execute(
+        """SELECT report_id, timestamp_utc, token, chain, price_usd,
+                  layer1_verdict, layer2_verdict, layer3_verdict,
+                  final_verdict, conviction, nansen_credits_used
+           FROM accum_distro_snapshots
+           WHERE token = ? ORDER BY timestamp_utc DESC LIMIT ?""",
+        (token.upper(), limit)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def check_snapshot_freshness(stale_hours: float = 7.0) -> Dict[str, Dict]:
+    """
+    Check freshness of all snapshot tables.
+
+    Returns:
+        Dict of {table_name: {"last_snapshot": str, "age_hours": float, "stale": bool}}
+    """
+    conn = get_connection()
+    tables = {
+        "derivatives_snapshots": "timestamp_utc",
+        "spot_flow_snapshots": "timestamp_utc",
+        "basis_snapshots": "timestamp_utc",
+        "orderbook_snapshots": "timestamp_utc",
+        "oi_exchange_snapshots": "timestamp_utc",
+        "liquidation_heatmap_snapshots": "timestamp_utc",
+        "btc_onchain_snapshots": "timestamp_utc",
+        "etf_flow_snapshots": "timestamp_utc",
+        "nansen_flow_snapshots": "timestamp_utc",
+        "nansen_holder_snapshots": "timestamp_utc",
+        "nansen_perp_snapshots": "timestamp_utc",
+        "nansen_quant_snapshots": "timestamp_utc",
+        "cex_snapshots": "timestamp_utc",
+    }
+
+    result = {}
+    now = datetime.now(timezone.utc)
+
+    for table, ts_col in tables.items():
+        try:
+            row = conn.execute(
+                f"SELECT MAX({ts_col}) as latest FROM {table}"
+            ).fetchone()
+            latest = row["latest"] if row and row["latest"] else None
+
+            if latest:
+                try:
+                    dt = datetime.fromisoformat(latest.replace("Z", "+00:00"))
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=timezone.utc)
+                    age_hours = (now - dt).total_seconds() / 3600
+                except Exception:
+                    age_hours = 999.0
+                result[table] = {
+                    "last_snapshot": latest,
+                    "age_hours": round(age_hours, 2),
+                    "stale": age_hours > stale_hours,
+                }
+            else:
+                result[table] = {
+                    "last_snapshot": None,
+                    "age_hours": None,
+                    "stale": True,
+                }
+        except Exception:
+            result[table] = {
+                "last_snapshot": None,
+                "age_hours": None,
+                "stale": True,
+            }
+
+    conn.close()
+    return result
+
+
+# ============================================================================
 # HELPERS
 # ============================================================================
 
@@ -3732,6 +3386,9 @@ def main():
     # init
     subparsers.add_parser('init', help='Initialize database')
 
+    # sync
+    subparsers.add_parser('sync', help='Sync local DB to Cowork directory')
+
     # stats
     subparsers.add_parser('stats', help='Query statistics')
 
@@ -3740,73 +3397,6 @@ def main():
 
     # mentor-stats
     subparsers.add_parser('mentor-stats', help='Mentor consultation statistics')
-
-    # log-setup
-    log_setup_parser = subparsers.add_parser('log-setup', help='Log a new trade setup')
-    log_setup_parser.add_argument('--token', required=True, help='Token symbol')
-    log_setup_parser.add_argument('--direction', required=True, choices=['LONG', 'SHORT', 'long', 'short'])
-    log_setup_parser.add_argument('--entry', required=True, type=float, help='Entry price')
-    log_setup_parser.add_argument('--stop', required=True, type=float, help='Stop loss price')
-    log_setup_parser.add_argument('--target1', required=True, type=float, help='Target 1 price')
-    log_setup_parser.add_argument('--target2', type=float, help='Target 2 price')
-    log_setup_parser.add_argument('--rr', type=float, help='Risk/reward ratio (auto-calculated if not provided)')
-    log_setup_parser.add_argument('--ta-summary', help='Technical analysis summary')
-    log_setup_parser.add_argument('--onchain-summary', help='On-chain analysis summary')
-    log_setup_parser.add_argument('--accum-score', type=int, choices=[0,1,2,3,4,5], help='Accumulation score 0-5')
-    log_setup_parser.add_argument('--signal-summary', help='Signal summary')
-    log_setup_parser.add_argument('--mentor-agrees', action='store_true', help='Mentor agrees with setup')
-    log_setup_parser.add_argument('--mentor-disagrees', action='store_true', help='Mentor disagrees')
-    log_setup_parser.add_argument('--mentor-action', choices=['proceed', 'wait', 'reverse', 'reduce_size'])
-    log_setup_parser.add_argument('--mentor-reasoning', help='Mentor reasoning')
-    log_setup_parser.add_argument('--skill', help='Skill name (e.g., pre-breakout-accumulator)')
-    log_setup_parser.add_argument('--pattern', help='Pattern type (e.g., distribution-short)')
-
-    # enter-setup
-    enter_parser = subparsers.add_parser('enter-setup', help='Mark setup as entered')
-    enter_parser.add_argument('--setup-id', required=True, help='Setup ID')
-    enter_parser.add_argument('--price', required=True, type=float, help='Actual entry price')
-
-    # close-setup
-    close_parser = subparsers.add_parser('close-setup', help='Close setup and record outcome')
-    close_parser.add_argument('--setup-id', required=True, help='Setup ID')
-    close_parser.add_argument('--price', required=True, type=float, help='Close price')
-    close_parser.add_argument('--outcome', required=True, choices=['WIN', 'LOSS', 'BREAKEVEN', 'PARTIAL', 'win', 'loss', 'breakeven', 'partial'])
-    close_parser.add_argument('--target', type=int, choices=[0,1,2], help='Which target hit (0=stop, 1=T1, 2=T2)')
-    close_parser.add_argument('--pnl-percent', type=float, help='PnL percentage (auto-calculated if not provided)')
-    close_parser.add_argument('--pnl-usd', type=float, help='PnL in USD')
-
-    # add-lessons
-    lessons_parser = subparsers.add_parser('add-lessons', help='Add post-trade analysis')
-    lessons_parser.add_argument('--setup-id', required=True, help='Setup ID')
-    lessons_parser.add_argument('--what-worked', help='What worked well')
-    lessons_parser.add_argument('--what-failed', help='What failed')
-    lessons_parser.add_argument('--lessons', help='Lessons learned')
-    lessons_parser.add_argument('--notes', help='Evaluation notes')
-
-    # setup-stats
-    stats_parser = subparsers.add_parser('setup-stats', help='Trade setup statistics')
-    stats_parser.add_argument('--token', help='Filter by token')
-    stats_parser.add_argument('--skill', help='Filter by skill name')
-    stats_parser.add_argument('--days', type=int, default=90, help='Lookback days (default: 90)')
-
-    # list-setups
-    list_parser = subparsers.add_parser('list-setups', help='List recent setups')
-    list_parser.add_argument('--status', choices=['PENDING', 'ENTERED', 'CLOSED', 'EXPIRED', 'SKIPPED'])
-    list_parser.add_argument('--limit', type=int, default=20, help='Number of setups (default: 20)')
-
-    # show-setup
-    show_parser = subparsers.add_parser('show-setup', help='Show setup details')
-    show_parser.add_argument('setup_id', help='Setup ID')
-
-    # update-setup
-    update_setup_parser = subparsers.add_parser('update-setup', help='Update label/notes on an existing setup')
-    update_setup_parser.add_argument('--setup-id', required=True, help='Setup ID')
-    update_setup_parser.add_argument('--label', help='Trade type label (e.g. "Range Deviation")')
-    update_setup_parser.add_argument('--notes', help='Free-text notes / cross-reference')
-    update_setup_parser.add_argument('--trigger', help='Update trigger/signal summary')
-
-    # monitor-setups
-    subparsers.add_parser('monitor-setups', help='Live price check on all active setups')
 
     # flow-stats
     subparsers.add_parser('flow-stats', help='Flow logging statistics')
@@ -3952,23 +3542,6 @@ def main():
     backtest_parser.add_argument('--price-14d', type=float, help='Price 14 days later')
     backtest_parser.add_argument('--price-30d', type=float, help='Price 30 days later')
 
-    # ========== OHLCV REFRESH COMMANDS ==========
-
-    # refresh-setups
-    subparsers.add_parser('refresh-setups', help='Download OHLCV for constant list + active setup tokens')
-
-    # refresh-list
-    subparsers.add_parser('refresh-list', help='Show the always-on refresh token list')
-
-    # refresh-add
-    refresh_add_parser = subparsers.add_parser('refresh-add', help='Add token to always-on refresh list')
-    refresh_add_parser.add_argument('token', help='Token symbol (e.g., BTC)')
-
-    # refresh-remove
-    refresh_remove_parser = subparsers.add_parser('refresh-remove', help='Remove token from always-on refresh list')
-    refresh_remove_parser.add_argument('token', help='Token symbol to remove')
-
-    # ========== DERIVATIVES HISTORY COMMANDS ==========
 
     # derivatives-history
     deriv_hist_parser = subparsers.add_parser('derivatives-history', help='Show recent derivatives snapshots')
@@ -3988,37 +3561,48 @@ def main():
     deriv_export_parser.add_argument('--days', type=int, default=30, help='Lookback days (default: 30)')
     deriv_export_parser.add_argument('--output', help='Output file path (default: stdout)')
 
-    # ========== WYCKOFF SCAN COMMANDS ==========
+    # snapshot-freshness
+    fresh_parser = subparsers.add_parser('snapshot-freshness', help='Check freshness of all snapshot tables')
+    fresh_parser.add_argument('--stale-hours', type=float, default=7.0, help='Hours before a table is stale (default: 7)')
+    fresh_parser.add_argument('--json', action='store_true', help='Output as JSON')
 
-    # log-wyckoff
-    log_wyckoff_parser = subparsers.add_parser('log-wyckoff', help='Log a Wyckoff scan result')
-    log_wyckoff_parser.add_argument('--date', required=True, help='Scan date YYYY-MM-DD')
-    log_wyckoff_parser.add_argument('--data', required=True, help='JSON string or @filepath with scan results array')
-    log_wyckoff_parser.add_argument('--batch-id', help='Optional batch ID')
+    # log-analyze
+    log_analyze_parser = subparsers.add_parser('log-analyze', help='Log structured /analyze output')
+    log_analyze_parser.add_argument('--json', dest='json_data', required=True,
+                                     help='JSON object with analyze fields')
 
-    # wyckoff-history
-    wyckoff_hist_parser = subparsers.add_parser('wyckoff-history', help='Query Wyckoff scan history')
-    wyckoff_hist_parser.add_argument('--token', help='Filter by token')
-    wyckoff_hist_parser.add_argument('--phase', choices=['A', 'B', 'C', 'D', 'E'], help='Filter by phase')
-    wyckoff_hist_parser.add_argument('--cycle', choices=['accumulation', 'distribution'], help='Filter by cycle type')
-    wyckoff_hist_parser.add_argument('--min-confidence', type=int, default=0, help='Minimum confidence (default: 0)')
-    wyckoff_hist_parser.add_argument('--days', type=int, default=90, help='Lookback days (default: 90)')
-    wyckoff_hist_parser.add_argument('--limit', type=int, default=20, help='Max results (default: 20)')
+    # analyze-history
+    analyze_hist_parser = subparsers.add_parser('analyze-history', help='Show analyze history for a token')
+    analyze_hist_parser.add_argument('token', help='Token symbol')
+    analyze_hist_parser.add_argument('--limit', type=int, default=10, help='Max results (default: 10)')
 
-    # wyckoff-latest
-    wyckoff_latest_parser = subparsers.add_parser('wyckoff-latest', help='Latest Wyckoff scan per token')
-    wyckoff_latest_parser.add_argument('--tokens', nargs='+', help='Filter to specific tokens')
+    # log-accum-distro
+    log_ad_parser = subparsers.add_parser('log-accum-distro', help='Log structured /accum-distro output')
+    log_ad_parser.add_argument('--json', dest='json_data', required=True,
+                                help='JSON object with accum-distro fields')
 
-    # wyckoff-transitions
-    wyckoff_trans_parser = subparsers.add_parser('wyckoff-transitions', help='Phase transitions for a token over time')
-    wyckoff_trans_parser.add_argument('--token', required=True, help='Token symbol')
-    wyckoff_trans_parser.add_argument('--days', type=int, default=90, help='Lookback days (default: 90)')
+    # accum-distro-history
+    ad_hist_parser = subparsers.add_parser('accum-distro-history', help='Show accum/distro history for a token')
+    ad_hist_parser.add_argument('token', help='Token symbol')
+    ad_hist_parser.add_argument('--limit', type=int, default=10, help='Max results (default: 10)')
+
+    # log-nansen (raw Nansen MCP responses)
+    log_nansen_parser = subparsers.add_parser('log-nansen', help='Log raw Nansen MCP response to snapshot table')
+    log_nansen_parser.add_argument('--json', dest='json_data', required=True,
+                                    help='JSON: {table, token, data, tool_name, ...}')
+
+    # refresh-setups (existing cron command)
+    subparsers.add_parser('refresh-setups', help='Refresh OHLCV for active watchlist setups + BTC/ETH/SOL')
 
     args = parser.parse_args()
 
     if args.command == "init":
         init_db()
         print(f"Database initialized at {DB_PATH}")
+
+    elif args.command == "sync":
+        ok = sync_to_cowork()
+        sys.exit(0 if ok else 1)
 
     elif args.command == "stats":
         stats = get_query_stats()
@@ -4048,148 +3632,6 @@ def main():
             print("\nBy suggested action:")
             for action, count in stats['by_suggested_action'].items():
                 print(f"  {action}: {count}")
-
-    elif args.command == "log-setup":
-        mentor_agrees = None
-        if args.mentor_agrees:
-            mentor_agrees = True
-        elif args.mentor_disagrees:
-            mentor_agrees = False
-
-        setup_id = log_trade_setup(
-            token=args.token,
-            direction=args.direction,
-            entry_price=args.entry,
-            stop_loss=args.stop,
-            target_1=args.target1,
-            target_2=args.target2,
-            risk_reward_ratio=args.rr,
-            ta_summary=args.ta_summary,
-            onchain_summary=args.onchain_summary,
-            accumulation_score=args.accum_score,
-            signal_summary=args.signal_summary,
-            mentor_agrees=mentor_agrees,
-            mentor_reasoning=args.mentor_reasoning,
-            mentor_action=args.mentor_action,
-            skill_name=args.skill,
-            pattern_type=args.pattern
-        )
-        print(f"Setup logged: {setup_id}")
-        print(f"  Token: {args.token.upper()} {args.direction.upper()}")
-        print(f"  Entry: ${args.entry} | Stop: ${args.stop} | T1: ${args.target1}")
-
-    elif args.command == "enter-setup":
-        update_setup_entered(args.setup_id, args.price)
-        print(f"Setup {args.setup_id} marked as ENTERED at ${args.price}")
-
-    elif args.command == "close-setup":
-        update_setup_closed(
-            setup_id=args.setup_id,
-            close_price=args.price,
-            outcome=args.outcome.upper(),
-            hit_target=args.target,
-            pnl_percent=args.pnl_percent,
-            pnl_usd=args.pnl_usd
-        )
-        print(f"Setup {args.setup_id} CLOSED: {args.outcome.upper()} at ${args.price}")
-
-    elif args.command == "add-lessons":
-        add_setup_lessons(
-            setup_id=args.setup_id,
-            what_worked=args.what_worked,
-            what_failed=args.what_failed,
-            lessons_learned=args.lessons,
-            evaluation_notes=args.notes
-        )
-        print(f"Lessons added to setup {args.setup_id}")
-
-    elif args.command == "setup-stats":
-        stats = get_setup_stats(token=args.token, skill_name=args.skill, days=args.days)
-        print(f"\n=== Trade Setup Statistics ({args.days} days) ===\n")
-        print(f"Closed: {stats['total_closed']} | Pending: {stats['pending']} | Active: {stats['active']}")
-        print(f"Wins: {stats['wins']} | Losses: {stats['losses']} | BE: {stats['breakeven']} | Partial: {stats['partial']}")
-        print(f"Win Rate: {stats['win_rate']:.0%}")
-        print(f"\nAvg PnL: {stats['avg_pnl_percent']:+.2f}%")
-        print(f"Avg Win: {stats['avg_win_percent']:+.2f}% | Avg Loss: {stats['avg_loss_percent']:+.2f}%")
-        if stats['best_trade']:
-            print(f"\nBest: {stats['best_trade']['token']} ({stats['best_trade']['setup_id']}) +{stats['best_trade']['pnl_percent']:.2f}%")
-        if stats['worst_trade']:
-            print(f"Worst: {stats['worst_trade']['token']} ({stats['worst_trade']['setup_id']}) {stats['worst_trade']['pnl_percent']:.2f}%")
-        if stats['by_direction']:
-            print("\nBy Direction:")
-            for direction, data in stats['by_direction'].items():
-                print(f"  {direction}: {data['count']} trades, avg {data['avg_pnl']:+.2f}%")
-
-    elif args.command == "list-setups":
-        setups = get_recent_setups(status=args.status, limit=args.limit)
-        if not setups:
-            print("No setups found.")
-            return
-        print(f"\n{'ID':<10} {'Token':<8} {'Dir':<6} {'Entry':<10} {'Status':<10} {'Outcome':<10} {'PnL':<10}")
-        print("-" * 70)
-        for s in setups:
-            pnl_str = f"{s['pnl_percent']:+.2f}%" if s['pnl_percent'] else "-"
-            print(f"{s['setup_id']:<10} {s['token']:<8} {s['direction']:<6} ${s['entry_price']:<9.4f} {s['status']:<10} {s['outcome'] or '-':<10} {pnl_str:<10}")
-
-    elif args.command == "show-setup":
-        setup = get_setup_by_id(args.setup_id)
-        if not setup:
-            print(f"Setup {args.setup_id} not found.")
-            return
-        print(f"\n=== Setup {setup['setup_id']} ===\n")
-        print(f"Token:   {setup['token']} {setup['direction']}")
-        print(f"Label:   {setup['pattern_type'] or '—'}")
-        print(f"Created: {setup['timestamp_utc'][:19]}")
-        print(f"Status:  {setup['status']}")
-        if setup.get('notes'):
-            print(f"Notes:   {setup['notes']}")
-        print(f"\nEntry: ${setup['entry_price']} | Stop: ${setup['stop_loss']} | T1: ${setup['target_1']} | T2: ${setup['target_2'] or '-'}")
-        print(f"R:R Ratio: {setup['risk_reward_ratio']}")
-        if setup['signal_summary']:
-            print(f"\nTrigger: {setup['signal_summary']}")
-        if setup['ta_summary']:
-            print(f"\nTA Summary: {setup['ta_summary']}")
-        if setup['onchain_summary']:
-            print(f"On-chain Summary: {setup['onchain_summary']}")
-        if setup['accumulation_score'] is not None:
-            print(f"Accumulation Score: {setup['accumulation_score']}/5")
-        if setup['mentor_agrees'] is not None:
-            agrees = "Yes" if setup['mentor_agrees'] else "No"
-            print(f"\nMentor Agrees: {agrees}")
-            print(f"Mentor Action: {setup['mentor_action'] or '-'}")
-            if setup['mentor_reasoning']:
-                print(f"Mentor Reasoning: {setup['mentor_reasoning']}")
-        if setup['status'] == 'CLOSED':
-            print(f"\n--- Outcome ---")
-            print(f"Close Price: ${setup['close_price']}")
-            print(f"Outcome: {setup['outcome']}")
-            print(f"PnL: {setup['pnl_percent']:+.2f}%" if setup['pnl_percent'] else "PnL: -")
-            if setup['what_worked']:
-                print(f"\nWhat Worked: {setup['what_worked']}")
-            if setup['what_failed']:
-                print(f"What Failed: {setup['what_failed']}")
-            if setup['lessons_learned']:
-                print(f"Lessons: {setup['lessons_learned']}")
-
-    elif args.command == "update-setup":
-        ok = update_setup_metadata(
-            setup_id=args.setup_id,
-            pattern_type=args.label,
-            notes=args.notes,
-            signal_summary=args.trigger,
-        )
-        if ok:
-            print(f"Updated setup {args.setup_id}.")
-            setup = get_setup_by_id(args.setup_id)
-            if setup:
-                print(f"  Label: {setup['pattern_type'] or '—'}")
-                if setup.get('notes'):
-                    print(f"  Notes: {setup['notes']}")
-        else:
-            print(f"Setup {args.setup_id} not found.")
-
-    elif args.command == "monitor-setups":
-        print(monitor_active_setups())
 
     elif args.command == "flow-stats":
         stats = get_flow_stats()
@@ -4594,47 +4036,6 @@ def main():
 
     # ========== OHLCV REFRESH HANDLERS ==========
 
-    elif args.command == "refresh-setups":
-        print("  Refreshing OHLCV data...\n")
-        result = refresh_active_tokens()
-        print(f"  Constant list : {', '.join(result['constant_list']) if result['constant_list'] else '(empty)'}")
-        print(f"  Active setups : {', '.join(result['setup_tokens']) if result['setup_tokens'] else '(none)'}")
-        print(f"  Total tokens  : {len(result['tokens'])}")
-        print()
-        if result['refreshed']:
-            print(f"  ✓ Refreshed: {', '.join(result['refreshed'])}")
-        if result['errors']:
-            print(f"  ⚠️  Errors:")
-            for e in result['errors']:
-                print(f"    {e}")
-        if not result['tokens']:
-            print("  Nothing to refresh. Add tokens with: refresh-add TOKEN")
-        print()
-
-    elif args.command == "refresh-list":
-        tokens = get_refresh_token_list()
-        if not tokens:
-            print("  Refresh list is empty. Add tokens with: refresh-add TOKEN")
-        else:
-            print(f"\n  Always-on refresh list ({len(tokens)} tokens):")
-            for t in tokens:
-                print(f"    {t}")
-            print()
-
-    elif args.command == "refresh-add":
-        added = add_to_refresh_list(args.token)
-        if added:
-            print(f"  Added {args.token.upper()} to refresh list.")
-        else:
-            print(f"  {args.token.upper()} is already in the refresh list.")
-
-    elif args.command == "refresh-remove":
-        removed = remove_from_refresh_list(args.token)
-        if removed:
-            print(f"  Removed {args.token.upper()} from refresh list.")
-        else:
-            print(f"  {args.token.upper()} not found in refresh list.")
-
     # ========== DERIVATIVES HISTORY HANDLERS ==========
 
     elif args.command == "derivatives-history":
@@ -4709,67 +4110,187 @@ def main():
         else:
             print(result)
 
-    # ========== WYCKOFF SCAN HANDLERS ==========
+    elif args.command == "snapshot-freshness":
+        freshness = check_snapshot_freshness(stale_hours=args.stale_hours)
+        if args.json:
+            print(json.dumps(freshness, indent=2, default=str))
+        else:
+            print(f"\n=== Snapshot Freshness (stale > {args.stale_hours}h) ===\n")
+            print(f"  {'Table':<35} {'Last Snapshot':<22} {'Age':<10} {'Status'}")
+            print(f"  {'─' * 80}")
+            for table, info in sorted(freshness.items()):
+                last = info['last_snapshot'][:19] if info['last_snapshot'] else 'NEVER'
+                age = f"{info['age_hours']:.1f}h" if info['age_hours'] is not None else '-'
+                status = 'STALE' if info['stale'] else 'OK'
+                marker = '  ' if not info['stale'] else '!!'
+                print(f"{marker} {table:<35} {last:<22} {age:<10} {status}")
 
-    elif args.command == "log-wyckoff":
-        data_str = args.data
-        if data_str.startswith('@'):
-            with open(data_str[1:]) as f:
-                data_str = f.read()
-        results = _parse_json_input(data_str)
-        if not isinstance(results, list):
-            results = [results]
-        batch_id = log_wyckoff_scan(args.date, results, args.batch_id)
-        print(f"Logged {len(results)} Wyckoff scan(s) — batch: {batch_id}")
-
-    elif args.command == "wyckoff-history":
-        results = get_wyckoff_history(
-            token=args.token, phase=args.phase, cycle_type=args.cycle,
-            min_confidence=args.min_confidence, days=args.days, limit=args.limit
+    elif args.command == "log-analyze":
+        data = _parse_json_input(args.json_data)
+        if not data or not data.get("token"):
+            print("Error: JSON must include 'token' field", file=sys.stderr)
+            sys.exit(1)
+        report_id = log_analyze_report(
+            token=data["token"],
+            price_usd=data.get("price_usd"),
+            verdict=data.get("verdict"),
+            conviction=data.get("conviction"),
+            direction=data.get("direction"),
+            accumulation_score=data.get("accumulation_score"),
+            exchange_flows_signal=data.get("exchange_flows_signal"),
+            fresh_wallets_signal=data.get("fresh_wallets_signal"),
+            smart_money_signal=data.get("smart_money_signal"),
+            top_pnl_signal=data.get("top_pnl_signal"),
+            whale_signal=data.get("whale_signal"),
+            onchain_verdict=data.get("onchain_verdict"),
+            perps_verdict=data.get("perps_verdict"),
+            derivatives_verdict=data.get("derivatives_verdict"),
+            ta_verdict=data.get("ta_verdict"),
+            support_levels=data.get("support_levels"),
+            resistance_levels=data.get("resistance_levels"),
+            ta_weekly_rsi=data.get("ta_weekly_rsi"),
+            ta_daily_rsi=data.get("ta_daily_rsi"),
+            ta_4h_rsi=data.get("ta_4h_rsi"),
+            ta_weekly_adx=data.get("ta_weekly_adx"),
+            ta_daily_adx=data.get("ta_daily_adx"),
+            ta_trend_direction=data.get("ta_trend_direction"),
+            funding_rate=data.get("funding_rate"),
+            oi_usd=data.get("oi_usd"),
+            oi_change_24h_pct=data.get("oi_change_24h_pct"),
+            ls_global_ratio=data.get("ls_global_ratio"),
+            ls_crowding=data.get("ls_crowding"),
+            invalidation_criteria=data.get("invalidation_criteria"),
+            nansen_credits_used=data.get("nansen_credits_used"),
+            full_markdown=data.get("full_markdown"),
         )
-        if not results:
-            print("No Wyckoff scans found matching filters.")
+        if report_id:
+            print(json.dumps({"report_id": report_id, "token": data["token"], "status": "logged"}))
         else:
-            print(f"\n{'Token':<8} {'Date':<12} {'Cycle':<15} {'Phase':<7} {'Conf':<6} {'Price':<12} {'Events'}")
-            print("-" * 80)
-            for r in results:
-                events = []
-                if r.get('spring_detected'): events.append('Spring')
-                if r.get('upthrust_detected'): events.append('Upthrust')
-                if r.get('sos_detected'): events.append('SOS')
-                if r.get('sow_detected'): events.append('SOW')
-                event_str = ', '.join(events) if events else 'None'
-                price = f"${r.get('price_at_scan', 0):,.2f}" if r.get('price_at_scan') else 'N/A'
-                print(f"{r['token']:<8} {r['scan_date']:<12} {r.get('cycle_type','?'):<15} {r.get('phase','?'):<7} {r.get('confidence','?'):<6} {price:<12} {event_str}")
+            print("Error: failed to log analyze report", file=sys.stderr)
+            sys.exit(1)
 
-    elif args.command == "wyckoff-latest":
-        results = get_wyckoff_latest(args.tokens)
-        if not results:
-            print("No Wyckoff scans found.")
+    elif args.command == "analyze-history":
+        history = get_analyze_history(args.token, limit=args.limit)
+        if not history:
+            print(f"No analyze snapshots found for {args.token}")
         else:
-            print(f"\n{'Token':<8} {'Date':<12} {'Cycle':<15} {'Phase':<7} {'Conf':<6} {'Price':<12} {'Vol Trend':<12} {'Position'}")
-            print("-" * 90)
-            for r in results:
-                price = f"${r.get('price_at_scan', 0):,.2f}" if r.get('price_at_scan') else 'N/A'
-                print(f"{r['token']:<8} {r['scan_date']:<12} {r.get('cycle_type','?'):<15} {r.get('phase','?'):<7} {r.get('confidence','?'):<6} {price:<12} {r.get('volume_trend','?'):<12} {r.get('position_in_range','?')}")
+            print(f"\n=== Analyze History: {args.token} ({len(history)} reports) ===\n")
+            for r in history:
+                ts = r['timestamp_utc'][:16]
+                v = r.get('verdict', '?')
+                c = r.get('conviction', '?')
+                acc = r.get('accumulation_score')
+                acc_str = f"  Accum: {acc}/5" if acc is not None else ""
+                price = f"  ${r['price_usd']:,.0f}" if r.get('price_usd') else ""
+                print(f"  {ts}  {v} ({c}){price}{acc_str}")
+                pillars = []
+                for p in ['onchain_verdict', 'perps_verdict', 'derivatives_verdict', 'ta_verdict']:
+                    if r.get(p):
+                        pillars.append(f"{p.replace('_verdict','')}: {r[p]}")
+                if pillars:
+                    print(f"    {' | '.join(pillars)}")
 
-    elif args.command == "wyckoff-transitions":
-        results = get_wyckoff_phase_transitions(args.token, args.days)
-        if not results:
-            print(f"No Wyckoff scans found for {args.token.upper()}.")
+    elif args.command == "log-accum-distro":
+        data = _parse_json_input(args.json_data)
+        if not data or not data.get("token"):
+            print("Error: JSON must include 'token' field", file=sys.stderr)
+            sys.exit(1)
+        report_id = log_accum_distro_report(
+            token=data["token"],
+            chain=data.get("chain"),
+            token_address=data.get("token_address"),
+            price_usd=data.get("price_usd"),
+            layer1_verdict=data.get("layer1_verdict"),
+            layer2_verdict=data.get("layer2_verdict"),
+            layer3_verdict=data.get("layer3_verdict"),
+            cex_net_flow_usd=data.get("cex_net_flow_usd"),
+            cex_inflow_usd=data.get("cex_inflow_usd"),
+            cex_outflow_usd=data.get("cex_outflow_usd"),
+            cex_flow_vs_avg=data.get("cex_flow_vs_avg"),
+            sm_holders_count=data.get("sm_holders_count"),
+            sm_balance_usd=data.get("sm_balance_usd"),
+            sm_balance_change_24h_pct=data.get("sm_balance_change_24h_pct"),
+            sm_net_buy_volume_usd=data.get("sm_net_buy_volume_usd"),
+            sm_buyer_count=data.get("sm_buyer_count"),
+            sm_seller_count=data.get("sm_seller_count"),
+            fresh_wallet_count=data.get("fresh_wallet_count"),
+            fresh_wallet_max_score=data.get("fresh_wallet_max_score"),
+            fresh_wallet_total_usd=data.get("fresh_wallet_total_usd"),
+            final_verdict=data.get("final_verdict"),
+            conviction=data.get("conviction"),
+            nansen_credits_used=data.get("nansen_credits_used"),
+            full_markdown=data.get("full_markdown"),
+        )
+        if report_id:
+            print(json.dumps({"report_id": report_id, "token": data["token"], "status": "logged"}))
         else:
-            print(f"\nWyckoff Phase Timeline — {args.token.upper()}")
-            print(f"\n{'Date':<12} {'Cycle':<15} {'Phase':<7} {'Conf':<6} {'Price':<12} {'Vol':<12} {'Events'}")
-            print("-" * 80)
-            for r in results:
-                events = []
-                if r.get('spring_detected'): events.append('Spring')
-                if r.get('upthrust_detected'): events.append('Upthrust')
-                if r.get('sos_detected'): events.append('SOS')
-                if r.get('sow_detected'): events.append('SOW')
-                event_str = ', '.join(events) if events else '-'
-                price = f"${r.get('price_at_scan', 0):,.2f}" if r.get('price_at_scan') else 'N/A'
-                print(f"{r['scan_date']:<12} {r.get('cycle_type','?'):<15} {r.get('phase','?'):<7} {r.get('confidence','?'):<6} {price:<12} {r.get('volume_trend','?'):<12} {event_str}")
+            print("Error: failed to log accum-distro report", file=sys.stderr)
+            sys.exit(1)
+
+    elif args.command == "log-nansen":
+        data = _parse_json_input(args.json_data)
+        if not data or not data.get("table") or not data.get("token") or "data" not in data:
+            print("Error: JSON must include 'table', 'token', and 'data' fields", file=sys.stderr)
+            sys.exit(1)
+        valid_tables = ["nansen_flow_snapshots", "nansen_holder_snapshots",
+                        "nansen_perp_snapshots", "nansen_quant_snapshots"]
+        if data["table"] not in valid_tables:
+            print(f"Error: table must be one of {valid_tables}", file=sys.stderr)
+            sys.exit(1)
+        row_id = log_nansen_snapshot(
+            table=data["table"],
+            token=data["token"],
+            data=data["data"],
+            tool_name=data.get("tool_name"),
+            holder_segment=data.get("holder_segment"),
+            lookback_period=data.get("lookback_period"),
+            chain=data.get("chain"),
+            label_type=data.get("label_type"),
+            mode=data.get("mode"),
+            source_query_id=data.get("source_query_id"),
+        )
+        if row_id > 0:
+            print(json.dumps({"row_id": row_id, "table": data["table"],
+                               "token": data["token"], "status": "stored"}))
+        else:
+            print("Error: failed to store Nansen snapshot", file=sys.stderr)
+            sys.exit(1)
+
+    elif args.command == "accum-distro-history":
+        history = get_accum_distro_history(args.token, limit=args.limit)
+        if not history:
+            print(f"No accum/distro snapshots found for {args.token}")
+        else:
+            print(f"\n=== Accum/Distro History: {args.token} ({len(history)} reports) ===\n")
+            for r in history:
+                ts = r['timestamp_utc'][:16]
+                fv = r.get('final_verdict', '?')
+                c = r.get('conviction', '?')
+                price = f"  ${r['price_usd']:,.2f}" if r.get('price_usd') else ""
+                print(f"  {ts}  {fv} ({c}){price}")
+                layers = []
+                for lbl, key in [('CEX', 'layer1_verdict'), ('SM', 'layer2_verdict'), ('Fresh', 'layer3_verdict')]:
+                    if r.get(key):
+                        layers.append(f"{lbl}: {r[key]}")
+                if layers:
+                    print(f"    {' | '.join(layers)}")
+
+    elif args.command == "refresh-setups":
+        # Refresh OHLCV for active watchlist setups + BTC/ETH/SOL
+        import subprocess
+        conn = get_connection()
+        rows = conn.execute(
+            "SELECT DISTINCT symbol FROM signal_watchlist WHERE status = 'active'"
+        ).fetchall()
+        conn.close()
+        symbols = list(set([r['symbol'] for r in rows] + ['BTC', 'ETH', 'SOL']))
+        for sym in symbols:
+            print(f"Refreshing OHLCV for {sym}...")
+            subprocess.run(
+                [sys.executable, str(Path(__file__).parent.parent / "analysis" / "indicators.py"),
+                 "download", sym, "--timeframe", "4h"],
+                capture_output=True)
+        print(f"Refreshed {len(symbols)} symbols: {', '.join(symbols)}")
 
     else:
         parser.print_help()

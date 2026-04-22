@@ -1,0 +1,128 @@
+{
+  "fetched_at": "2026-03-23T07:44:54.703933",
+  "symbol": "MARKET_PULSE",
+  "btc_funding": {
+    "symbol": "BTC",
+    "avg_rate": -0.00097181,
+    "avg_rate_pct": "-0.0972%",
+    "max_rate": 0.0015,
+    "max_exchange": "BingX",
+    "min_rate": -0.0053,
+    "min_exchange": "Bitget",
+    "num_exchanges": 21,
+    "annualized_cost_pct": -141.88,
+    "bias": "short_crowded",
+    "interpretation": "BTC avg funding: -0.0972% across 21 exchanges. Shorts paying heavily \u2014 crowded short positioning, squeeze UP risk. Annualized cost: -141.9% for the dominant side"
+  },
+  "eth_funding": {
+    "symbol": "ETH",
+    "avg_rate": 0.00112527,
+    "avg_rate_pct": "0.1125%",
+    "max_rate": 0.0068,
+    "max_exchange": "BingX",
+    "min_rate": -0.00235331,
+    "min_exchange": "HTX",
+    "num_exchanges": 21,
+    "annualized_cost_pct": 164.29,
+    "bias": "long_crowded",
+    "interpretation": "ETH avg funding: 0.1125% across 21 exchanges. Longs paying heavily \u2014 crowded long positioning, squeeze DOWN risk. Annualized cost: 164.3% for the dominant side"
+  },
+  "btc_oi": {
+    "symbol": "BTC",
+    "total_oi_usd": 46192355875.4439,
+    "change_1h_pct": 0.78,
+    "change_4h_pct": 0.37,
+    "change_24h_pct": -0.52,
+    "momentum": "stable",
+    "top_exchange_changes": [
+      {
+        "exchange": "CoinEx",
+        "change_1h_pct": 17.05,
+        "oi_usd": 93946235.157
+      },
+      {
+        "exchange": "BingX",
+        "change_1h_pct": 8.37,
+        "oi_usd": 1169764593.21861
+      },
+      {
+        "exchange": "Bitmex",
+        "change_1h_pct": 6.5,
+        "oi_usd": 177955779.2622601
+      }
+    ],
+    "interpretation": "BTC total OI: $46.19B (-0.5% 24h). Biggest mover: CoinEx (+17.1% 1h)"
+  },
+  "eth_oi": {
+    "symbol": "ETH",
+    "total_oi_usd": 28037638082.6549,
+    "change_1h_pct": 1.29,
+    "change_4h_pct": 0.94,
+    "change_24h_pct": 1.11,
+    "momentum": "stable",
+    "top_exchange_changes": [
+      {
+        "exchange": "Bitunix",
+        "change_1h_pct": 7.66,
+        "oi_usd": 1140250701.113461
+      },
+      {
+        "exchange": "BingX",
+        "change_1h_pct": 6.52,
+        "oi_usd": 782223218.067767
+      },
+      {
+        "exchange": "Bitget",
+        "change_1h_pct": 3.14,
+        "oi_usd": 1720586506.5058
+      }
+    ],
+    "interpretation": "ETH total OI: $28.04B (+1.1% 24h). Biggest mover: Bitunix (+7.7% 1h)"
+  },
+  "btc_ls": {
+    "symbol": "BTC",
+    "current_long_pct": 65.13,
+    "current_short_pct": 34.87,
+    "current_ratio": 1.87,
+    "trend": "more_longs",
+    "extreme": false,
+    "contrarian_signal": null,
+    "interpretation": "BTC Global L/S: 1.87x (65.1% long / 34.9% short). Crowd shifting long \u2014 retail piling into longs"
+  },
+  "btc_top_ls": {
+    "symbol": "BTC",
+    "top_account_long_pct": 65.28,
+    "top_account_ratio": 1.88,
+    "top_position_long_pct": 50.58,
+    "top_position_ratio": 1.02,
+    "account_position_divergence": true,
+    "smart_money_lean": "neutral",
+    "interpretation": "BTC Top Traders \u2014 Account: 1.88x (65.3% long), Position: 1.02x (50.6% long). Account/Position divergence: many small longs (acct 65%) but position weight lower (51%) \u2014 retail long, smart money less convinced"
+  },
+  "etf": {
+    "latest_day_flow_usd": -52000000.0,
+    "latest_day_date": "2026-03-20",
+    "latest_day_top_etf": "IBIT",
+    "latest_day_top_etf_flow_usd": -45900000.0,
+    "weekly_net_flow_usd": 327300000.0,
+    "streak_days": -3,
+    "bias": "moderate_inflow",
+    "interpretation": "BTC ETF latest: $52.0M outflow (2026-03-20). Weekly net: $327.3M inflow"
+  },
+  "fear_greed": {
+    "value": 9,
+    "label": "Extreme Fear",
+    "avg_7d": 16.7,
+    "trend": "falling",
+    "contrarian_signal": "long",
+    "interpretation": "Fear & Greed: 9 \u2014 Extreme Fear. Extreme Fear \u2014 contrarian long signal. Markets most fearful = historically best buying opportunities. 7d avg: 17, trend: falling"
+  },
+  "coinbase_premium": {
+    "premium_usd": -11.47,
+    "premium_rate": -0.0168,
+    "premium_rate_pct": "-1.68%",
+    "avg_rate": -0.00975,
+    "bias": "us_selling",
+    "interpretation": "Coinbase Premium: $-11.47 (-1.68%). US institutions selling below global price \u2014 bearish institutional flow"
+  }
+}

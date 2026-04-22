@@ -1,0 +1,173 @@
+{
+  "fetched_at": "2026-03-21T05:45:56.801163",
+  "symbol": "ETH",
+  "current_price": 2155.0,
+  "funding": {
+    "symbol": "ETH",
+    "avg_rate": 0.00202838,
+    "avg_rate_pct": "0.2028%",
+    "max_rate": 0.007042,
+    "max_exchange": "WhiteBIT",
+    "min_rate": -0.0041,
+    "min_exchange": "KuCoin",
+    "num_exchanges": 21,
+    "annualized_cost_pct": 296.14,
+    "bias": "long_crowded",
+    "interpretation": "ETH avg funding: 0.2028% across 21 exchanges. Longs paying heavily \u2014 crowded long positioning, squeeze DOWN risk. Annualized cost: 296.1% for the dominant side"
+  },
+  "open_interest": {
+    "history": {
+      "symbol": "ETH",
+      "current_oi_usd": 29033359152.0948,
+      "oi_24h_ago_usd": 29288116804.0,
+      "oi_change_24h_pct": -0.87,
+      "oi_change_period_pct": -13.13,
+      "oi_trend": "flat",
+      "interpretation": "ETH OI: $29.03B (-0.9% 24h). OI stable \u2014 no significant position changes"
+    },
+    "exchanges": {
+      "symbol": "ETH",
+      "total_oi_usd": 29033359152.0948,
+      "change_1h_pct": -0.18,
+      "change_4h_pct": 0.11,
+      "change_24h_pct": -1.69,
+      "momentum": "stable",
+      "top_exchange_changes": [
+        {
+          "exchange": "Bitunix",
+          "change_1h_pct": -9.61,
+          "oi_usd": 832801068.76483
+        },
+        {
+          "exchange": "BingX",
+          "change_1h_pct": -1.75,
+          "oi_usd": 629113711.71063
+        },
+        {
+          "exchange": "MEXC",
+          "change_1h_pct": 0.85,
+          "oi_usd": 1425503226.9247
+        }
+      ],
+      "interpretation": "ETH total OI: $29.03B (-1.7% 24h). Biggest mover: Bitunix (-9.6% 1h)"
+    }
+  },
+  "long_short": {
+    "global": {
+      "symbol": "ETH",
+      "current_long_pct": 65.62,
+      "current_short_pct": 34.38,
+      "current_ratio": 1.91,
+      "trend": "stable",
+      "extreme": false,
+      "contrarian_signal": null,
+      "interpretation": "ETH Global L/S: 1.91x (65.6% long / 34.4% short)"
+    },
+    "top_traders": {
+      "symbol": "ETH",
+      "top_account_long_pct": 65.08,
+      "top_account_ratio": 1.86,
+      "top_position_long_pct": 52.74,
+      "top_position_ratio": 1.12,
+      "account_position_divergence": true,
+      "smart_money_lean": "neutral",
+      "interpretation": "ETH Top Traders \u2014 Account: 1.86x (65.1% long), Position: 1.12x (52.7% long). Account/Position divergence: many small longs (acct 65%) but position weight lower (53%) \u2014 retail long, smart money less convinced"
+    }
+  },
+  "liquidation": {
+    "symbol": "ETH",
+    "total_24h_usd": 8679492.27718,
+    "long_liq_24h_usd": 4184089.37453,
+    "short_liq_24h_usd": 4495402.90265,
+    "long_short_ratio": 0.93,
+    "bias": "balanced",
+    "recent_acceleration": false,
+    "timeframe_breakdown": {
+      "24h": {
+        "total": 8679492.27718,
+        "long": 4184089.37453,
+        "short": 4495402.90265
+      },
+      "12h": {
+        "total": 1838537.06949,
+        "long": 767789.12776,
+        "short": 1070747.94173
+      },
+      "4h": {
+        "total": 118694.83325,
+        "long": 48291.35182,
+        "short": 70403.48143
+      },
+      "1h": {
+        "total": 17612.4273,
+        "long": 9408.98153,
+        "short": 8203.44577
+      }
+    },
+    "interpretation": "ETH 24h liquidations: $8.7M (Long: $4.2M | Short: $4.5M). Balanced liquidation (L/S ratio: 0.9x)"
+  },
+  "max_pain": {
+    "nearest_expiry": "260321",
+    "max_pain_price": 2150.0,
+    "distance_pct": -0.23,
+    "direction": "at",
+    "put_call_oi_ratio": 0.53,
+    "expiries": [
+      {
+        "date": "260321",
+        "max_pain_price": 2150.0,
+        "call_oi": 14297.0,
+        "put_oi": 18114.7,
+        "put_call_ratio": 1.27,
+        "distance_pct": -0.23
+      },
+      {
+        "date": "260322",
+        "max_pain_price": 2150.0,
+        "call_oi": 15409.7,
+        "put_oi": 18183.4,
+        "put_call_ratio": 1.18,
+        "distance_pct": -0.23
+      },
+      {
+        "date": "260323",
+        "max_pain_price": 2150.0,
+        "call_oi": 5708.5,
+        "put_oi": 13070.9,
+        "put_call_ratio": 2.29,
+        "distance_pct": -0.23
+      },
+      {
+        "date": "260324",
+        "max_pain_price": 2125.0,
+        "call_oi": 3004.5,
+        "put_oi": 2998.4,
+        "put_call_ratio": 1.0,
+        "distance_pct": -1.39
+      },
+      {
+        "date": "260327",
+        "max_pain_price": 2350.0,
+        "call_oi": 708368.4,
+        "put_oi": 436153.2,
+        "put_call_ratio": 0.62,
+        "distance_pct": 9.05
+      }
+    ],
+    "interpretation": "Nearest options max pain: $2,150 (-0.2% from $2,155). Price near max pain \u2014 MMs comfortable, expect range-bound. Put/Call OI ratio: 0.53x \u2014 call-heavy, bullish positioning"
+  },
+  "options": {
+    "total_oi_usd": 8855823069.067114,
+    "volume_24h_usd": 1298155829.9565325,
+    "oi_change_24h_pct": 0.1,
+    "interpretation": "Options OI: $8.86B | 24h Volume: $1.30B"
+  },
+  "setup": {
+    "detected": false,
+    "direction": null,
+    "confidence": "low",
+    "snap_back_target": null,
+    "thesis": "No liquidity grab setup detected",
+    "components": {}
+  }
+}
