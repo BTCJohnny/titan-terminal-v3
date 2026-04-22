@@ -21,6 +21,8 @@ Read `CONTEXT.md` for full workflow details.
 | `/hunt` | Daily scan — pull all data, reason through it, surface 0-5 opportunity cards |
 | `/analyze [TOKEN]` | Deep dive on one token — full TA + on-chain + derivatives + verdict |
 | `/targets [TOKEN] [LONG/SHORT] [entry] [stop]` | S/R levels + position sizing for a specific setup |
+| `/accum-distro [TOKEN] [CHAIN] [ADDRESS]` | 3-layer accumulation/distribution detection via Nansen |
+| `/fresh-wallets [TIER]` | Scan universe for stealth accumulation by unlabeled wallets (~20 credits, run every 2-3 days) |
 
 ## Signal Hierarchy
 
@@ -61,8 +63,8 @@ Refresh stale data without prompting:
 
 ## Nansen Credit Budget
 
-Session limit: **100 credits.** Track running total. Warn at 80. Stop at 100 (prompt for approval).
-Per-analysis cap: 20 credits. See `_config/nansen-budget.md` for cost table.
+Session limit: **200 credits.** Track running total. Warn at 160. Stop at 200 (prompt for approval).
+This is a guardrail against looping issues, not a conservation target — burn credits freely when they serve analysis. See `_config/nansen-budget.md` for cost table.
 
 ## Position Sizing
 
@@ -96,6 +98,56 @@ Risk per trade: **2% max.** Minimum R:R: **3:1.**
 | `titan_data.db` | `data/` | OHLCV price cache |
 | `titan_intelligence.db` | `data/` | Derivatives snapshots, watchlist |
 | `ohlcv_cache.db` | `data/` | Fast OHLCV lookup |
+
+## Accumulation/Distribution Skill
+
+3-layer Nansen analysis to detect token accumulation or distribution. Budget: 11-16 credits per analysis.
+
+### Chain Routing
+- **Ethereum/Base/Arbitrum/Optimism/Polygon/BNB/Solana**: Run all 3 layers
+- **Hyperliquid**: Skip Layer 1. Use `mode: "perps"` for Layer 2/3. Add `hyperliquid_leaderboard`
+- **Other L1s**: Run `general_search` first (1 credit) to test coverage
+
+### Layer 1 — CEX Flows (2 credits)
+1. `token_recent_flows_summary` — net CEX inflow/outflow direction
+2. `token_flows` (7d range) — hourly flow detail and segment breakdown
+- **Verdict**: ACCUMULATION if net outflow from CEX. DISTRIBUTION if net inflow.
+
+### Layer 2 — Smart Money (6-7 credits)
+3. `smart_traders_and_funds_token_balances` (chain, smFilter: `["Fund", "Smart Trader", "180D Smart Trader"]`) — find token, check `balancePctChange24H` and `nofHolders`. **Skip for tokens outside top 50 by market cap** (usually returns empty, saves 2 credits).
+4. `token_who_bought_sold` (7d range) — buyer vs seller count, net volume direction
+5. `token_dex_trades` (3d range) — trade size clustering, large buy/sell patterns
+- For Hyperliquid: use `smart_traders_and_funds_perp_trades` + `token_dex_trades` with `mode: "perps"` + `token_flows` with `mode: "perps"`
+- **Verdict**: ACCUMULATION if buyers > sellers by volume + large clustered buys. DISTRIBUTION if opposite.
+
+### Layer 3 — Fresh Wallet Detection (5-7 credits)
+6. `token_current_top_holders` — find large holders (>$100K) with NO Nansen label
+7. `address_portfolio` (×2-3, use `wallet_dress` param) — check stablecoin war chest ($500K+ USDC/USDT/DAI = continued buying capacity)
+8. `address_related_addresses` (batch all wallets in one call via `addresses: [...]`) — wallet age, first funder, connected addresses
+
+**Fresh wallet scoring (0-5):** +1 position acquired last 30d, +1 >$100K stables, +1 single-purpose portfolio (1-3 tokens), +1 funded from exchange/unlabeled, +1 related wallets hold same token. Score 4-5 = high-confidence stealth accumulation.
+
+### Final Verdict
+| Scenario | Verdict |
+|----------|---------|
+| All 3 layers accumulation | **STRONG ACCUMULATION** |
+| 2 of 3 layers accumulation | **ACCUMULATION** |
+| Mixed signals | **NEUTRAL** |
+| 2 of 3 layers distribution | **DISTRIBUTION** |
+| All 3 layers distribution | **STRONG DISTRIBUTION** |
+
+### Tool Parameter Reference
+- `general_search`, `transaction_lookup` — flat args (no `request` wrapper)
+- All other tools — wrap in `{"request": {...}}`
+- Most wallet tools: `addresses: ["0x..."]` (plural array)
+- `wallet_pnl_for_token`, `wallet_pnl_summary`: `address: "0x..."` (singular)
+- `address_portfolio`: `wallet_dress: "0x..."` (unique name)
+- Enums are case-sensitive: `"BUY"` / `"SELL"`
+- Dates: `{"from": "YYYY-MM-DD", "to": "YYYY-MM-DD"}`
+- Always batch `address_related_addresses` — saves 2 credits per analysis
+
+### Wrapped Token Caveat
+For wrapped tokens (wTAO, wBTC, etc.), note in the report that analysis only covers the wrapped chain. Bridge user outflows are ambiguous — could be unwrapping to native chain, not selling.
 
 ## Output Rules
 

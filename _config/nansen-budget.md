@@ -2,17 +2,15 @@
 
 **Last Updated:** 2026-03-20
 
-## Session Limit: 100 Credits
+## Session Limit: 200 Credits
 
-Track usage across all Nansen MCP calls in a session. Report running total after each Nansen-using stage.
+Track usage across all Nansen MCP calls in a session. Report running total after each Nansen-using stage. This limit is a guardrail against looping issues — burn credits freely when they serve analysis.
 
 | Threshold | Action |
 |-----------|--------|
-| 80 credits | ⚠️ Warn: "80/100 Nansen credits used this session." |
-| 100 credits | 🛑 Stop: "100 credit limit reached. Approve more? (Y to continue, N to stop on-chain analysis)" |
-| If approved | Continue in 10-credit increments, prompting at each |
-
-**Per-analysis cap:** No single `/analyze` or pipeline run should use more than 20 credits without prompting.
+| 160 credits | ⚠️ Warn: "160/200 Nansen credits used this session." |
+| 200 credits | 🛑 Stop: "200 credit limit reached. Approve more? (Y to continue, N to stop on-chain analysis)" |
+| If approved | Continue in 20-credit increments, prompting at each |
 
 ---
 
@@ -65,11 +63,10 @@ Track usage across all Nansen MCP calls in a session. Report running total after
 
 | Pipeline / Command | Typical Credits | Notes |
 |-------------------|----------------|-------|
-| `/analyze [TOKEN]` | 15-20 | Full trade card: identity (1) + flows 1d+7d (4) + holders ×2 (6) + perps (3) = 14 minimum |
+| `/analyze [TOKEN]` | 17-22 | Full trade card: identity (1) + flows 1d+7d (4) + holders ×2 (6) + fresh wallets (2) + perps (3) = 16 minimum |
+| `/hunt` | 65-75 | SM scan (10) + discovery (15) + fresh wallets all (30) + individual flows (~10-20) |
+| `/fresh-wallets` | 20-30 | 10-15 tokens × 2 credits each |
 | `/nansen-exit [TOKEN]` | 4 | Cheapest on-chain check: 4 parallel queries at 1 credit each |
-| `/find-setups` (full) | 40-80 | Regime (0) + scan on-chain (5-10) + squeeze scan (5) + analyze 1-3 candidates (15-60) |
-| `/hunt-accumulation` | 20-40 | Discovery screener (5) + entity scans + flow checks per candidate |
-| `/hunt-squeezes` | 10-20 | Broad perp scan (5) + deep scan top 3 candidates |
 
 ## Cache Rules
 

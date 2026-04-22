@@ -11,6 +11,7 @@ Storage: SQLite (data/titan_intelligence.db)
 import sqlite3
 import json
 import uuid
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, List, Any
@@ -20,6 +21,7 @@ from typing import Optional, Dict, List, Any
 # ============================================================================
 
 DB_PATH = Path(__file__).parent.parent.parent / "data" / "titan_intelligence.db"
+COWORK_DB_PATH = Path("/Users/johnny_main/Developer/Claude_Cowork/Alpha-Terminal/database/titan_intelligence.db")
 
 # ============================================================================
 # DATABASE INITIALIZATION
@@ -506,6 +508,260 @@ CREATE INDEX IF NOT EXISTS idx_deriv_ls_extreme ON derivatives_snapshots(ls_extr
 
 """
 
+# ============================================================================
+# SNAPSHOT PIPELINE TABLES (cron-fed, 6h cadence)
+# ============================================================================
+
+SNAPSHOT_SCHEMA = """
+-- Spot CVD & Taker Data (Coinglass)
+CREATE TABLE IF NOT EXISTS spot_flow_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    endpoint TEXT NOT NULL,
+    interval TEXT,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_spot_flow_symbol ON spot_flow_snapshots(symbol, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_spot_flow_endpoint ON spot_flow_snapshots(endpoint);
+
+-- Futures Basis & Speculation (Coinglass)
+CREATE TABLE IF NOT EXISTS basis_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT,
+    endpoint TEXT NOT NULL,
+    interval TEXT,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_basis_symbol ON basis_snapshots(symbol, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_basis_endpoint ON basis_snapshots(endpoint);
+
+-- Large Orders & Orderbook (Coinglass)
+CREATE TABLE IF NOT EXISTS orderbook_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    endpoint TEXT NOT NULL,
+    interval TEXT,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_orderbook_symbol ON orderbook_snapshots(symbol, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_orderbook_endpoint ON orderbook_snapshots(endpoint);
+
+-- OI by Exchange over time (Coinglass)
+CREATE TABLE IF NOT EXISTS oi_exchange_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    interval TEXT,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_oi_exchange_symbol ON oi_exchange_snapshots(symbol, timestamp_utc);
+
+-- Liquidation Heatmaps (Coinglass)
+CREATE TABLE IF NOT EXISTS liquidation_heatmap_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    model TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_liq_heatmap_symbol ON liquidation_heatmap_snapshots(symbol, timestamp_utc);
+
+-- BTC Macro On-Chain (Coinglass)
+CREATE TABLE IF NOT EXISTS btc_onchain_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    indicator TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_btc_onchain_indicator ON btc_onchain_snapshots(indicator, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_btc_onchain_time ON btc_onchain_snapshots(timestamp_utc);
+
+-- Nansen Flow Snapshots (cron-fed from cache)
+CREATE TABLE IF NOT EXISTS nansen_flow_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    tool_name TEXT NOT NULL,
+    holder_segment TEXT,
+    lookback_period TEXT,
+    data_json TEXT NOT NULL,
+    source_query_id TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_nansen_flow_token ON nansen_flow_snapshots(token, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_nansen_flow_tool ON nansen_flow_snapshots(tool_name);
+
+-- Nansen Holder Snapshots
+CREATE TABLE IF NOT EXISTS nansen_holder_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    chain TEXT,
+    label_type TEXT,
+    mode TEXT,
+    data_json TEXT NOT NULL,
+    source_query_id TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_nansen_holder_token ON nansen_holder_snapshots(token, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_nansen_holder_label ON nansen_holder_snapshots(label_type);
+
+-- Nansen Perp Trade Snapshots
+CREATE TABLE IF NOT EXISTS nansen_perp_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    source_query_id TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_nansen_perp_time ON nansen_perp_snapshots(timestamp_utc);
+
+-- Nansen Quant Score Snapshots
+CREATE TABLE IF NOT EXISTS nansen_quant_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    source_query_id TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_nansen_quant_token ON nansen_quant_snapshots(token, timestamp_utc);
+
+-- Snapshot Metadata (tracks each cron run)
+CREATE TABLE IF NOT EXISTS snapshot_metadata (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id TEXT NOT NULL,
+    run_type TEXT NOT NULL,
+    started_at TEXT NOT NULL,
+    finished_at TEXT,
+    endpoints_succeeded INTEGER DEFAULT 0,
+    endpoints_failed INTEGER DEFAULT 0,
+    total_rows_inserted INTEGER DEFAULT 0,
+    error_log TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_snapshot_meta_type ON snapshot_metadata(run_type, started_at);
+CREATE INDEX IF NOT EXISTS idx_snapshot_meta_run ON snapshot_metadata(run_id);
+
+-- Structured output from /analyze command
+CREATE TABLE IF NOT EXISTS analyze_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    report_id TEXT UNIQUE,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    price_usd REAL,
+
+    -- Verdict
+    verdict TEXT,
+    conviction TEXT,
+    direction TEXT,
+
+    -- Accumulation Score (0-5)
+    accumulation_score REAL,
+    exchange_flows_signal TEXT,
+    fresh_wallets_signal TEXT,
+    smart_money_signal TEXT,
+    top_pnl_signal TEXT,
+    whale_signal TEXT,
+
+    -- Signal Hierarchy Pillar Verdicts
+    onchain_verdict TEXT,
+    perps_verdict TEXT,
+    derivatives_verdict TEXT,
+    ta_verdict TEXT,
+
+    -- Key Levels (JSON arrays)
+    support_levels_json TEXT,
+    resistance_levels_json TEXT,
+
+    -- TA Summary
+    ta_weekly_rsi REAL,
+    ta_daily_rsi REAL,
+    ta_4h_rsi REAL,
+    ta_weekly_adx REAL,
+    ta_daily_adx REAL,
+    ta_trend_direction TEXT,
+
+    -- Derivatives Summary
+    funding_rate REAL,
+    oi_usd REAL,
+    oi_change_24h_pct REAL,
+    ls_global_ratio REAL,
+    ls_crowding TEXT,
+
+    -- Invalidation
+    invalidation_criteria TEXT,
+
+    -- Cost tracking
+    nansen_credits_used INTEGER,
+
+    -- Full report
+    full_markdown TEXT,
+
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_analyze_token ON analyze_snapshots(token, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_analyze_verdict ON analyze_snapshots(verdict, token);
+
+-- Structured output from /accum-distro command
+CREATE TABLE IF NOT EXISTS accum_distro_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    report_id TEXT UNIQUE,
+    timestamp_utc TEXT NOT NULL,
+    token TEXT NOT NULL,
+    chain TEXT,
+    token_address TEXT,
+    price_usd REAL,
+
+    -- Layer Verdicts
+    layer1_verdict TEXT,
+    layer2_verdict TEXT,
+    layer3_verdict TEXT,
+
+    -- Layer 1: CEX Flows
+    cex_net_flow_usd REAL,
+    cex_inflow_usd REAL,
+    cex_outflow_usd REAL,
+    cex_flow_vs_avg REAL,
+
+    -- Layer 2: Smart Money
+    sm_holders_count INTEGER,
+    sm_balance_usd REAL,
+    sm_balance_change_24h_pct REAL,
+    sm_net_buy_volume_usd REAL,
+    sm_buyer_count INTEGER,
+    sm_seller_count INTEGER,
+
+    -- Layer 3: Fresh Wallets
+    fresh_wallet_count INTEGER,
+    fresh_wallet_max_score INTEGER,
+    fresh_wallet_total_usd REAL,
+
+    -- Final Verdict
+    final_verdict TEXT,
+    conviction TEXT,
+
+    -- Cost tracking
+    nansen_credits_used INTEGER,
+
+    -- Full report
+    full_markdown TEXT,
+
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_accum_distro_token ON accum_distro_snapshots(token, timestamp_utc);
+CREATE INDEX IF NOT EXISTS idx_accum_distro_verdict ON accum_distro_snapshots(final_verdict, token);
+"""
+
 
 def init_db() -> None:
     """Initialize database with schema."""
@@ -513,7 +769,8 @@ def init_db() -> None:
     conn = sqlite3.connect(DB_PATH)
     # Execute statements individually to handle legacy table schema mismatches
     # (e.g., cex_snapshots was created with different columns than SCHEMA defines)
-    for statement in SCHEMA.split(';'):
+    combined_schema = SCHEMA + "\n" + SNAPSHOT_SCHEMA
+    for statement in combined_schema.split(';'):
         statement = statement.strip()
         if statement:
             try:
@@ -542,6 +799,24 @@ def get_connection() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def sync_to_cowork() -> bool:
+    """Copy local DB to Cowork directory so it has fresh data."""
+    if not DB_PATH.exists():
+        print(f"[sync] Source DB not found: {DB_PATH}")
+        return False
+    if not COWORK_DB_PATH.parent.exists():
+        print(f"[sync] Cowork directory not found: {COWORK_DB_PATH.parent}")
+        return False
+    try:
+        shutil.copy2(DB_PATH, COWORK_DB_PATH)
+        size_mb = COWORK_DB_PATH.stat().st_size / (1024 * 1024)
+        print(f"[sync] Copied {size_mb:.1f}MB → {COWORK_DB_PATH}")
+        return True
+    except Exception as e:
+        print(f"[sync] Failed: {e}")
+        return False
 
 
 # ============================================================================
@@ -2619,6 +2894,452 @@ def export_derivatives_csv(symbol: str = None, days: int = 30,
 
 
 # ============================================================================
+# SNAPSHOT PIPELINE FUNCTIONS (cron-fed)
+# ============================================================================
+
+def log_cg_snapshot(table: str, symbol: str, endpoint: str, data,
+                    interval: str = None, model: str = None,
+                    indicator: str = None) -> int:
+    """
+    Generic logger for Coinglass snapshot tables.
+
+    Args:
+        table: Target table name
+        symbol: Token symbol (or None for market-wide)
+        endpoint: Endpoint identifier
+        data: Raw data (dict or list) to store as JSON
+        interval: Time interval if applicable
+        model: Model identifier (for liquidation heatmaps)
+        indicator: Indicator name (for btc_onchain)
+
+    Returns:
+        Row ID or -1 on error
+    """
+    if data is None:
+        return -1
+    timestamp = datetime.now(timezone.utc).isoformat()
+    data_json = json.dumps(data) if not isinstance(data, str) else data
+
+    conn = get_connection()
+    try:
+        if table == "spot_flow_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO spot_flow_snapshots
+                   (timestamp_utc, symbol, endpoint, interval, data_json)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (timestamp, symbol.upper(), endpoint, interval, data_json))
+        elif table == "basis_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO basis_snapshots
+                   (timestamp_utc, symbol, endpoint, interval, data_json)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (timestamp, symbol.upper() if symbol else None, endpoint,
+                 interval, data_json))
+        elif table == "orderbook_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO orderbook_snapshots
+                   (timestamp_utc, symbol, endpoint, interval, data_json)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (timestamp, symbol.upper(), endpoint, interval, data_json))
+        elif table == "oi_exchange_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO oi_exchange_snapshots
+                   (timestamp_utc, symbol, interval, data_json)
+                   VALUES (?, ?, ?, ?)""",
+                (timestamp, symbol.upper(), interval, data_json))
+        elif table == "liquidation_heatmap_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO liquidation_heatmap_snapshots
+                   (timestamp_utc, symbol, model, data_json)
+                   VALUES (?, ?, ?, ?)""",
+                (timestamp, symbol.upper(), model, data_json))
+        elif table == "btc_onchain_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO btc_onchain_snapshots
+                   (timestamp_utc, indicator, data_json)
+                   VALUES (?, ?, ?)""",
+                (timestamp, indicator, data_json))
+        elif table == "etf_flow_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO etf_flow_snapshots
+                   (timestamp_utc, asset, data_json)
+                   VALUES (?, ?, ?)""",
+                (timestamp, symbol.upper() if symbol else "BTC", data_json))
+        else:
+            conn.close()
+            return -1
+        conn.commit()
+        row_id = cursor.lastrowid
+        conn.close()
+        return row_id
+    except Exception as e:
+        conn.close()
+        import sys as _sys
+        print(f"  Warning: log_cg_snapshot({table}) failed: {e}", file=_sys.stderr)
+        return -1
+
+
+def log_nansen_snapshot(table: str, token: str, data, tool_name: str = None,
+                        holder_segment: str = None, lookback_period: str = None,
+                        chain: str = None, label_type: str = None,
+                        mode: str = None, source_query_id: str = None) -> int:
+    """
+    Logger for Nansen snapshot tables.
+
+    Returns:
+        Row ID or -1 on error
+    """
+    if data is None:
+        return -1
+    timestamp = datetime.now(timezone.utc).isoformat()
+    data_json = json.dumps(data) if not isinstance(data, str) else data
+
+    conn = get_connection()
+    try:
+        if table == "nansen_flow_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO nansen_flow_snapshots
+                   (timestamp_utc, token, tool_name, holder_segment,
+                    lookback_period, data_json, source_query_id)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (timestamp, token.upper(), tool_name, holder_segment,
+                 lookback_period, data_json, source_query_id))
+        elif table == "nansen_holder_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO nansen_holder_snapshots
+                   (timestamp_utc, token, chain, label_type, mode,
+                    data_json, source_query_id)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (timestamp, token.upper(), chain, label_type, mode,
+                 data_json, source_query_id))
+        elif table == "nansen_perp_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO nansen_perp_snapshots
+                   (timestamp_utc, data_json, source_query_id)
+                   VALUES (?, ?, ?)""",
+                (timestamp, data_json, source_query_id))
+        elif table == "nansen_quant_snapshots":
+            cursor = conn.execute(
+                """INSERT INTO nansen_quant_snapshots
+                   (timestamp_utc, token, data_json, source_query_id)
+                   VALUES (?, ?, ?, ?)""",
+                (timestamp, token.upper(), data_json, source_query_id))
+        else:
+            conn.close()
+            return -1
+        conn.commit()
+        row_id = cursor.lastrowid
+        conn.close()
+        return row_id
+    except Exception as e:
+        conn.close()
+        import sys as _sys
+        print(f"  Warning: log_nansen_snapshot({table}) failed: {e}", file=_sys.stderr)
+        return -1
+
+
+def log_snapshot_run(run_id: str, run_type: str) -> int:
+    """Start a snapshot run — insert metadata row. Returns row ID."""
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    cursor = conn.execute(
+        """INSERT INTO snapshot_metadata
+           (run_id, run_type, started_at)
+           VALUES (?, ?, ?)""",
+        (run_id, run_type, timestamp))
+    conn.commit()
+    row_id = cursor.lastrowid
+    conn.close()
+    return row_id
+
+
+def finish_snapshot_run(run_id: str, succeeded: int, failed: int,
+                        rows_inserted: int, errors: list = None) -> None:
+    """Finish a snapshot run — update metadata with results."""
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    conn.execute(
+        """UPDATE snapshot_metadata
+           SET finished_at = ?, endpoints_succeeded = ?, endpoints_failed = ?,
+               total_rows_inserted = ?, error_log = ?
+           WHERE run_id = ?""",
+        (timestamp, succeeded, failed, rows_inserted,
+         json.dumps(errors) if errors else None, run_id))
+    conn.commit()
+    conn.close()
+
+
+def log_analyze_report(
+    token: str,
+    price_usd: float = None,
+    verdict: str = None,
+    conviction: str = None,
+    direction: str = None,
+    accumulation_score: float = None,
+    exchange_flows_signal: str = None,
+    fresh_wallets_signal: str = None,
+    smart_money_signal: str = None,
+    top_pnl_signal: str = None,
+    whale_signal: str = None,
+    onchain_verdict: str = None,
+    perps_verdict: str = None,
+    derivatives_verdict: str = None,
+    ta_verdict: str = None,
+    support_levels: list = None,
+    resistance_levels: list = None,
+    ta_weekly_rsi: float = None,
+    ta_daily_rsi: float = None,
+    ta_4h_rsi: float = None,
+    ta_weekly_adx: float = None,
+    ta_daily_adx: float = None,
+    ta_trend_direction: str = None,
+    funding_rate: float = None,
+    oi_usd: float = None,
+    oi_change_24h_pct: float = None,
+    ls_global_ratio: float = None,
+    ls_crowding: str = None,
+    invalidation_criteria: str = None,
+    nansen_credits_used: int = None,
+    full_markdown: str = None,
+) -> str:
+    """Log structured /analyze output. Returns report_id."""
+    report_id = str(uuid.uuid4())[:12]
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    try:
+        conn.execute(
+            """INSERT INTO analyze_snapshots (
+                report_id, timestamp_utc, token, price_usd,
+                verdict, conviction, direction,
+                accumulation_score,
+                exchange_flows_signal, fresh_wallets_signal,
+                smart_money_signal, top_pnl_signal, whale_signal,
+                onchain_verdict, perps_verdict, derivatives_verdict, ta_verdict,
+                support_levels_json, resistance_levels_json,
+                ta_weekly_rsi, ta_daily_rsi, ta_4h_rsi,
+                ta_weekly_adx, ta_daily_adx, ta_trend_direction,
+                funding_rate, oi_usd, oi_change_24h_pct,
+                ls_global_ratio, ls_crowding,
+                invalidation_criteria, nansen_credits_used, full_markdown
+            ) VALUES (
+                ?, ?, ?, ?,
+                ?, ?, ?,
+                ?,
+                ?, ?,
+                ?, ?, ?,
+                ?, ?, ?, ?,
+                ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?,
+                ?, ?, ?
+            )""",
+            (report_id, timestamp, token.upper(), price_usd,
+             verdict, conviction, direction,
+             accumulation_score,
+             exchange_flows_signal, fresh_wallets_signal,
+             smart_money_signal, top_pnl_signal, whale_signal,
+             onchain_verdict, perps_verdict, derivatives_verdict, ta_verdict,
+             json.dumps(support_levels) if support_levels else None,
+             json.dumps(resistance_levels) if resistance_levels else None,
+             ta_weekly_rsi, ta_daily_rsi, ta_4h_rsi,
+             ta_weekly_adx, ta_daily_adx, ta_trend_direction,
+             funding_rate, oi_usd, oi_change_24h_pct,
+             ls_global_ratio, ls_crowding,
+             invalidation_criteria, nansen_credits_used, full_markdown))
+        conn.commit()
+        conn.close()
+        return report_id
+    except Exception as e:
+        conn.close()
+        import sys as _sys
+        print(f"  Warning: log_analyze_report failed: {e}", file=_sys.stderr)
+        return ""
+
+
+def get_latest_analyze(token: str) -> Optional[Dict]:
+    """Get the most recent analyze snapshot for a token."""
+    conn = get_connection()
+    row = conn.execute(
+        """SELECT * FROM analyze_snapshots
+           WHERE token = ? ORDER BY timestamp_utc DESC LIMIT 1""",
+        (token.upper(),)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_analyze_history(token: str, limit: int = 10) -> List[Dict]:
+    """Get analyze snapshot history for a token."""
+    conn = get_connection()
+    rows = conn.execute(
+        """SELECT report_id, timestamp_utc, token, price_usd,
+                  verdict, conviction, direction, accumulation_score,
+                  onchain_verdict, perps_verdict, derivatives_verdict, ta_verdict,
+                  ta_trend_direction, ls_crowding, nansen_credits_used
+           FROM analyze_snapshots
+           WHERE token = ? ORDER BY timestamp_utc DESC LIMIT ?""",
+        (token.upper(), limit)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def log_accum_distro_report(
+    token: str,
+    chain: str = None,
+    token_address: str = None,
+    price_usd: float = None,
+    layer1_verdict: str = None,
+    layer2_verdict: str = None,
+    layer3_verdict: str = None,
+    cex_net_flow_usd: float = None,
+    cex_inflow_usd: float = None,
+    cex_outflow_usd: float = None,
+    cex_flow_vs_avg: float = None,
+    sm_holders_count: int = None,
+    sm_balance_usd: float = None,
+    sm_balance_change_24h_pct: float = None,
+    sm_net_buy_volume_usd: float = None,
+    sm_buyer_count: int = None,
+    sm_seller_count: int = None,
+    fresh_wallet_count: int = None,
+    fresh_wallet_max_score: int = None,
+    fresh_wallet_total_usd: float = None,
+    final_verdict: str = None,
+    conviction: str = None,
+    nansen_credits_used: int = None,
+    full_markdown: str = None,
+) -> str:
+    """Log structured /accum-distro output. Returns report_id."""
+    report_id = str(uuid.uuid4())[:12]
+    timestamp = datetime.now(timezone.utc).isoformat()
+    conn = get_connection()
+    try:
+        conn.execute(
+            """INSERT INTO accum_distro_snapshots (
+                report_id, timestamp_utc, token, chain, token_address, price_usd,
+                layer1_verdict, layer2_verdict, layer3_verdict,
+                cex_net_flow_usd, cex_inflow_usd, cex_outflow_usd, cex_flow_vs_avg,
+                sm_holders_count, sm_balance_usd, sm_balance_change_24h_pct,
+                sm_net_buy_volume_usd, sm_buyer_count, sm_seller_count,
+                fresh_wallet_count, fresh_wallet_max_score, fresh_wallet_total_usd,
+                final_verdict, conviction, nansen_credits_used, full_markdown
+            ) VALUES (
+                ?, ?, ?, ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?,
+                ?, ?, ?, ?
+            )""",
+            (report_id, timestamp, token.upper(), chain, token_address, price_usd,
+             layer1_verdict, layer2_verdict, layer3_verdict,
+             cex_net_flow_usd, cex_inflow_usd, cex_outflow_usd, cex_flow_vs_avg,
+             sm_holders_count, sm_balance_usd, sm_balance_change_24h_pct,
+             sm_net_buy_volume_usd, sm_buyer_count, sm_seller_count,
+             fresh_wallet_count, fresh_wallet_max_score, fresh_wallet_total_usd,
+             final_verdict, conviction, nansen_credits_used, full_markdown))
+        conn.commit()
+        conn.close()
+        return report_id
+    except Exception as e:
+        conn.close()
+        import sys as _sys
+        print(f"  Warning: log_accum_distro_report failed: {e}", file=_sys.stderr)
+        return ""
+
+
+def get_latest_accum_distro(token: str) -> Optional[Dict]:
+    """Get the most recent accum/distro snapshot for a token."""
+    conn = get_connection()
+    row = conn.execute(
+        """SELECT * FROM accum_distro_snapshots
+           WHERE token = ? ORDER BY timestamp_utc DESC LIMIT 1""",
+        (token.upper(),)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_accum_distro_history(token: str, limit: int = 10) -> List[Dict]:
+    """Get accum/distro snapshot history for a token."""
+    conn = get_connection()
+    rows = conn.execute(
+        """SELECT report_id, timestamp_utc, token, chain, price_usd,
+                  layer1_verdict, layer2_verdict, layer3_verdict,
+                  final_verdict, conviction, nansen_credits_used
+           FROM accum_distro_snapshots
+           WHERE token = ? ORDER BY timestamp_utc DESC LIMIT ?""",
+        (token.upper(), limit)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def check_snapshot_freshness(stale_hours: float = 7.0) -> Dict[str, Dict]:
+    """
+    Check freshness of all snapshot tables.
+
+    Returns:
+        Dict of {table_name: {"last_snapshot": str, "age_hours": float, "stale": bool}}
+    """
+    conn = get_connection()
+    tables = {
+        "derivatives_snapshots": "timestamp_utc",
+        "spot_flow_snapshots": "timestamp_utc",
+        "basis_snapshots": "timestamp_utc",
+        "orderbook_snapshots": "timestamp_utc",
+        "oi_exchange_snapshots": "timestamp_utc",
+        "liquidation_heatmap_snapshots": "timestamp_utc",
+        "btc_onchain_snapshots": "timestamp_utc",
+        "etf_flow_snapshots": "timestamp_utc",
+        "nansen_flow_snapshots": "timestamp_utc",
+        "nansen_holder_snapshots": "timestamp_utc",
+        "nansen_perp_snapshots": "timestamp_utc",
+        "nansen_quant_snapshots": "timestamp_utc",
+        "cex_snapshots": "timestamp_utc",
+    }
+
+    result = {}
+    now = datetime.now(timezone.utc)
+
+    for table, ts_col in tables.items():
+        try:
+            row = conn.execute(
+                f"SELECT MAX({ts_col}) as latest FROM {table}"
+            ).fetchone()
+            latest = row["latest"] if row and row["latest"] else None
+
+            if latest:
+                try:
+                    dt = datetime.fromisoformat(latest.replace("Z", "+00:00"))
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=timezone.utc)
+                    age_hours = (now - dt).total_seconds() / 3600
+                except Exception:
+                    age_hours = 999.0
+                result[table] = {
+                    "last_snapshot": latest,
+                    "age_hours": round(age_hours, 2),
+                    "stale": age_hours > stale_hours,
+                }
+            else:
+                result[table] = {
+                    "last_snapshot": None,
+                    "age_hours": None,
+                    "stale": True,
+                }
+        except Exception:
+            result[table] = {
+                "last_snapshot": None,
+                "age_hours": None,
+                "stale": True,
+            }
+
+    conn.close()
+    return result
+
+
+# ============================================================================
 # HELPERS
 # ============================================================================
 
@@ -2664,6 +3385,9 @@ def main():
 
     # init
     subparsers.add_parser('init', help='Initialize database')
+
+    # sync
+    subparsers.add_parser('sync', help='Sync local DB to Cowork directory')
 
     # stats
     subparsers.add_parser('stats', help='Query statistics')
@@ -2837,11 +3561,48 @@ def main():
     deriv_export_parser.add_argument('--days', type=int, default=30, help='Lookback days (default: 30)')
     deriv_export_parser.add_argument('--output', help='Output file path (default: stdout)')
 
+    # snapshot-freshness
+    fresh_parser = subparsers.add_parser('snapshot-freshness', help='Check freshness of all snapshot tables')
+    fresh_parser.add_argument('--stale-hours', type=float, default=7.0, help='Hours before a table is stale (default: 7)')
+    fresh_parser.add_argument('--json', action='store_true', help='Output as JSON')
+
+    # log-analyze
+    log_analyze_parser = subparsers.add_parser('log-analyze', help='Log structured /analyze output')
+    log_analyze_parser.add_argument('--json', dest='json_data', required=True,
+                                     help='JSON object with analyze fields')
+
+    # analyze-history
+    analyze_hist_parser = subparsers.add_parser('analyze-history', help='Show analyze history for a token')
+    analyze_hist_parser.add_argument('token', help='Token symbol')
+    analyze_hist_parser.add_argument('--limit', type=int, default=10, help='Max results (default: 10)')
+
+    # log-accum-distro
+    log_ad_parser = subparsers.add_parser('log-accum-distro', help='Log structured /accum-distro output')
+    log_ad_parser.add_argument('--json', dest='json_data', required=True,
+                                help='JSON object with accum-distro fields')
+
+    # accum-distro-history
+    ad_hist_parser = subparsers.add_parser('accum-distro-history', help='Show accum/distro history for a token')
+    ad_hist_parser.add_argument('token', help='Token symbol')
+    ad_hist_parser.add_argument('--limit', type=int, default=10, help='Max results (default: 10)')
+
+    # log-nansen (raw Nansen MCP responses)
+    log_nansen_parser = subparsers.add_parser('log-nansen', help='Log raw Nansen MCP response to snapshot table')
+    log_nansen_parser.add_argument('--json', dest='json_data', required=True,
+                                    help='JSON: {table, token, data, tool_name, ...}')
+
+    # refresh-setups (existing cron command)
+    subparsers.add_parser('refresh-setups', help='Refresh OHLCV for active watchlist setups + BTC/ETH/SOL')
+
     args = parser.parse_args()
 
     if args.command == "init":
         init_db()
         print(f"Database initialized at {DB_PATH}")
+
+    elif args.command == "sync":
+        ok = sync_to_cowork()
+        sys.exit(0 if ok else 1)
 
     elif args.command == "stats":
         stats = get_query_stats()
@@ -3348,6 +4109,189 @@ def main():
             print(f"Exported to {args.output}")
         else:
             print(result)
+
+    elif args.command == "snapshot-freshness":
+        freshness = check_snapshot_freshness(stale_hours=args.stale_hours)
+        if args.json:
+            print(json.dumps(freshness, indent=2, default=str))
+        else:
+            print(f"\n=== Snapshot Freshness (stale > {args.stale_hours}h) ===\n")
+            print(f"  {'Table':<35} {'Last Snapshot':<22} {'Age':<10} {'Status'}")
+            print(f"  {'─' * 80}")
+            for table, info in sorted(freshness.items()):
+                last = info['last_snapshot'][:19] if info['last_snapshot'] else 'NEVER'
+                age = f"{info['age_hours']:.1f}h" if info['age_hours'] is not None else '-'
+                status = 'STALE' if info['stale'] else 'OK'
+                marker = '  ' if not info['stale'] else '!!'
+                print(f"{marker} {table:<35} {last:<22} {age:<10} {status}")
+
+    elif args.command == "log-analyze":
+        data = _parse_json_input(args.json_data)
+        if not data or not data.get("token"):
+            print("Error: JSON must include 'token' field", file=sys.stderr)
+            sys.exit(1)
+        report_id = log_analyze_report(
+            token=data["token"],
+            price_usd=data.get("price_usd"),
+            verdict=data.get("verdict"),
+            conviction=data.get("conviction"),
+            direction=data.get("direction"),
+            accumulation_score=data.get("accumulation_score"),
+            exchange_flows_signal=data.get("exchange_flows_signal"),
+            fresh_wallets_signal=data.get("fresh_wallets_signal"),
+            smart_money_signal=data.get("smart_money_signal"),
+            top_pnl_signal=data.get("top_pnl_signal"),
+            whale_signal=data.get("whale_signal"),
+            onchain_verdict=data.get("onchain_verdict"),
+            perps_verdict=data.get("perps_verdict"),
+            derivatives_verdict=data.get("derivatives_verdict"),
+            ta_verdict=data.get("ta_verdict"),
+            support_levels=data.get("support_levels"),
+            resistance_levels=data.get("resistance_levels"),
+            ta_weekly_rsi=data.get("ta_weekly_rsi"),
+            ta_daily_rsi=data.get("ta_daily_rsi"),
+            ta_4h_rsi=data.get("ta_4h_rsi"),
+            ta_weekly_adx=data.get("ta_weekly_adx"),
+            ta_daily_adx=data.get("ta_daily_adx"),
+            ta_trend_direction=data.get("ta_trend_direction"),
+            funding_rate=data.get("funding_rate"),
+            oi_usd=data.get("oi_usd"),
+            oi_change_24h_pct=data.get("oi_change_24h_pct"),
+            ls_global_ratio=data.get("ls_global_ratio"),
+            ls_crowding=data.get("ls_crowding"),
+            invalidation_criteria=data.get("invalidation_criteria"),
+            nansen_credits_used=data.get("nansen_credits_used"),
+            full_markdown=data.get("full_markdown"),
+        )
+        if report_id:
+            print(json.dumps({"report_id": report_id, "token": data["token"], "status": "logged"}))
+        else:
+            print("Error: failed to log analyze report", file=sys.stderr)
+            sys.exit(1)
+
+    elif args.command == "analyze-history":
+        history = get_analyze_history(args.token, limit=args.limit)
+        if not history:
+            print(f"No analyze snapshots found for {args.token}")
+        else:
+            print(f"\n=== Analyze History: {args.token} ({len(history)} reports) ===\n")
+            for r in history:
+                ts = r['timestamp_utc'][:16]
+                v = r.get('verdict', '?')
+                c = r.get('conviction', '?')
+                acc = r.get('accumulation_score')
+                acc_str = f"  Accum: {acc}/5" if acc is not None else ""
+                price = f"  ${r['price_usd']:,.0f}" if r.get('price_usd') else ""
+                print(f"  {ts}  {v} ({c}){price}{acc_str}")
+                pillars = []
+                for p in ['onchain_verdict', 'perps_verdict', 'derivatives_verdict', 'ta_verdict']:
+                    if r.get(p):
+                        pillars.append(f"{p.replace('_verdict','')}: {r[p]}")
+                if pillars:
+                    print(f"    {' | '.join(pillars)}")
+
+    elif args.command == "log-accum-distro":
+        data = _parse_json_input(args.json_data)
+        if not data or not data.get("token"):
+            print("Error: JSON must include 'token' field", file=sys.stderr)
+            sys.exit(1)
+        report_id = log_accum_distro_report(
+            token=data["token"],
+            chain=data.get("chain"),
+            token_address=data.get("token_address"),
+            price_usd=data.get("price_usd"),
+            layer1_verdict=data.get("layer1_verdict"),
+            layer2_verdict=data.get("layer2_verdict"),
+            layer3_verdict=data.get("layer3_verdict"),
+            cex_net_flow_usd=data.get("cex_net_flow_usd"),
+            cex_inflow_usd=data.get("cex_inflow_usd"),
+            cex_outflow_usd=data.get("cex_outflow_usd"),
+            cex_flow_vs_avg=data.get("cex_flow_vs_avg"),
+            sm_holders_count=data.get("sm_holders_count"),
+            sm_balance_usd=data.get("sm_balance_usd"),
+            sm_balance_change_24h_pct=data.get("sm_balance_change_24h_pct"),
+            sm_net_buy_volume_usd=data.get("sm_net_buy_volume_usd"),
+            sm_buyer_count=data.get("sm_buyer_count"),
+            sm_seller_count=data.get("sm_seller_count"),
+            fresh_wallet_count=data.get("fresh_wallet_count"),
+            fresh_wallet_max_score=data.get("fresh_wallet_max_score"),
+            fresh_wallet_total_usd=data.get("fresh_wallet_total_usd"),
+            final_verdict=data.get("final_verdict"),
+            conviction=data.get("conviction"),
+            nansen_credits_used=data.get("nansen_credits_used"),
+            full_markdown=data.get("full_markdown"),
+        )
+        if report_id:
+            print(json.dumps({"report_id": report_id, "token": data["token"], "status": "logged"}))
+        else:
+            print("Error: failed to log accum-distro report", file=sys.stderr)
+            sys.exit(1)
+
+    elif args.command == "log-nansen":
+        data = _parse_json_input(args.json_data)
+        if not data or not data.get("table") or not data.get("token") or "data" not in data:
+            print("Error: JSON must include 'table', 'token', and 'data' fields", file=sys.stderr)
+            sys.exit(1)
+        valid_tables = ["nansen_flow_snapshots", "nansen_holder_snapshots",
+                        "nansen_perp_snapshots", "nansen_quant_snapshots"]
+        if data["table"] not in valid_tables:
+            print(f"Error: table must be one of {valid_tables}", file=sys.stderr)
+            sys.exit(1)
+        row_id = log_nansen_snapshot(
+            table=data["table"],
+            token=data["token"],
+            data=data["data"],
+            tool_name=data.get("tool_name"),
+            holder_segment=data.get("holder_segment"),
+            lookback_period=data.get("lookback_period"),
+            chain=data.get("chain"),
+            label_type=data.get("label_type"),
+            mode=data.get("mode"),
+            source_query_id=data.get("source_query_id"),
+        )
+        if row_id > 0:
+            print(json.dumps({"row_id": row_id, "table": data["table"],
+                               "token": data["token"], "status": "stored"}))
+        else:
+            print("Error: failed to store Nansen snapshot", file=sys.stderr)
+            sys.exit(1)
+
+    elif args.command == "accum-distro-history":
+        history = get_accum_distro_history(args.token, limit=args.limit)
+        if not history:
+            print(f"No accum/distro snapshots found for {args.token}")
+        else:
+            print(f"\n=== Accum/Distro History: {args.token} ({len(history)} reports) ===\n")
+            for r in history:
+                ts = r['timestamp_utc'][:16]
+                fv = r.get('final_verdict', '?')
+                c = r.get('conviction', '?')
+                price = f"  ${r['price_usd']:,.2f}" if r.get('price_usd') else ""
+                print(f"  {ts}  {fv} ({c}){price}")
+                layers = []
+                for lbl, key in [('CEX', 'layer1_verdict'), ('SM', 'layer2_verdict'), ('Fresh', 'layer3_verdict')]:
+                    if r.get(key):
+                        layers.append(f"{lbl}: {r[key]}")
+                if layers:
+                    print(f"    {' | '.join(layers)}")
+
+    elif args.command == "refresh-setups":
+        # Refresh OHLCV for active watchlist setups + BTC/ETH/SOL
+        import subprocess
+        conn = get_connection()
+        rows = conn.execute(
+            "SELECT DISTINCT symbol FROM signal_watchlist WHERE status = 'active'"
+        ).fetchall()
+        conn.close()
+        symbols = list(set([r['symbol'] for r in rows] + ['BTC', 'ETH', 'SOL']))
+        for sym in symbols:
+            print(f"Refreshing OHLCV for {sym}...")
+            subprocess.run(
+                [sys.executable, str(Path(__file__).parent.parent / "analysis" / "indicators.py"),
+                 "download", sym, "--timeframe", "4h"],
+                capture_output=True)
+        print(f"Refreshed {len(symbols)} symbols: {', '.join(symbols)}")
+
     else:
         parser.print_help()
 

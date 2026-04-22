@@ -43,6 +43,12 @@ config/token_list.json
 
 # CEX dashboard snapshots (generated data)
 signals/dashboards/*.md
+signals/dashboards/*.json
+
+# Cron logs & data backups
+logs/cron/
+logs/*.log
+data/*.backup_*
 
 # Results (generated analysis)
 results/trade-cards/

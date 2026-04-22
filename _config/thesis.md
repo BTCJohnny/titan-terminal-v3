@@ -178,6 +178,16 @@ Fade extreme overextensions where price has deviated too far from fair value. Th
 
 **Status:** Watchlist — check every 3 days
 
+### 5. XPL (Plasma) Momentum (Watchlist)
+
+**Thesis:** Tether-backed L1 for stablecoin settlement. Strongest TA momentum in session — 4H ADX 46.5, daily ADX 32, +40% in 7 days ($0.092→$0.129). Funding at -0.40% (extreme short crowded, 1003% annualized). Squeeze UP mechanics in play. No Nansen SM coverage on BNB — on-chain blind spot. Blocked by risk-off regime (no exceptional on-chain evidence for longs).
+
+**What would upgrade:** Regime change to risk-on. Pullback to $0.10-0.11 (SMA 20/50) for better entry. Nansen SM data appearing with accumulation. HL SM positions growing beyond $5M long.
+
+**Risk:** Monthly token unlocks ongoing. Major 1B XPL public sale unlock July 28, 2026. Small cap (5% max, 2.5% with confidence penalty).
+
+**Status:** Watchlist — monitor trend + wait for on-chain visibility or regime change
+
 ---
 
 ## Hunting Priorities
